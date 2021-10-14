@@ -7,7 +7,7 @@ Add the following Nuget Package to your Umbraco website project `Our.Umbraco.Tag
 
 ```
 cd MyUmbracoProject
-dotnet add package Our.Umbraco.TagHelpers`
+dotnet add package Our.Umbraco.TagHelpers
 ```
 
 ## Setup
