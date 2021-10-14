@@ -80,3 +80,59 @@ So to pass/set a value for the macro parameter `startNodeId` then I will need to
 <our-macro alias="ListChildrenFromCurrentPage" content="Model.FirstChild()" />
 <our-macro alias="ChildPagesFromStartNode" our-macro-startNodeId="umb://document/4d39ea8a077949dbb2d80c9f0c7545" />
 ```
+
+## BeginUmbracoForm Replacement
+This is to make it easier to create a HTML `<form>` that uses an Umbraco SurfaceController and would be an alternative of using the `@Html.BeginUmbracoForm` approach. This taghelper runs against the `<form>` element along with these attributes `our-controller`and `our-action` to help generate a hidden input field of `ufprt` containing the encoded path that this form needs to route to.
+
+https://our.umbraco.com/Documentation/Fundamentals/Code/Creating-Forms/
+
+### Before
+```cshtml
+@using (Html.BeginUmbracoForm("ContactForm", "Submit", FormMethod.Post, new { @id ="customerForm", @class = "needs-validation", @novalidate = "novalidate" }))
+{
+    @Html.ValidationSummary()
+
+    <div class="input-group">
+        <p>Name:</p>
+        @Html.TextBoxFor(m => m.Name)
+        @Html.ValidationMessageFor(m => m.Name)
+    </div>
+    <div>
+        <p>Email:</p>
+        @Html.TextBoxFor(m => m.Email)
+        @Html.ValidationMessageFor(m => m.Email)
+    </div>
+    <div>
+        <p>Message:</p>
+        @Html.TextAreaFor(m => m.Message)
+        @Html.ValidationMessageFor(m => m.Message)
+    </div>
+    <br/>
+    <input type="submit" name="Submit" value="Submit" />
+}
+```
+
+### After
+```cshtml
+<form our-controller="ContactForm" our-action="Submit" method="post" id="customerForm" class="fneeds-validation" novalidate>
+    <div asp-validation-summary="All"></div>
+
+    <div class="input-group">
+        <p>Name:</p>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+    <div>
+        <p>Email:</p>
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <p>Message:</p>
+        <textarea asp-for="Message"></textarea>
+        <span asp-validation-for="Message"></span>
+    </div>
+    <br/>
+    <input type="submit" name="Submit" value="Submit" />
+</form>
+```
