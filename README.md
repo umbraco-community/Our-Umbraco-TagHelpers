@@ -136,3 +136,44 @@ https://our.umbraco.com/Documentation/Fundamentals/Code/Creating-Forms/
     <input type="submit" name="Submit" value="Submit" />
 </form>
 ```
+
+## `<our-lang-switcher>`
+This tag helper element `<our-lang-switcher>` will create a simple unordered list of all languages and domains, in order to create a simple language switcher.
+As this produces alot of HTML markup that is opionated with certain class names and elements, you may wish to change and control the markup it produces. 
+
+With this tag helper the child DOM elements inside the `<our-lang-switcher>` element is used as a Mustache templating language to control the markup.
+
+### Example
+```cshtml
+<our-lang-switcher>
+    <div class="lang-switcher">
+        {{#Languages}}
+            <div class="lang-switcher__item">
+                <a href="{{Url}}" lang="{{Culture}}" hreflang="{{Culture}}" class="lang-switcher__link {{#IsCurrentLang}}selected{{/IsCurrentLang}}">{{Name}}</a>
+            </div>
+        {{/Languages}}
+    </div>
+</our-lang-switcher>
+
+<div class="lang-switcher">
+    <div class="lang-switcher__item">
+         <a href="https://localhost:44331/en" lang="en-US" hreflang="en-US" class="lang-switcher__link selected">English</a>
+     </div>
+    <div class="lang-switcher__item">
+         <a href="https://localhost:44331/dk" lang="da-DK" hreflang="da-DK" class="lang-switcher__link ">dansk</a>
+     </div>
+</div>
+```
+
+If you do not specify a template and use `<our-lang-switcher />` it will use the following Mustache template
+```mustache
+<ul class='lang-switcher'>
+    {{#Languages}}
+        <li>
+            <a href='{{Url}}' lang='{{Culture}}' hreflang='{{Culture}}' class='{{#IsCurrentLang}}selected{{/IsCurrentLang}}'>
+                {{Name}}
+            </a>
+        </li>
+    {{/Languages}}
+</ul>
+```
