@@ -7,7 +7,7 @@ Add the following Nuget Package to your Umbraco website project `Our.Umbraco.Tag
 
 ```
 cd MyUmbracoProject
-dotnet add package Our.Umbraco.TagHelpers`
+dotnet add package Our.Umbraco.TagHelpers
 ```
 
 ## Setup
@@ -63,4 +63,76 @@ This is a tag helper attribute that can be applied to any DOM element in the raz
     <span>@Model.ContentPickerThing.Name</span>
     <img our-if="Model.LinkMediaPicker != null" src="@Model.LinkMediaPicker?.Url()" class="img-circle" />
 </a>
+```
+
+## `<our-macro>`
+This tag helper element `<our-umbraco>` will render an Umbraco Macro Partial View and will use the current page/request for the Macro rendering & context.
+
+If you wish, you can modify this behaviour and pass the context/content node that the Macro will render with using an optional attribute `content` on the `<our-umbraco>` tag and passing an `IPublishedContent` into the attribute. This allows the same Macro Partial View Macro code/snippet to work in various scenarios when the content node/context is changed.
+
+Additionally custom Macro Parameters that can be passed through and consumed by Macro Partial Views are specified in the following way. The key/alias of the Macro Parameter must be prefixed with the following `our-macro-`
+
+So to pass/set a value for the macro parameter `startNodeId` then I will need to set an attribute on the element as follows `our-macro-startNodeId`
+
+```cshtml
+<our-macro alias="ListChildrenFromCurrentPage" />
+<our-macro alias="ListChildrenFromCurrentPage" content="Model" />
+<our-macro alias="ListChildrenFromCurrentPage" content="Model.FirstChild()" />
+<our-macro alias="ChildPagesFromStartNode" our-macro-startNodeId="umb://document/4d39ea8a077949dbb2d80c9f0c7545" />
+```
+
+## BeginUmbracoForm Replacement
+This is to make it easier to create a HTML `<form>` that uses an Umbraco SurfaceController and would be an alternative of using the `@Html.BeginUmbracoForm` approach. This taghelper runs against the `<form>` element along with these attributes `our-controller`and `our-action` to help generate a hidden input field of `ufprt` containing the encoded path that this form needs to route to.
+
+https://our.umbraco.com/Documentation/Fundamentals/Code/Creating-Forms/
+
+### Before
+```cshtml
+@using (Html.BeginUmbracoForm("ContactForm", "Submit", FormMethod.Post, new { @id ="customerForm", @class = "needs-validation", @novalidate = "novalidate" }))
+{
+    @Html.ValidationSummary()
+
+    <div class="input-group">
+        <p>Name:</p>
+        @Html.TextBoxFor(m => m.Name)
+        @Html.ValidationMessageFor(m => m.Name)
+    </div>
+    <div>
+        <p>Email:</p>
+        @Html.TextBoxFor(m => m.Email)
+        @Html.ValidationMessageFor(m => m.Email)
+    </div>
+    <div>
+        <p>Message:</p>
+        @Html.TextAreaFor(m => m.Message)
+        @Html.ValidationMessageFor(m => m.Message)
+    </div>
+    <br/>
+    <input type="submit" name="Submit" value="Submit" />
+}
+```
+
+### After
+```cshtml
+<form our-controller="ContactForm" our-action="Submit" method="post" id="customerForm" class="fneeds-validation" novalidate>
+    <div asp-validation-summary="All"></div>
+
+    <div class="input-group">
+        <p>Name:</p>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+    <div>
+        <p>Email:</p>
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <p>Message:</p>
+        <textarea asp-for="Message"></textarea>
+        <span asp-validation-for="Message"></span>
+    </div>
+    <br/>
+    <input type="submit" name="Submit" value="Submit" />
+</form>
 ```
