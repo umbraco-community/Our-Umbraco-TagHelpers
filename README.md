@@ -64,3 +64,19 @@ This is a tag helper attribute that can be applied to any DOM element in the raz
     <img our-if="Model.LinkMediaPicker != null" src="@Model.LinkMediaPicker?.Url()" class="img-circle" />
 </a>
 ```
+
+## `<our-macro>`
+This tag helper element `<our-umbraco>` will render an Umbraco Macro Partial View and will use the current page/request for the Macro rendering & context.
+
+If you wish, you can modify this behaviour and pass the context/content node that the Macro will render with using an optional attribute `content` on the `<our-umbraco>` tag and passing an `IPublishedContent` into the attribute. This allows the same Macro Partial View Macro code/snippet to work in various scenarios when the content node/context is changed.
+
+Additionally custom Macro Parameters that can be passed through and consumed by Macro Partial Views are specified in the following way. The key/alias of the Macro Parameter must be prefixed with the following `our-macro-`
+
+So to pass/set a value for the macro parameter `startNodeId` then I will need to set an attribute on the element as follows `our-macro-startNodeId`
+
+```cshtml
+<our-macro alias="ListChildrenFromCurrentPage" />
+<our-macro alias="ListChildrenFromCurrentPage" content="Model" />
+<our-macro alias="ListChildrenFromCurrentPage" content="Model.FirstChild()" />
+<our-macro alias="ChildPagesFromStartNode" our-macro-startNodeId="umb://document/4d39ea8a077949dbb2d80c9f0c7545" />
+```
