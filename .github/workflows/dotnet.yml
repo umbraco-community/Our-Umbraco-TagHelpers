@@ -42,4 +42,4 @@ jobs:
       
     - name: Push to GH Nuget Repo
       working-directory: build.out
-      run: dotnet push --source "github"
+      run: dotnet nuget push --source "github"
