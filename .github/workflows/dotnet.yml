@@ -33,7 +33,6 @@ jobs:
       uses: gittools/actions/gitversion/execute@v0.9.7
       with:
         useConfigFile: true
-        additionalArguments: '/showConfig'
 
     - name: Display GitVersion outputs - Help for debugging for now
       run: |
