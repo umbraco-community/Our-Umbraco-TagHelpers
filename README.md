@@ -13,7 +13,7 @@ dotnet add package Our.Umbraco.TagHelpers
 ## Setup
 
 With the Nuget package added you need to register the collection of TagHelpers for Razor views and partials to use them.
-Browse to `/Views/_viewStart.cshtml` in your Umbraco project and add the followign line at the bottom
+Browse to `/Views/_ViewImports.cshtml` in your Umbraco project and add the followign line at the bottom
 ```cshtml
 @addTagHelper *, Our.Umbraco.TagHelpers
 ```
