@@ -32,9 +32,9 @@ namespace Our.Umbraco.TagHelpers
 
         /// <summary>
         /// An optional list of attributes that will map to Macro Parameters
-        /// our-macro-myMacroParam="" umb-macro-startNodeId="" etc...
+        /// bind:myMacroParam="" bind:startNodeId="" etc...
         /// </summary>
-        [HtmlAttributeName(DictionaryAttributePrefix = "our-macro-")]
+        [HtmlAttributeName(DictionaryAttributePrefix = "bind:")]
         public IDictionary<string, string> MacroParameters { get; set; } = new Dictionary<string, string>();
 
         public MacroTagHelper(IUmbracoComponentRenderer umbracoComponentRenderer, IUmbracoContextAccessor umbracoContextAccessor)
