@@ -177,3 +177,13 @@ If you do not specify a template and use `<our-lang-switcher />` it will use the
     {{/Languages}}
 </ul>
 ```
+
+
+## `<our-svg>`
+This tag helper element `<our-svg>` will read the file contents of an SVG file and output it as an inline SVG in the DOM.
+It can be used in one of two ways, either by specifying the `src` attribute to a physcial static file served from wwwRoot or by specifying the `media-item` attribute to use a picked IPublishedContent Media Item.
+
+```cshtml
+<our-svg src="/assets/icon.svg" />
+<our-svg media-item="@Model.Logo" />
+```
