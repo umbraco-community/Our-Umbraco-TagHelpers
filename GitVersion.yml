@@ -1,0 +1,6 @@
+branches:
+  main:
+    tag: ci
+ignore:
+  sha: []
+merge-message-formats: {}
