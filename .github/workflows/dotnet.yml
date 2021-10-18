@@ -36,3 +36,10 @@ jobs:
       with:
         name: Nuget Build Output
         path: build.out/
+      
+    - name: Add GH Nuget Repo Source
+      run: dotnet nuget add source --username umbraco-community --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/umbraco-community/index.json"
+      
+    - name: Push to GH Nuget Repo
+      working-directory: build.out
+      run: dotnet push --source "github"
