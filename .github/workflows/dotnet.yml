@@ -21,6 +21,8 @@ jobs:
         
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: Our.Umbraco.TagHelpers
       
     - name: Build
       run: dotnet build --no-restore
+      working-directory: Our.Umbraco.TagHelpers
