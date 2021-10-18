@@ -26,3 +26,12 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
       working-directory: Our.Umbraco.TagHelpers
+      
+    - name: Dotnet Pack
+      run: dotnet pack --output ../build.out/
+      
+    - name: Upload nuget file as build artifact      
+      uses: actions/upload-artifact@v2
+      with:
+        name: Nuget Build Output
+        path: /build.out/
