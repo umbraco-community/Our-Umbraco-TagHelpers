@@ -82,7 +82,7 @@ jobs:
       
     - name: Push to GitHub Nuget Repo
       working-directory: build.out
-      run: dotnet nuget push *.nupkg --skip-duplicate --api-key ${{secrets.NUGET_TOKEN}}
+      run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate --api-key ${{secrets.NUGET_TOKEN}}
   
     - name: Upload Nuget package to release binaries
       uses: softprops/action-gh-release@v1
