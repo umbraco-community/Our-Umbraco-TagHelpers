@@ -187,3 +187,6 @@ It can be used in one of two ways, either by specifying the `src` attribute to a
 <our-svg src="/assets/icon.svg" />
 <our-svg media-item="@Model.Logo" />
 ```
+
+## Attribution
+The logo for Our.Umbraco.TagHelpers is made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
