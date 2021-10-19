@@ -81,7 +81,8 @@ jobs:
       working-directory: Our.Umbraco.TagHelpers
       
     - name: Push to GitHub Nuget Repo
-      run: dotnet nuget push ./build.out/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_TOKEN}}
+      working-directory: build.out
+      run: dotnet nuget push *.nupkg --skip-duplicate --api-key ${{secrets.NUGET_TOKEN}}
   
     - name: Upload Nuget package to release binaries
       uses: softprops/action-gh-release@v1
