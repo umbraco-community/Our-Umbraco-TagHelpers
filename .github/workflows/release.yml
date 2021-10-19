@@ -7,6 +7,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions: 
+      contents: write
 
     steps:    
     - name: Install GitVersion
@@ -81,8 +83,10 @@ jobs:
     - name: Push to GitHub Nuget Repo
       run: dotnet nuget push ./build.out/*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_TOKEN}}
   
-    - name: Upload nuget file as build artifact  
-      uses: actions/upload-artifact@v2
+    - name: Upload Nuget package to release binaries
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        name: Nuget Release ${{ steps.gitversion.outputs.nuGetVersion }}
-        path: ./build.out/
+        files: |
+          ./build.out/*.nupkg
+          ./build.out/*.snupkg
