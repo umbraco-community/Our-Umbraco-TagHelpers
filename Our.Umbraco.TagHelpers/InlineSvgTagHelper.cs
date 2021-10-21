@@ -1,19 +1,18 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using Microsoft.Extensions.FileProviders;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Extensions;
 
 namespace Our.Umbraco.TagHelpers
 {
+    /// <summary>
+    /// This allows you to inline an SVG file into the DOM 
+    /// from a file on disk or an Umbraco Media Item
+    /// </summary>
     [HtmlTargetElement("our-svg")]
     public class InlineSvgTagHelper : TagHelper
     {
@@ -26,9 +25,17 @@ namespace Our.Umbraco.TagHelpers
             _webHostEnvironment = webHostEnvironment;
         }
 
+        /// <summary>
+        /// A filepath to a SVG on disk such as /assets/icon.svg
+        /// NOTE: You cannot use this in conjuction with the media-item attribute
+        /// </summary>
         [HtmlAttributeName("src")]
         public string FileSource { get; set; }
 
+        /// <summary>
+        /// An IPublishedContent Umbraco Media Item that has an .svg file extension
+        /// NOTE: You cannot use this in conjuction with the src attribute
+        /// </summary>
         [HtmlAttributeName("media-item")]
         public IPublishedContent MediaItem { get; set; }
 
