@@ -87,4 +87,4 @@ jobs:
         path: ./build.out/  
       
     - name: Push to GitHub Nuget Repo
-      run: dotnet nuget push ./build.out/*.nupkg --source https://nuget.pkg.github.com/umbraco-community/index.json --api-key ${{ github.token }}
+      run: dotnet nuget push ./build.out/*.nupkg --skip-duplicate --source https://nuget.pkg.github.com/umbraco-community/index.json --api-key ${{ github.token }}
