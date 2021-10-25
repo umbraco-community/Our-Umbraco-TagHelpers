@@ -7,17 +7,24 @@ using Umbraco.Extensions;
 namespace Our.Umbraco.TagHelpers
 {
     /// <summary>
-    /// Use to fallback simple properties 
+    /// Fallback Umbraco properties
     /// </summary>
     [HtmlTargetElement("our-fallback")]
     public class OurFallbackTagHelper : TagHelper
     {
+        /// <summary>
+        /// The property on the Model to use as a fallback such as Model.Header
+        /// Would just be Header
+        /// </summary>
         [HtmlAttributeName("property")]
         public ModelExpression ModelProperty { get; set; }
 
         [HtmlAttributeName("mode")]
         public Fallback Mode { get; set; }
 
+        /// <summary>
+        /// If using the fallback mode as Language then you can specify the culture to fallback to
+        /// </summary>
         [HtmlAttributeName("culture")]
         public string CultureCode { get; set; } = null;
 
