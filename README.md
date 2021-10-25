@@ -18,7 +18,6 @@ Browse to `/Views/_ViewImports.cshtml` in your Umbraco project and add the follo
 @addTagHelper *, Our.Umbraco.TagHelpers
 ```
 
-
 ## `<our-dictionary>`
 This is a tag helper element `<our-dictionary>` that will use the current page's request Language/Culture to use a dictionary translation from the Umbraco translation section.
 
@@ -187,6 +186,10 @@ It can be used in one of two ways, either by specifying the `src` attribute to a
 <our-svg src="/assets/icon.svg" />
 <our-svg media-item="@Model.Logo" />
 ```
+
+## Video 📺
+[![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
+
 
 ## Attribution
 The logo for Our.Umbraco.TagHelpers is made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
