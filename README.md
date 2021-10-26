@@ -198,6 +198,16 @@ This tag helper element `<our-fallback>` uses the same fallback mode logic that 
 <h3><our-fallback property="Header" mode="Fallback.ToAncestors">I do NOT have a Header property set on ANY parent and ancestors</our-fallback></h3> 
 ```
 
+## `<our-version>`
+This tag helper element `<our-version>` prints out version number for a given Assembly name loaded into the current AppDomain or if none is given then the EntryAssembly version is displayed, which would be the Umbraco website project you are building.
+
+```cshtml
+<!-- Prints out the Website Project Assembly Version -->
+<our-version />
+
+<!-- Prints out the version number of a specific assembly loaded into Current AppDomain -->
+<our-version="Our.Umbraco.TagHelpers" />
+```
 
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
