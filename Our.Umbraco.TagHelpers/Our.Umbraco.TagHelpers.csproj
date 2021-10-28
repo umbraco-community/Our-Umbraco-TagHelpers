@@ -28,6 +28,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageIcon>TagHelperLogo.png</PackageIcon>
 		<PackageTags>Umbraco;TagHelper;TagHelpers;UmbracoCMS</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
   <ItemGroup>
@@ -44,6 +45,7 @@
 
   <ItemGroup>
 	<None Include="TagHelperLogo.png" Pack="true" PackagePath="\"/>
+	<None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
