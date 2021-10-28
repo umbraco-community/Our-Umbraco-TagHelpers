@@ -209,6 +209,24 @@ This tag helper element `<our-version>` prints out version number for a given As
 <our-version="Our.Umbraco.TagHelpers" />
 ```
 
+## `our-member-include` and `our-member-exclude`
+This is a tag helper attribute that can be applied to any DOM element in the razor template or partial. It will show or hide its element and children on the page when passing a comma seperated string of member groups that the current logged in member for the exclude or include variants.
+
+There are two special Member Groups you can use:
+* `*` - All anonymous users 
+* `?` - All authenticated users
+
+```cshtml
+<div our-member-include="Staff">Only members of Staff Member Group will see this.</div>
+<div our-member-include="Staff,Admins">Only members of Staff OR Admins member group will see this.</div>
+<div our-member-include="*">Only logged in members will see this.</div>
+<div our-member-include="?">Only anonymous members will see this.</div>
+
+<div our-member-exclude="Staff">Only Staff members can't see this (Including anonymous).</div>
+<div our-member-exclude="?">Everyone except Anonymous members will see this.</div>
+<div our-member-exclude="*">Everyone except who is authenticated will see this.</div>
+```
+
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
 
