@@ -7,6 +7,7 @@ using Umbraco.Cms.Core.Security;
 namespace Our.Umbraco.TagHelpers
 {
     /// <summary>
+    /// An attribute TagHelper to help show or hide DOM elements for members
     /// 
     /// </summary>
     [HtmlTargetElement("*", Attributes = "our-member-include")]
@@ -16,13 +17,17 @@ namespace Our.Umbraco.TagHelpers
         private IMemberManager _memberManager;
 
         /// <summary>
-        /// 
+        /// A comma seperated list of Member Groups to exclude
+        /// ? = All anonymous users
+        /// * = All authenticated users
         /// </summary>
         [HtmlAttributeName("our-member-exclude")]
         public string ExcludeRoles { get; set; }
 
         /// <summary>
-        /// 
+        /// A comma seperated list of Member Groups to include
+        /// ? = All anonymous users
+        /// * = All authenticated users
         /// </summary>
         [HtmlAttributeName("our-member-include")]
         public string IncludeRoles { get; set; }
