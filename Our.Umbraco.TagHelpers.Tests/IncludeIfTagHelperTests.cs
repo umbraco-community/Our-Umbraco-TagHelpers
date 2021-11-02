@@ -9,54 +9,27 @@ namespace Our.Umbraco.TagHelpers.Tests
 {
     public class IncludeIfTagHelperTests
     {
-        [Test]
-        public async Task Given_True_Value_Return_Contents()
+        [TestCase(true, "original-child-content", "original-child-content")]
+        [TestCase(false, "original-child-content", "")]
+        public async Task Given_Predicate_Return_Contents_Or_Empty(bool predicate, string childContent, string expected)
         {
             // Arrange
             var id = "unique-id";
-            var childContent = "original-child-content";
             var tagHelperContext = GetTagHelperContext(id);
             var tagHelperOutput = GetTagHelperOutput(
                 attributes: new TagHelperAttributeList(),
                 childContent: childContent);
             tagHelperOutput.Content.SetContent(childContent);
 
-            var tagHelper = new IncludeIfTagHelper();
-            tagHelper.Predicate = true;
+            var tagHelper = new IncludeIfTagHelper { Predicate = predicate };
 
             // Act
             await tagHelper.ProcessAsync(tagHelperContext, tagHelperOutput);
 
             var content = tagHelperOutput.Content.GetContent();
-            Console.WriteLine("Value:" + content);
 
             // Assert
-            Assert.AreEqual(childContent, tagHelperOutput.Content.GetContent());
-        }
-
-        [Test]
-        public async Task Given_False_Value_Return_Empty()
-        {
-            // Arrange
-            var id = "unique-id";
-            var childContent = "original-child-content";
-            var tagHelperContext = GetTagHelperContext(id);
-            var tagHelperOutput = GetTagHelperOutput(
-                attributes: new TagHelperAttributeList(),
-                childContent: childContent);
-            tagHelperOutput.Content.SetContent(childContent);
-
-            var tagHelper = new IncludeIfTagHelper();
-            tagHelper.Predicate = false;
-
-            // Act
-            await tagHelper.ProcessAsync(tagHelperContext, tagHelperOutput);
-
-            var content = tagHelperOutput.Content.GetContent();
-            Console.WriteLine("Value:" + content);
-
-            // Assert
-            Assert.AreEqual(string.Empty, tagHelperOutput.Content.GetContent());
+            Assert.AreEqual(expected, content);
         }
 
         private static TagHelperContext GetTagHelperContext(string id = "testid")
