@@ -75,6 +75,10 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
       working-directory: Our.Umbraco.TagHelpers
+
+    - name: Test
+      run: dotnet test
+      working-directory: Our.Umbraco.TagHelpers.Tests
       
     - name: Dotnet Pack
       run: dotnet pack --output ../build.out/
@@ -87,4 +91,5 @@ jobs:
         path: ./build.out/  
       
     - name: Push to GitHub Nuget Repo
+      if: ${{ github.event_name != 'pull_request' }}
       run: dotnet nuget push ./build.out/*.nupkg --skip-duplicate --source https://nuget.pkg.github.com/umbraco-community/index.json --api-key ${{ github.token }}
