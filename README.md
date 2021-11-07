@@ -227,112 +227,55 @@ There are two special Member Groups you can use:
 <div our-member-exclude="*">Everyone except who is authenticated will see this.</div>
 ```
 
-## `<our-editlink>`
-This is a tag helper element which renders an edit link on the front end if the current user is logged into umbraco. The edit link will go to the current page in the umbraco backoffice. You can override the link text and the umbraco url if you are using a different url for the backoffice. You also have different options for styling the link.
+## `<our-edit-link>`
+This is a tag helper element which renders an edit link on the front end only if the current user is logged into umbraco and has access to the content section. 
 
-### Simple Example
-This is the most basic example. You need to pass in the id of the content item. The link will render in the bottom right of the screen by default.
+The edit link will open the current page in the umbraco backoffice. You can override the link text and the umbraco url if you are using a different url for the backoffice. 
 
-```cshtml
-<our-editlink content-id="@(Model.Id)" />
-```
-
-### Changing the position example
-
-This will make the link render on the bottom right of the screen
+### Simple example
+This is the most basic example. You need to pass in the id of the content item using the `content-id` attribute. The link will render wherever you put it in the HTML.
 
 ```cshtml
-<our-editlink content-id="@(Model.Id)" position="@(Our.Umbraco.TagHelpers.Enums.EditLinkPosition.BottomRight)" />
+<our-edit-link content-id="@(Model.Id)" />
 ```
 
-Here are the full set of attributes and what they do:
+### Use Default Styles example
 
-#### Required Attributes:
+If you set `use-default-styles` to `true`, it will render the link fixed to the bottom left of the screen with white text and a navy blue background.
 
-**content-id**
-Default value: `0`
+```cshtml
+<our-edit-link content-id="@(Model.Id)" use-default-styles="true" />
+```
 
-This is the id of the content item.
+### Changing the link text
 
-#### Optional Attributes
+You can change the link text by adding a `text` attribute:
 
-**position**
-Default value: `Our.Umbraco.TagHelpers.Enums.EditLinkPosition.BottomLeft`
+```cshtml
+<our-edit-link content-id="@(Model.Id)" text="✍" />
+```
 
-An enum to say which corner of the screen you would like the edit link to show.
+If you have a multilingual site you could use a dictionary value:
 
-**apply-inline-link-styles**
-Default value: `true`
+```cshtml
+<our-edit-link content-id="@(Model.Id)" text="@(Umbraco.GetDictionaryValue("EditLinkText"))" />
+```
 
-A bool to say whether or not you would like to apply the inline link styles.
+### Change the edit link url
 
-**edit-message**
-Default value: `"Edit"`
+Perhaps you have changed your umbraco path to something different, you can use the `edit-url` attribute to change the umbraco edit content url:
 
-The 'Edit' text in the link.
+```cshtml
+<our-edit-link content-id="@(Model.Id)" edit-url="/mysecretumbracopath#/content/content/edit/" />
+```
 
-**link-colour**
-Default value: `"#fff"`
+**Here are the other attributes you can set, just like on a normal `a` tag:**
 
-**link-background-colour**
-Default value: `"#1b264f"`
-
-The CSS colour of the link background
-
-**font-size**
-Default value: `16`
-
-The font size of the link text in pixels
-
-**link-padding**
-Default value: `10`
-
-The padding around the link in pixels
-
-**border-radius**
-Default value: `6`
-
-The border radius of the link
-
-**link-class-name**
-Default value: `"edit-link-inner"`
-
-The class you would like to add to the link
-
-**apply-inline-outer-element-styles**
-Default value: `true`
-
-Whether or not you would like to apply the inline styles for the outer element
-
-**margin**
-Default value: `10`
-
-The margin around the link
-
-**zindex**
-Default value: `10000`
-
-The zindex of this link block
-
-**umbraco-edit-content-url**
-Default value: `"/umbraco#/content/content/edit/"`
-
-Override the umbraco edit content url if yours is different
-
-**outer-class-name**
-Default value: `"edit-link-outer"`
-
-The class name for the outer element
-
-**outer-position**
-Default value: `"fixed"`
-
-The CSS position for the outer element
-
-**link-position**
-Default value: `"absolute"`
-
-The CSS position for the link
+- id
+- class
+- target (defaults to `_blank`)
+- style
+- title
 
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)

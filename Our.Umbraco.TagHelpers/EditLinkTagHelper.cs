@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
-using Our.Umbraco.TagHelpers.Enums;
+using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Services;
-using System.Linq;
 using System.Text;
 
 namespace Our.Umbraco.TagHelpers
@@ -11,7 +10,7 @@ namespace Our.Umbraco.TagHelpers
     /// then an edit link will display on the front end of the site. This will
     /// take you to the umbraco backoffice to edit the current page.
     /// </summary>
-    [HtmlTargetElement("our-editlink")]
+    [HtmlTargetElement("our-edit-link")]
     public class EditLinkTagHelper : TagHelper
     {
         private readonly IBackofficeUserAccessor _backofficeUserAccessor;
@@ -28,150 +27,99 @@ namespace Our.Umbraco.TagHelpers
         public int ContentId { get; set; } = 0;
 
         /// <summary>
-        /// An enum to say which corner of the screen you would like 
-        /// the edit link to show. Defaults to bottom left.
-        /// </summary>
-        [HtmlAttributeName("position")]
-        public EditLinkPosition Position { get; set; } = EditLinkPosition.BottomLeft;
-
-        /// <summary>
-        /// A bool to say whether or not you would like to apply the inline link styles. Defaults to true.
-        /// </summary>
-        [HtmlAttributeName("apply-inline-link-styles")]
-        public bool ApplyInlineLinkStyles { get; set; } = true;
-
-        /// <summary>
-        /// The 'Edit' text in the link. Defaults to "Edit"
-        /// </summary>
-        [HtmlAttributeName("edit-message")]
-        public string EditMessage { get; set; } = "Edit";
-
-        /// <summary>
-        /// The CSS colour of the link text. Defaults to #fff
-        /// </summary>
-        [HtmlAttributeName("link-colour")]
-        public string LinkColour { get; set; } = "#fff";
-
-        /// <summary>
-        /// The CSS colour of the link background. Defaults to "#1b264f"
-        /// </summary>
-        [HtmlAttributeName("link-background-colour")]
-        public string LinkBackgroundColour { get; set; } = "#1b264f";
-
-        /// <summary>
-        /// The font size of the link text in pixels. Defaults to 16
-        /// </summary>
-        [HtmlAttributeName("font-size")]
-        public int FontSize { get; set; } = 16;
-
-        /// <summary>
-        /// The padding around the link in pixels. Defaults to 10
-        /// </summary>
-        [HtmlAttributeName("link-padding")]
-        public int LinkPadding { get; set; } = 10;
-
-        /// <summary>
-        /// The border radius of the link in pixels. Defaults to 6
-        /// </summary>
-        [HtmlAttributeName("border-radius")]
-        public int BorderRadius { get; set; } = 6;
-
-        /// <summary>
-        /// The class you would like to add to the link. Defaults to "edit-link-inner"
-        /// </summary>
-        [HtmlAttributeName("link-class-name")]
-        public string LinkClassName { get; set; } = "edit-link-inner";
-
-        /// <summary>
-        /// Whether or not you would like to apply the inline styles for the outer element. Defaults to true
-        /// </summary>
-        [HtmlAttributeName("apply-inline-outer-element-styles")]
-        public bool ApplyInlineOuterElementStyles { get; set; } = true;
-
-        /// <summary>
-        /// The margin around the link. Defaults to 10
-        /// </summary>
-        [HtmlAttributeName("margin")]
-        public int Margin { get; set; } = 10;
-
-        /// <summary>
-        /// The zindex of this link block. Defaults to 10000
-        /// </summary>
-        [HtmlAttributeName("zindex")]
-        public int Zindex { get; set; } = 10000;
-
-        /// <summary>
         /// Override the umbraco edit content url if yours is different
         /// </summary>
-        [HtmlAttributeName("umbraco-edit-content-url")]
-        public string UmbracoEditContentUrl { get; set; } = "/umbraco#/content/content/edit/";
+        [HtmlAttributeName("edit-url")]
+        public string EditUrl { get; set; } = "/umbraco#/content/content/edit/";
 
         /// <summary>
-        /// The class name for the outer element. Defaults to "edit-link-outer"
+        /// Override the text of the link
         /// </summary>
-        [HtmlAttributeName("outer-class-name")]
-        public string OuterClassName { get; set; } = "edit-link-outer";
+        [HtmlAttributeName("text")]
+        public string Text { get; set; } = "Edit";
 
         /// <summary>
-        /// The CSS position for the outer element. Defaults to "fixed"
+        /// A boolean to say whether or not you would like to use the default styling.
         /// </summary>
-        [HtmlAttributeName("outer-position")]
-        public string OuterPosition { get; set; } = "fixed";
+        [HtmlAttributeName("use-default-styles")]
+        public bool UseDefaultStyles { get; set; } = false;
 
         /// <summary>
-        /// The CSS position for the link. Defaults to "absolute"
+        /// Set the id attribute if you want
         /// </summary>
-        [HtmlAttributeName("link-position")]
-        public string LinkPosition { get; set; } = "absolute";
+        [HtmlAttributeName("id")]
+        public string Id { get; set; } = "";
 
+        /// <summary>
+        /// The class attribute for the link
+        /// </summary>
+        [HtmlAttributeName("class")]
+        public string Class { get; set; } = "";
+
+        /// <summary>
+        /// Set the target attribute if you want. Defaults to _blank
+        /// </summary>
+        [HtmlAttributeName("target")]
+        public string Target { get; set; } = "_blank";
+
+        /// <summary>
+        /// Add some inline styles to the link if you want
+        /// </summary>
+        [HtmlAttributeName("style")]
+        public string Style { get; set; } = "";
+
+        /// <summary>
+        /// Set the title attribute if you want
+        /// </summary>
+        [HtmlAttributeName("title")]
+        public string Title { get; set; } = "";
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
+            //don't output the tag name as it's not valid HTML
             output.TagName = "";
 
-            if(_backofficeUserAccessor.BackofficeUser != null 
-                && _backofficeUserAccessor.BackofficeUser.AuthenticationType 
-                    == global::Umbraco.Cms.Core.Constants.Security.BackOfficeAuthenticationType
-                && _backofficeUserAccessor.BackofficeUser.Claims != null
-                && _backofficeUserAccessor.BackofficeUser.Claims.Any(x => 
-                    x.Type == global::Umbraco.Cms.Core.Constants.Security.AllowedApplicationsClaimType
-                    && x.Value == global::Umbraco.Cms.Core.Constants.Conventions.PermissionCategories.ContentCategory))
+            //check if the user is logged in to the backoffice
+            //and they have access to the content section
+            if(_backofficeUserAccessor.BackofficeUser.IsAllowedToSeeEditLink())
             {
-                var editLink = $"/umbraco#/content/content/edit/{ContentId}";
-
-
+                var editLinkUrl = $"{EditUrl}{ContentId}";
 
                 StringBuilder editLinkCode = new StringBuilder();
+                SetAttributeValue("style", Style, editLinkCode);
 
-                //Render the starting outer div
-                editLinkCode.Append($"<div");
-                editLinkCode.Append($" class=\"{OuterClassName}\"");
-
-                //Render the inline styles for the outer div
-                if (ApplyInlineOuterElementStyles)
+                if (UseDefaultStyles)
                 {
-                    string outerStyles = GetOuterElementStyles(OuterPosition, Position, Margin, Zindex, LinkPadding);
-                    editLinkCode.Append($" style=\"{outerStyles}\"");
-                }
-                editLinkCode.Append($">");
-
-                //Render the link
-                editLinkCode.Append($"<a href=\"{UmbracoEditContentUrl}{ContentId}\"");
-                editLinkCode.Append($" target=\"_blank\"");
-                editLinkCode.Append($" class=\"{LinkClassName}\"");
-
-                //Render the inline styles for the link
-                if (ApplyInlineLinkStyles)
-                {
-                    string linkStyles = GetLinkStyles(LinkColour, LinkBackgroundColour, LinkPadding, FontSize, BorderRadius);
-                    editLinkCode.Append($"style=\"{linkStyles}\"");
+                    //Render the outer div with some inline styles
+                    editLinkCode.Append($"<div");
+                    SetAttributeValue("style", GetOuterElementStyles(), editLinkCode);
+                    editLinkCode.Append($">");
                 }
 
-                //Render the link text and closing tag
-                editLinkCode.Append($">{EditMessage}</a>");
+                //Add the opening tag of the link
+                editLinkCode.Append($"<a");
 
-                //Render the closing outer div
-                editLinkCode.Append($"</div>");
+                SetAttributeValue("href", editLinkUrl, editLinkCode);
+                SetAttributeValue("id", Id, editLinkCode);
+                SetAttributeValue("class", Class, editLinkCode);
+                SetAttributeValue("target", Target, editLinkCode);
+                SetAttributeValue("title", Title, editLinkCode);
+
+                if (UseDefaultStyles)
+                {
+                    SetAttributeValue("style", GetLinkStyles(), editLinkCode);
+                }
+
+                //Add the link text and close the link tag
+                editLinkCode.Append($">{Text}</a>");
+
+                if (UseDefaultStyles)
+                {
+                    //Add the closing outer div
+                    editLinkCode.Append($"</div>");
+                }
+
+                //Set the content of the tag helper
                 output.Content.SetHtmlContent(editLinkCode.ToString());
                 return;
             }
@@ -179,6 +127,14 @@ namespace Our.Umbraco.TagHelpers
             {
                 output.SuppressOutput();
                 return;
+            }
+        }
+
+        private static void SetAttributeValue(string attributeName, string attributeValue, StringBuilder editLinkCode)
+        {
+            if (!string.IsNullOrWhiteSpace(attributeValue))
+            {
+                editLinkCode.Append($" {attributeName}=\"{attributeValue}\"");
             }
         }
 
@@ -191,8 +147,12 @@ namespace Our.Umbraco.TagHelpers
         /// <param name="fontSize">The font size of the link text</param>
         /// <param name="borderRadius">The border radius of the link</param>
         /// <returns></returns>
-        private static string GetLinkStyles(string linkColour, string linkBackgroundColour,
-            int linkPadding, int fontSize, int borderRadius)
+        private static string GetLinkStyles(
+            string linkColour = "#ffffff", 
+            string linkBackgroundColour = "#1b264f",
+            int linkPadding = 10, 
+            int fontSize = 16, 
+            int borderRadius = 6)
         {
             StringBuilder linkStyles = new StringBuilder();
             linkStyles.Append($"color:{linkColour};");
@@ -207,40 +167,25 @@ namespace Our.Umbraco.TagHelpers
         /// Helper method to get the outer element styles
         /// </summary>
         /// <param name="outerPosition">The CSS position of the outer element</param>
-        /// <param name="position">The CSS position of the link element</param>
         /// <param name="margin">The margin around the outer element</param>
-        /// <param name="zindex">The zindex of the outer element</param>
+        /// <param name="zindex">The z-index of the outer element</param>
         /// <param name="linkPadding">The padding around the link</param>
         /// <returns></returns>
-        private static string GetOuterElementStyles(string outerPosition, EditLinkPosition position,
-            int margin, int zindex, int linkPadding)
+        private static string GetOuterElementStyles(
+            string outerPosition = "fixed", 
+            int margin = 10, 
+            int zindex = 10000, 
+            int linkPadding = 10)
         {
-            linkPadding = linkPadding / 2;
+            linkPadding /= 2;
 
-            StringBuilder outerStyles = new StringBuilder();
+            var outerStyles = new StringBuilder();
 
             outerStyles.Append("display:block;");
             if (outerPosition == "fixed")
             {
-                switch (position)
-                {
-                    case EditLinkPosition.TopLeft:
-                        outerStyles.Append($"top:{margin + linkPadding}px;");
-                        outerStyles.Append($"left:{margin}px;");
-                        break;
-                    case EditLinkPosition.TopRight:
-                        outerStyles.Append($"top:{margin + linkPadding}px;");
-                        outerStyles.Append($"right:{margin}px;");
-                        break;
-                    case EditLinkPosition.BottomRight:
-                        outerStyles.Append($"bottom:{margin + linkPadding}px;");
-                        outerStyles.Append($"right:{margin}px;");
-                        break;
-                    case EditLinkPosition.BottomLeft:
-                        outerStyles.Append($"bottom:{margin + linkPadding}px;");
-                        outerStyles.Append($"left:{margin}px;");
-                        break;
-                }
+                outerStyles.Append($"bottom:{margin + linkPadding}px;");
+                outerStyles.Append($"left:{margin}px;");
             }
 
             outerStyles.Append($"z-index:{zindex};");

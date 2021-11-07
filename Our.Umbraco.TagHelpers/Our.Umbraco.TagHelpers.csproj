@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	<None Include="TagHelperLogo.png" Pack="true" PackagePath="\"/>
+	<None Include="TagHelperLogo.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
