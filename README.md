@@ -230,52 +230,45 @@ There are two special Member Groups you can use:
 ## `<our-edit-link>`
 This is a tag helper element which renders an edit link on the front end only if the current user is logged into umbraco and has access to the content section. 
 
-The edit link will open the current page in the umbraco backoffice. You can override the link text and the umbraco url if you are using a different url for the backoffice. 
+The link will open the current page in the umbraco backoffice. You can override the umbraco url if you are using a different url for the backoffice.
 
 ### Simple example
-This is the most basic example. You need to pass in the id of the content item using the `content-id` attribute. The link will render wherever you put it in the HTML.
+This is the most basic example. The link will render wherever you put it in the HTML.
 
-```cshtml
-<our-edit-link content-id="@(Model.Id)" />
+```html
+<our-edit-link>Edit</our-edit-link>
+```
+
+It will output a link link this, where 1057 is the id of the current page:
+
+```html
+<a href="/umbraco#/content/content/edit/1057">Edit</a>
 ```
 
 ### Use Default Styles example
 
-If you set `use-default-styles` to `true`, it will render the link fixed to the bottom left of the screen with white text and a navy blue background.
+If you add an attribute of `use-default-styles`, it will render the link fixed to the bottom left of the screen with white text and a navy blue background.
 
-```cshtml
-<our-edit-link content-id="@(Model.Id)" use-default-styles="true" />
+```html
+<our-edit-link use-default-styles>Edit</our-edit-link>
 ```
 
-### Changing the link text
-
-You can change the link text by adding a `text` attribute:
-
-```cshtml
-<our-edit-link content-id="@(Model.Id)" text="✍" />
-```
-
-If you have a multilingual site you could use a dictionary value:
-
-```cshtml
-<our-edit-link content-id="@(Model.Id)" text="@(Umbraco.GetDictionaryValue("EditLinkText"))" />
-```
-
-### Change the edit link url
+### Change the edit url
 
 Perhaps you have changed your umbraco path to something different, you can use the `edit-url` attribute to change the umbraco edit content url:
 
-```cshtml
-<our-edit-link content-id="@(Model.Id)" edit-url="/mysecretumbracopath#/content/content/edit/" />
+```html
+<our-edit-link edit-url="/mysecretumbracopath#/content/content/edit/">Edit</our-edit-link>
 ```
 
-**Here are the other attributes you can set, just like on a normal `a` tag:**
+### Open in a new tab
 
-- id
-- class
-- target (defaults to `_blank`)
-- style
-- title
+As the edit link is just an `a` tag, you can add the usual attributes like `target` and `class` etc.
+If you want the edit link to open in a new tab, just add the `target="_blank"` attribute.
+
+```html
+<our-edit-link target="_blank">Edit</our-edit-link>
+```
 
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)

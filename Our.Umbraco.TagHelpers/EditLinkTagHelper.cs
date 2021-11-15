@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Services;
 using System.Text;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core.Web;
 
@@ -48,7 +48,7 @@ namespace Our.Umbraco.TagHelpers
             // Turn <our-edit-link> into an <a> tag
             output.TagName = "a";
 
-            // An outter wrapper div if we use inbuilt styling
+            // An outer wrapper div if we use inbuilt styling
             var outerDiv = new TagBuilder("div");
 
             // Check if the user is logged in to the backoffice
