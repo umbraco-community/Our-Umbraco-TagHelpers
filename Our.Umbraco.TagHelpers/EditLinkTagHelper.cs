@@ -2,6 +2,9 @@
 using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Services;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
+using Umbraco.Cms.Core.Web;
 
 namespace Our.Umbraco.TagHelpers
 {
@@ -14,17 +17,19 @@ namespace Our.Umbraco.TagHelpers
     public class EditLinkTagHelper : TagHelper
     {
         private readonly IBackofficeUserAccessor _backofficeUserAccessor;
+        private IUmbracoContextAccessor _umbracoContextAccessor;
 
-        public EditLinkTagHelper(IBackofficeUserAccessor backofficeUserAccessor)
+        public EditLinkTagHelper(IBackofficeUserAccessor backofficeUserAccessor, IUmbracoContextAccessor umbracoContextAccessor)
         {
             _backofficeUserAccessor = backofficeUserAccessor;
+            _umbracoContextAccessor = umbracoContextAccessor;
         }
 
         /// <summary>
-        /// The id of the current content item. Defaults to 0
+        /// The id of the current content item
         /// </summary>
         [HtmlAttributeName("content-id")]
-        public int ContentId { get; set; } = 0;
+        public int ContentId { get; set; } = int.MinValue;
 
         /// <summary>
         /// Override the umbraco edit content url if yours is different
@@ -33,108 +38,60 @@ namespace Our.Umbraco.TagHelpers
         public string EditUrl { get; set; } = "/umbraco#/content/content/edit/";
 
         /// <summary>
-        /// Override the text of the link
-        /// </summary>
-        [HtmlAttributeName("text")]
-        public string Text { get; set; } = "Edit";
-
-        /// <summary>
         /// A boolean to say whether or not you would like to use the default styling.
         /// </summary>
         [HtmlAttributeName("use-default-styles")]
         public bool UseDefaultStyles { get; set; } = false;
 
-        /// <summary>
-        /// Set the id attribute if you want
-        /// </summary>
-        [HtmlAttributeName("id")]
-        public string Id { get; set; } = "";
-
-        /// <summary>
-        /// The class attribute for the link
-        /// </summary>
-        [HtmlAttributeName("class")]
-        public string Class { get; set; } = "";
-
-        /// <summary>
-        /// Set the target attribute if you want. Defaults to _blank
-        /// </summary>
-        [HtmlAttributeName("target")]
-        public string Target { get; set; } = "_blank";
-
-        /// <summary>
-        /// Add some inline styles to the link if you want
-        /// </summary>
-        [HtmlAttributeName("style")]
-        public string Style { get; set; } = "";
-
-        /// <summary>
-        /// Set the title attribute if you want
-        /// </summary>
-        [HtmlAttributeName("title")]
-        public string Title { get; set; } = "";
-
-        public override void Process(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            //don't output the tag name as it's not valid HTML
-            output.TagName = "";
+            // Turn <our-edit-link> into an <a> tag
+            output.TagName = "a";
 
-            //check if the user is logged in to the backoffice
-            //and they have access to the content section
-            if(_backofficeUserAccessor.BackofficeUser.IsAllowedToSeeEditLink())
+            // An outter wrapper div if we use inbuilt styling
+            var outerDiv = new TagBuilder("div");
+
+            // Check if the user is logged in to the backoffice
+            // and they have access to the content section
+            if (_backofficeUserAccessor.BackofficeUser.IsAllowedToSeeEditLink())
             {
+                // Try & get Umbraco Current Node int ID (Only do this if ContentId has NOT been set)
+                if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) && ContentId == int.MinValue)
+                {
+                    ContentId = umbracoContext.PublishedRequest.PublishedContent.Id;
+                }
+                
+                // Backoffice URL to content item
                 var editLinkUrl = $"{EditUrl}{ContentId}";
 
-                StringBuilder editLinkCode = new StringBuilder();
-                SetAttributeValue("style", Style, editLinkCode);
+                if (UseDefaultStyles)
+                {
+                    // Wrap the <a> in a <div>
+                    // Render the outer div with some inline styles
+                    outerDiv.Attributes.Add("style", GetOuterElementStyles());
+                    output.PreElement.AppendHtml(outerDiv.RenderStartTag());
+                }
+
+                // Set the link on the <a> tag
+                output.Attributes.SetAttribute("href", editLinkUrl);
 
                 if (UseDefaultStyles)
                 {
-                    //Render the outer div with some inline styles
-                    editLinkCode.Append($"<div");
-                    SetAttributeValue("style", GetOuterElementStyles(), editLinkCode);
-                    editLinkCode.Append($">");
+                    output.Attributes.SetAttribute("style", GetLinkStyles());
                 }
-
-                //Add the opening tag of the link
-                editLinkCode.Append($"<a");
-
-                SetAttributeValue("href", editLinkUrl, editLinkCode);
-                SetAttributeValue("id", Id, editLinkCode);
-                SetAttributeValue("class", Class, editLinkCode);
-                SetAttributeValue("target", Target, editLinkCode);
-                SetAttributeValue("title", Title, editLinkCode);
-
-                if (UseDefaultStyles)
-                {
-                    SetAttributeValue("style", GetLinkStyles(), editLinkCode);
-                }
-
-                //Add the link text and close the link tag
-                editLinkCode.Append($">{Text}</a>");
 
                 if (UseDefaultStyles)
                 {
                     //Add the closing outer div
-                    editLinkCode.Append($"</div>");
+                    output.PostElement.AppendHtml(outerDiv.RenderEndTag());
                 }
 
-                //Set the content of the tag helper
-                output.Content.SetHtmlContent(editLinkCode.ToString());
                 return;
             }
             else
             {
                 output.SuppressOutput();
                 return;
-            }
-        }
-
-        private static void SetAttributeValue(string attributeName, string attributeValue, StringBuilder editLinkCode)
-        {
-            if (!string.IsNullOrWhiteSpace(attributeValue))
-            {
-                editLinkCode.Append($" {attributeName}=\"{attributeValue}\"");
             }
         }
 
