@@ -227,6 +227,49 @@ There are two special Member Groups you can use:
 <div our-member-exclude="*">Everyone except who is authenticated will see this.</div>
 ```
 
+## `<our-edit-link>`
+This is a tag helper element which renders an edit link on the front end only if the current user is logged into umbraco and has access to the content section. 
+
+The link will open the current page in the umbraco backoffice. You can override the umbraco url if you are using a different url for the backoffice.
+
+### Simple example
+This is the most basic example. The link will render wherever you put it in the HTML.
+
+```html
+<our-edit-link>Edit</our-edit-link>
+```
+
+It will output a link link this, where 1057 is the id of the current page:
+
+```html
+<a href="/umbraco#/content/content/edit/1057">Edit</a>
+```
+
+### Use Default Styles example
+
+If you add an attribute of `use-default-styles`, it will render the link fixed to the bottom left of the screen with white text and a navy blue background.
+
+```html
+<our-edit-link use-default-styles>Edit</our-edit-link>
+```
+
+### Change the edit url
+
+Perhaps you have changed your umbraco path to something different, you can use the `edit-url` attribute to change the umbraco edit content url:
+
+```html
+<our-edit-link edit-url="/mysecretumbracopath#/content/content/edit/">Edit</our-edit-link>
+```
+
+### Open in a new tab
+
+As the edit link is just an `a` tag, you can add the usual attributes like `target` and `class` etc.
+If you want the edit link to open in a new tab, just add the `target="_blank"` attribute.
+
+```html
+<our-edit-link target="_blank">Edit</our-edit-link>
+```
+
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
 
