@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Services;
 using System.Text;
-using System.Threading.Tasks;
 using Umbraco.Cms.Core.Web;
 
 namespace Our.Umbraco.TagHelpers
@@ -43,7 +42,7 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("use-default-styles")]
         public bool UseDefaultStyles { get; set; } = false;
 
-        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             // Turn <our-edit-link> into an <a> tag
             output.TagName = "a";
@@ -60,7 +59,7 @@ namespace Our.Umbraco.TagHelpers
                 {
                     ContentId = umbracoContext.PublishedRequest.PublishedContent.Id;
                 }
-                
+
                 // Backoffice URL to content item
                 var editLinkUrl = $"{EditUrl}{ContentId}";
 
