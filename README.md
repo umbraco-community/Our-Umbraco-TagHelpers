@@ -238,7 +238,7 @@ There are two special User Groups you can use:
 
 Use the alias of the User Group
 
-````cshtml
+```cshtml
 <div our-user-include="admin">Only users in the Admin group will see this.</div>
 <div our-user-include="admin,editor">Only users in the Admin or Editor user group will see this.</div>
 <div our-user-include="*">Only logged in users will see this.</div>
@@ -247,7 +247,7 @@ Use the alias of the User Group
 <div our-user-exclude="editor">Only Editor users can't see this (Including anonymous).</div>
 <div our-user-exclude="?">Everyone except Anonymous users will see this.</div>
 <div our-user-exclude="*">Everyone except who is authenticated will see this.</div>
-
+```
 
 ## `<our-edit-link>`
 This is a tag helper element which renders an edit link on the front end only if the current user is logged into umbraco and has access to the content section. 
