@@ -206,7 +206,7 @@ This tag helper element `<our-version>` prints out version number for a given As
 <our-version />
 
 <!-- Prints out the version number of a specific assembly loaded into Current AppDomain -->
-<our-version="Our.Umbraco.TagHelpers" />
+<our-version assembly="Our.Umbraco.TagHelpers" />
 ```
 
 ## `our-member-include` and `our-member-exclude`
