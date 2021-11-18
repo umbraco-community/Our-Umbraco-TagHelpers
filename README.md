@@ -227,6 +227,28 @@ There are two special Member Groups you can use:
 <div our-member-exclude="*">Everyone except who is authenticated will see this.</div>
 ```
 
+## `our-user-include` and `our-user-exclude`
+
+This is a tag helper attribute that can be applied to any DOM element in the razor template or partial. It will show or hide its element and children on the page when passing a comma seperated string of user groups that the current logged in Umbraco backoffice user is in, for the exclude or include variants.
+
+There are two special User Groups you can use:
+
+- `*` - All anonymous users
+- `?` - All authenticated users
+
+Use the alias of the User Group
+
+````cshtml
+<div our-user-include="admin">Only users in the Admin group will see this.</div>
+<div our-user-include="admin,editor">Only users in the Admin or Editor user group will see this.</div>
+<div our-user-include="*">Only logged in users will see this.</div>
+<div our-user-include="?">Only anonymous users will see this.</div>
+
+<div our-user-exclude="editor">Only Editor users can't see this (Including anonymous).</div>
+<div our-user-exclude="?">Everyone except Anonymous users will see this.</div>
+<div our-user-exclude="*">Everyone except who is authenticated will see this.</div>
+
+
 ## `<our-edit-link>`
 This is a tag helper element which renders an edit link on the front end only if the current user is logged into umbraco and has access to the content section. 
 

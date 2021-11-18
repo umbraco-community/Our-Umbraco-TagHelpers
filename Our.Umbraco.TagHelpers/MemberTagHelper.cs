@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core.Security;
+using Umbraco.Extensions;
 
 namespace Our.Umbraco.TagHelpers
 {
@@ -17,7 +18,7 @@ namespace Our.Umbraco.TagHelpers
         private IMemberManager _memberManager;
 
         /// <summary>
-        /// A comma seperated list of Member Groups to exclude
+        /// A comma separated list of Member Groups to exclude
         /// ? = All anonymous users
         /// * = All authenticated users
         /// </summary>
@@ -25,7 +26,7 @@ namespace Our.Umbraco.TagHelpers
         public string ExcludeRoles { get; set; }
 
         /// <summary>
-        /// A comma seperated list of Member Groups to include
+        /// A comma separated list of Member Groups to include
         /// ? = All anonymous users
         /// * = All authenticated users
         /// </summary>
@@ -79,7 +80,7 @@ namespace Our.Umbraco.TagHelpers
                     return true;
                 }
 
-                if (currentMemberRoles.Contains(role))
+                if (currentMemberRoles.InvariantContains(role))
                 {
                     return true;
                 }
