@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -28,22 +28,31 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageIcon>TagHelperLogo.png</PackageIcon>
 		<PackageTags>Umbraco;TagHelper;TagHelpers;UmbracoCMS</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="5.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.2.0" />
-    <PackageReference Include="Stubble.Core" Version="1.9.3" />
-    <PackageReference Include="Umbraco.Cms.Core" Version="9.0.1" />
-    <PackageReference Include="Umbraco.Cms.Web.Common" Version="9.0.1" />
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.2.0" />
+		<PackageReference Include="Stubble.Core" Version="1.9.3" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="9.0.1" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="9.0.1" />
 	  
-	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-	<PackageReference Include="GitVersion.MsBuild" Version="5.6.10*" PrivateAssets="All" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+		<PackageReference Include="GitVersion.MsBuild" Version="5.6.10*" PrivateAssets="All" />
+	</ItemGroup>
 
-  <ItemGroup>
-	<None Include="TagHelperLogo.png" Pack="true" PackagePath="\" />
-  </ItemGroup>
+	<ItemGroup>
+		<!-- Include files in package -->
+		<None Include="TagHelperLogo.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
 </Project>
