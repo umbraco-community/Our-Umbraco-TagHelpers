@@ -206,7 +206,7 @@ This tag helper element `<our-version>` prints out version number for a given As
 <our-version />
 
 <!-- Prints out the version number of a specific assembly loaded into Current AppDomain -->
-<our-version="Our.Umbraco.TagHelpers" />
+<our-version assembly="Our.Umbraco.TagHelpers" />
 ```
 
 ## `our-member-include` and `our-member-exclude`
@@ -225,6 +225,71 @@ There are two special Member Groups you can use:
 <div our-member-exclude="Staff">Only Staff members can't see this (Including anonymous).</div>
 <div our-member-exclude="?">Everyone except Anonymous members will see this.</div>
 <div our-member-exclude="*">Everyone except who is authenticated will see this.</div>
+```
+
+## `our-user-include` and `our-user-exclude`
+
+This is a tag helper attribute that can be applied to any DOM element in the razor template or partial. It will show or hide its element and children on the page when passing a comma seperated string of user groups that the current logged in Umbraco backoffice user is in, for the exclude or include variants.
+
+There are two special User Groups you can use:
+
+- `*` - All anonymous users
+- `?` - All authenticated users
+
+Use the alias of the User Group
+
+```cshtml
+<div our-user-include="admin">Only users in the Admin group will see this.</div>
+<div our-user-include="admin,editor">Only users in the Admin or Editor user group will see this.</div>
+<div our-user-include="*">Only logged in users will see this.</div>
+<div our-user-include="?">Only anonymous users will see this.</div>
+
+<div our-user-exclude="editor">Only Editor users can't see this (Including anonymous).</div>
+<div our-user-exclude="?">Everyone except Anonymous users will see this.</div>
+<div our-user-exclude="*">Everyone except who is authenticated will see this.</div>
+```
+
+## `<our-edit-link>`
+This is a tag helper element which renders an edit link on the front end only if the current user is logged into umbraco and has access to the content section. 
+
+The link will open the current page in the umbraco backoffice. You can override the umbraco url if you are using a different url for the backoffice.
+
+### Simple example
+This is the most basic example. The link will render wherever you put it in the HTML.
+
+```html
+<our-edit-link>Edit</our-edit-link>
+```
+
+It will output a link link this, where 1057 is the id of the current page:
+
+```html
+<a href="/umbraco#/content/content/edit/1057">Edit</a>
+```
+
+### Use Default Styles example
+
+If you add an attribute of `use-default-styles`, it will render the link fixed to the bottom left of the screen with white text and a navy blue background.
+
+```html
+<our-edit-link use-default-styles>Edit</our-edit-link>
+```
+
+### Change the edit url
+
+Perhaps you have changed your umbraco path to something different, you can use the `edit-url` attribute to change the umbraco edit content url:
+
+```html
+<our-edit-link edit-url="/mysecretumbracopath#/content/content/edit/">Edit</our-edit-link>
+```
+
+### Open in a new tab
+
+As the edit link is just an `a` tag, you can add the usual attributes like `target` and `class` etc.
+If you want the edit link to open in a new tab, just add the `target="_blank"` attribute.
+
+```html
+<our-edit-link target="_blank">Edit</our-edit-link>
 ```
 
 ## Video 📺

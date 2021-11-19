@@ -45,7 +45,7 @@
 
   <ItemGroup>
 	<None Include="TagHelperLogo.png" Pack="true" PackagePath="\" />
-	<None Include="../README.md">
+	<None Include="..\README.md" Pack="true" PackagePath="\"/>
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
