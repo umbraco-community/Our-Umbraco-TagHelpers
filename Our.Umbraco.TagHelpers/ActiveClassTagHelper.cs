@@ -14,14 +14,18 @@ namespace Our.Umbraco.TagHelpers
     /// Will apply the CSS class name navi-active to the class attribute
     /// if the value in the href of the <a> compared to the page being rendered
     /// is the current page or part of an ancestor
-    /// </summary>
+    /// </summary>"
+    [HtmlTargetElement("*", Attributes = tagHelperAttributes)]
     [HtmlTargetElement("a", Attributes = tagHelperAttributeName)]
-    public class IsActivePageTagHelper : TagHelper
+    public class ActiveClassTagHelper : TagHelper
     {
         private const string tagHelperAttributeName = "our-active-class";
+        private const string tagHelperAttributeHrefName = "our-active-href";
+        private const string tagHelperAttributes = tagHelperAttributeName + ", " + tagHelperAttributeHrefName;
+
         private IUmbracoContextAccessor _umbracoContextAccessor;
 
-        public IsActivePageTagHelper(IUmbracoContextAccessor umbracoContextAccessor)
+        public ActiveClassTagHelper(IUmbracoContextAccessor umbracoContextAccessor)
         {
             _umbracoContextAccessor = umbracoContextAccessor;
         }
@@ -33,6 +37,10 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName(tagHelperAttributeName)]
         public string ActiveClassName { get; set; }
 
+
+        [HtmlAttributeName("our-active-href")]
+        public string? ActiveLink { get; set; }
+
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             // Remove the attribute 
@@ -41,8 +49,8 @@ namespace Our.Umbraco.TagHelpers
 
             var ctx = _umbracoContextAccessor.GetRequiredUmbracoContext();
 
-            // On the <a> try to find the href attribute and its value
-            var href = output.Attributes["href"]?.Value.ToString();
+            // If we have active link prop set use that othewise try to find the href attribute on an <a> and its value
+            var href = string.IsNullOrEmpty(ActiveLink) ? output.Attributes["href"]?.Value.ToString() : ActiveLink;
             if (string.IsNullOrEmpty(href))
             {
                 return;
