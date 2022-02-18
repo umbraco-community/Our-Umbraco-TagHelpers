@@ -62,17 +62,7 @@ namespace Our.Umbraco.TagHelpers
             if(nodeOfLink.IsAncestorOrSelf(currentPageRendering))
             {
                 // Is active page
-                // Check if the <a> has a class attribute already
-                if(output.Attributes.TryGetAttribute("class", out TagHelperAttribute classAttribute))
-                {
-                    var existingClasses = classAttribute.Value.ToString();
-                    output.Attributes.SetAttribute("class", existingClasses + " nav-link--active");
-                }
-                else
-                {
-                    // No class attribute exists so add a new one
-                    output.Attributes.SetAttribute("class", "nav-link--active");
-                }
+                output.Attributes.AddClass(ActiveClassName, HtmlEncoder.Default);
             }
         }
     }
