@@ -302,7 +302,7 @@ This allows for the navigation item to still have the class added to it when a c
 ```cshtml
 @foreach (var item in Model.Root().Children)
 {
-    <a href="@item.Url()" class="nav-link" our-is-active-page="navi-link--active">@item.Name</a>
+    <a href="@item.Url()" class="nav-link" our-is-active-page="nav-link--active">@item.Name</a>
 }
 ```
 
