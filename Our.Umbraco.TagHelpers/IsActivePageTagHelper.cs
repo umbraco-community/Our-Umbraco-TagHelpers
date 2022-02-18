@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
+using System;
 
 namespace Our.Umbraco.TagHelpers
 {
@@ -31,7 +32,7 @@ namespace Our.Umbraco.TagHelpers
         /// </summary>
         [HtmlAttributeName(tagHelperAttributeName)]
         public string ActiveClassName { get; set; }
-        
+
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             // Remove the attribute 
@@ -47,25 +48,26 @@ namespace Our.Umbraco.TagHelpers
                 return;
             }
 
-            // Clean href values of any querystrings
-            // As we won't be able to query GetByRoute for an Umbraco node with them
-            href = href.Substring(0, href.IndexOf("?") > 0 ? href.IndexOf("?") : href.Length);
-
-            // Get the node based of the value in the HREF
-            var nodeOfLink = ctx.Content.GetByRoute(href);
-            if(nodeOfLink == null)
+            // Try & parse href as URI, as it could be relative or absolute
+            // or contain a quersystring we only want the path part
+            if (Uri.TryCreate(href, UriKind.Absolute, out Uri link) || Uri.TryCreate(ctx.PublishedRequest.Uri, href, out link))
             {
-                return;
-            }
+                // Get the node based of the value in the HREF
+                var nodeOfLink = ctx.Content.GetByRoute(link.AbsolutePath);
+                if (nodeOfLink == null)
+                {
+                    return;
+                }
 
-            // Get the current node of the page that is rendering
-            var currentPageRendering = ctx.PublishedRequest.PublishedContent;
+                // Get the current node of the page that is rendering
+                var currentPageRendering = ctx.PublishedRequest.PublishedContent;
 
-            // Check if thelink we are rendering is current page or an ancestor
-            if(nodeOfLink.IsAncestorOrSelf(currentPageRendering))
-            {
-                // Is active page
-                output.AddClass(ActiveClassName, HtmlEncoder.Default);
+                // Check if thelink we are rendering is current page or an ancestor
+                if (nodeOfLink.IsAncestorOrSelf(currentPageRendering))
+                {
+                    // Is active page
+                    output.AddClass(ActiveClassName, HtmlEncoder.Default);
+                }
             }
         }
     }
