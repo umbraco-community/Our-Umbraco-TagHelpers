@@ -292,7 +292,7 @@ If you want the edit link to open in a new tab, just add the `target="_blank"` a
 <our-edit-link target="_blank">Edit</our-edit-link>
 ```
 
-## `our-is-active-page`
+## `our-active-class`
 This is a tag helper attribute that can be applied to `<a>` element in the razor template or partial. It will use the value inside the attribute and append it to the class attribute of the `<a>`.
 If the link inside the href attribute can be found by its route as a content node, if so then it will check with the current page being rendered if its the same node or an ancestor.
 
@@ -302,7 +302,7 @@ This allows for the navigation item to still have the class added to it when a c
 ```cshtml
 @foreach (var item in Model.Root().Children)
 {
-    <a href="@item.Url()" class="nav-link" our-is-active-page="nav-link--active">@item.Name</a>
+    <a href="@item.Url()" class="nav-link" our-active-class="nav-link--active">@item.Name</a>
 }
 ```
 

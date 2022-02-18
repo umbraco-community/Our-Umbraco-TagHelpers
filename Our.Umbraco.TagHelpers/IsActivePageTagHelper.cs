@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+using System.Text.Encodings.Web;
 using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 
 namespace Our.Umbraco.TagHelpers
 {
@@ -12,9 +14,10 @@ namespace Our.Umbraco.TagHelpers
     /// if the value in the href of the <a> compared to the page being rendered
     /// is the current page or part of an ancestor
     /// </summary>
-    [HtmlTargetElement("a", Attributes = "our-is-active-page")]
+    [HtmlTargetElement("a", Attributes = tagHelperAttributeName)]
     public class IsActivePageTagHelper : TagHelper
     {
+        private const string tagHelperAttributeName = "our-active-class";
         private IUmbracoContextAccessor _umbracoContextAccessor;
 
         public IsActivePageTagHelper(IUmbracoContextAccessor umbracoContextAccessor)
@@ -26,7 +29,7 @@ namespace Our.Umbraco.TagHelpers
         /// The CSS class name you wish to append to the class attribute
         /// on an <a> tag when the page is active/selected
         /// </summary>
-        [HtmlAttributeName("our-is-active-page")]
+        [HtmlAttributeName(tagHelperAttributeName)]
         public string ActiveClassName { get; set; }
         
         public override void Process(TagHelperContext context, TagHelperOutput output)
@@ -62,7 +65,7 @@ namespace Our.Umbraco.TagHelpers
             if(nodeOfLink.IsAncestorOrSelf(currentPageRendering))
             {
                 // Is active page
-                output.Attributes.AddClass(ActiveClassName, HtmlEncoder.Default);
+                output.AddClass(ActiveClassName, HtmlEncoder.Default);
             }
         }
     }
