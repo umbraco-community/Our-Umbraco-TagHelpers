@@ -33,10 +33,7 @@ namespace Our.Umbraco.TagHelpers
         {
             // Remove the attribute 
             // We don't want it in the markup we send down to the page
-            if(output.Attributes.TryGetAttribute("our-is-active-page", out TagHelperAttribute tagHelperAttr))
-            {
-                output.Attributes.Remove(tagHelperAttr);
-            }
+            output.Attributes.RemoveAll("our-is-active-page");
 
             var ctx = _umbracoContextAccessor.GetRequiredUmbracoContext();
 
