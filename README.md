@@ -306,6 +306,19 @@ This allows for the navigation item to still have the class added to it when a c
 }
 ```
 
+Alternatively you can use the `our-active-class` attribute in conjuction with `our-active-href` attribute to apply this to any HTML DOM element on the page.
+
+```cshtml
+<ul>
+    @foreach (var item in Model.Root().Children)
+    {
+        <li our-active-href="@item.Url()" our-active-class="selected">
+            <a href="@item.Url()" class="nav-link" our-active-class="nav-link--active">@item.Name</a>
+        </li>    
+    }
+</ul>
+```
+
 
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
