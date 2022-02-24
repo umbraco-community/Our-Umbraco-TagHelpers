@@ -36,7 +36,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.2.0" />
 		<PackageReference Include="Stubble.Core" Version="1.9.3" />
-		<PackageReference Include="Umbraco.Cms.Core" Version="9.1.0" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="9.2.0" />
 		<PackageReference Include="Umbraco.Cms.Web.Common" Version="9.1.0" />
 	  
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
