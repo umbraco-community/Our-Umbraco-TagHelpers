@@ -38,6 +38,10 @@ namespace Our.Umbraco.TagHelpers
         public string ActiveClassName { get; set; }
 
 
+        /// <summary>
+        /// If you wish to add an active CSS class on another DOM element than an <a>
+        /// You can use this attribute to pass a link to the page to check in conjuction with `our-active-class` attribute
+        /// </summary>
         [HtmlAttributeName("our-active-href")]
         public string? ActiveLink { get; set; }
 
