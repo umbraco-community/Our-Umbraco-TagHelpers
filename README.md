@@ -313,7 +313,7 @@ Alternatively you can use the `our-active-class` attribute in conjuction with `o
     @foreach (var item in Model.Root().Children)
     {
         <li our-active-href="@item.Url()" our-active-class="selected">
-            <a href="@item.Url()" class="nav-link" our-active-class="nav-link--active">@item.Name</a>
+            <a href="@item.Url()" class="nav-link">@item.Name</a>
         </li>    
     }
 </ul>
