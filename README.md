@@ -292,6 +292,34 @@ If you want the edit link to open in a new tab, just add the `target="_blank"` a
 <our-edit-link target="_blank">Edit</our-edit-link>
 ```
 
+## `our-active-class`
+This is a tag helper attribute that can be applied to `<a>` element in the razor template or partial. It will use the value inside the attribute and append it to the class attribute of the `<a>`.
+If the link inside the href attribute can be found by its route as a content node, if so then it will check with the current page being rendered if its the same node or an ancestor.
+
+This allows for the navigation item to still have the class added to it when a child or grandchildren page is the currently page being rendered.
+
+### Simple Example
+```cshtml
+@foreach (var item in Model.Root().Children)
+{
+    <a href="@item.Url()" class="nav-link" our-active-class="nav-link--active">@item.Name</a>
+}
+```
+
+Alternatively you can use the `our-active-class` attribute in conjuction with `our-active-href` attribute to apply this to any HTML DOM element on the page.
+
+```cshtml
+<ul>
+    @foreach (var item in Model.Root().Children)
+    {
+        <li our-active-href="@item.Url()" our-active-class="selected">
+            <a href="@item.Url()" class="nav-link" our-active-class="nav-link--active">@item.Name</a>
+        </li>    
+    }
+</ul>
+```
+
+
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
 
