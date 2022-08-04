@@ -21,7 +21,7 @@ namespace Our.Umbraco.TagHelpers.Composing
 
             manifests.Add(new PackageManifest
             {
-                PackageName = "Our.Umbraco.TagHelpers",
+                PackageName = "Our Umbraco TagHelpers",
                 AllowPackageTelemetry = true,
                 Version = version
             });
