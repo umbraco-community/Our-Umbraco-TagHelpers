@@ -17,7 +17,7 @@ namespace Our.Umbraco.TagHelpers.Composing
     {
         public void Filter(List<PackageManifest> manifests)
         {
-            var version = typeof(TagHelperManifestFilter).Assembly.GetName().Version.ToString();
+            var version = typeof(TagHelperManifestFilter).Assembly.GetName()?.Version?.ToString() ?? "Unknown";
 
             manifests.Add(new PackageManifest
             {

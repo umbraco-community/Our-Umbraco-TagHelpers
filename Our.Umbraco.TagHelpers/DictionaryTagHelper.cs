@@ -23,14 +23,14 @@ namespace Our.Umbraco.TagHelpers
         /// The dictionary key to translate
         /// </summary>
         [HtmlAttributeName("key")]
-        public string Key { get; set; }
+        public string? Key { get; set; }
 
         /// <summary>
         /// An optional attribute to set a fallback language to use
         /// If the current language does not contain a translation for the key
         /// </summary>
         [HtmlAttributeName("fallback-lang")]
-        public string FallbackLang { get; set; }
+        public string? FallbackLang { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {

@@ -21,21 +21,21 @@ namespace Our.Umbraco.TagHelpers
         /// The alias of the Macro to execute
         /// </summary>
         [HtmlAttributeName("alias")]
-        public string MacroAlias { get; set; }
+        public string? MacroAlias { get; set; }
 
         /// <summary>
         /// An optional attribute to set the context of the Content that the Macro will use
         /// Without it set it will use the current page
         /// </summary>
         [HtmlAttributeName("content")]
-        public IPublishedContent ContentNode { get; set; }
+        public IPublishedContent? ContentNode { get; set; }
 
         /// <summary>
         /// An optional list of attributes that will map to Macro Parameters
         /// bind:myMacroParam="" bind:startNodeId="" etc...
         /// </summary>
         [HtmlAttributeName(DictionaryAttributePrefix = "bind:")]
-        public IDictionary<string, string> MacroParameters { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, string>? MacroParameters { get; set; } = new Dictionary<string, string>();
 
         public MacroTagHelper(IUmbracoComponentRenderer umbracoComponentRenderer, IUmbracoContextAccessor umbracoContextAccessor)
         {
@@ -59,7 +59,7 @@ namespace Our.Umbraco.TagHelpers
             // TagHelpers dont seem to like HTMLAttributes as <string, object> dictionary
             // Hence us trying to convert it here
             IDictionary<string, object> macroParams = new Dictionary<string, object>();
-            if (MacroParameters.Any())
+            if (MacroParameters != null && MacroParameters.Any())
             {
                 macroParams = MacroParameters.ToDictionary(p => p.Key, p => (object)p.Value);
             }

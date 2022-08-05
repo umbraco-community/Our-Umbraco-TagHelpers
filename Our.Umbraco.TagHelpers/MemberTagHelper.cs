@@ -23,7 +23,7 @@ namespace Our.Umbraco.TagHelpers
         /// * = All authenticated users
         /// </summary>
         [HtmlAttributeName("our-member-exclude")]
-        public string ExcludeRoles { get; set; }
+        public string? ExcludeRoles { get; set; }
 
         /// <summary>
         /// A comma separated list of Member Groups to include
@@ -31,7 +31,7 @@ namespace Our.Umbraco.TagHelpers
         /// * = All authenticated users
         /// </summary>
         [HtmlAttributeName("our-member-include")]
-        public string IncludeRoles { get; set; }
+        public string? IncludeRoles { get; set; }
 
         public MemberTagHelper(IMemberManager memberManager)
         {
@@ -62,29 +62,30 @@ namespace Our.Umbraco.TagHelpers
             }
         }
 
-        private bool IsUserInRole(string roleString, List<string> currentMemberRoles)
+        private bool IsUserInRole(string? roleString, List<string> currentMemberRoles)
         {
             // roles is a CSV of member groups they need to have access to
-            var roles = roleString.Split(',').Select(x => x.Trim());
-            foreach (var role in roles)
-            {
-                // Role ? == all anonymous users (User not logged in)
-                if (role == "?" && _memberManager.IsLoggedIn() == false)
+            var roles = roleString?.Split(',').Select(x => x.Trim());
+            if (roles != null)
+                foreach (var role in roles)
                 {
-                    return true;
-                }
+                    // Role ? == all anonymous users (User not logged in)
+                    if (role == "?" && _memberManager.IsLoggedIn() == false)
+                    {
+                        return true;
+                    }
 
-                // Role * == all authenticated users
-                if (role == "*" && _memberManager.IsLoggedIn())
-                {
-                    return true;
-                }
+                    // Role * == all authenticated users
+                    if (role == "*" && _memberManager.IsLoggedIn())
+                    {
+                        return true;
+                    }
 
-                if (currentMemberRoles.InvariantContains(role))
-                {
-                    return true;
+                    if (currentMemberRoles.InvariantContains(role))
+                    {
+                        return true;
+                    }
                 }
-            }
 
             return false;
         }
