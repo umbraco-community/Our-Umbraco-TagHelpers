@@ -319,6 +319,25 @@ Alternatively you can use the `our-active-class` attribute in conjuction with `o
 </ul>
 ```
 
+## `<our-link>`
+This tag helper element `<our-link>` will create a simple anchor tag using the Umbraco Multi Url Picker property editor that uses the C# Model `Umbraco.Cms.Core.Models.Link`
+
+Note if the link set is an external link and you set the target of the link to be `_blank`, then the link will have the noopener attribute added to the link.
+
+### Simple Example
+```cshtml
+<our-link="@Model.ctaLink">
+    <h2>Hi There</h2>
+</our-link>
+```
+
+Alternatively if you use the `<our-link>` without child DOM elements then it will use the `Title` property of the link in the Multi Url Picker property editor to create the anchor tag.
+
+```cshtml
+<our-link="@Model.ctaLink"></our-link>
+```
+
+With this tag helper the child DOM elements inside the `<our-link>` is wrapped with the `<a>` tag
 
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
