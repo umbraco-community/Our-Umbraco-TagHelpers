@@ -35,7 +35,7 @@ namespace Our.Umbraco.TagHelpers
         /// on an <a> tag when the page is active/selected
         /// </summary>
         [HtmlAttributeName(tagHelperAttributeName)]
-        public string ActiveClassName { get; set; }
+        public string? ActiveClassName { get; set; }
 
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Our.Umbraco.TagHelpers
 
             // Try & parse href as URI, as it could be relative or absolute
             // or contain a quersystring we only want the path part
-            if (Uri.TryCreate(href, UriKind.Absolute, out Uri link) || Uri.TryCreate(ctx.PublishedRequest.Uri, href, out link))
+            if (Uri.TryCreate(href, UriKind.Absolute, out Uri? link) || Uri.TryCreate(ctx.PublishedRequest.Uri, href, out link))
             {
                 // Get the node based of the value in the HREF
                 var nodeOfLink = ctx.Content.GetByRoute(link.AbsolutePath);
