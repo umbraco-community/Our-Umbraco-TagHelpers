@@ -19,12 +19,16 @@ namespace Our.Umbraco.TagHelpers
                 return;
             }
 
+            // If the <our-link /> is self closing
+            // Ensure that our <a></a> always has a matching end tag
+            output.TagMode = TagMode.StartTagAndEndTag;
+
             output.TagName = "a";
             var childContent = await output.GetChildContentAsync();
 
             // If we use the TagHelper <umb-link></umb-link>
             // Without child DOM elements then it will use the Link Name property inside the <a> it generates
-            if (childContent == null)
+            if (childContent.IsEmptyOrWhiteSpace)
             {
                 output.Content.SetContent(Link.Name);
             }
