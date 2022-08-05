@@ -52,7 +52,7 @@ namespace Our.Umbraco.TagHelpers
                 var allDomains = umbracoContext.Domains.GetAll(false);
                 var allDomainsFiltered = allDomains?.GroupBy(d => d.Culture).Select(g => g.First()).ToList();
 
-                if (allDomainsFiltered.Count() > 0)
+                if (allDomainsFiltered?.Count() > 0)
                 {
                     // List of languages/model to use with
                     var data = new Dictionary<string, object>();
@@ -99,11 +99,11 @@ namespace Our.Umbraco.TagHelpers
 
     public class LanguageSwitcherLang
     {
-        public string Culture { get; set; }
+        public string? Culture { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
         public bool IsCurrentLang { get; set; }
     }
