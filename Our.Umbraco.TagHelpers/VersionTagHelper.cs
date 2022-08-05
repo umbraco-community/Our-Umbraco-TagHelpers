@@ -28,8 +28,8 @@ namespace Our.Umbraco.TagHelpers
             if (string.IsNullOrEmpty(AssemblyName))
             {
                 var siteAssembly = Assembly.GetEntryAssembly();
-                var version = siteAssembly?.GetName().Version;
-                output.Content.SetHtmlContent(version.ToString());
+                var version = siteAssembly?.GetName()?.Version;
+                output.Content.SetHtmlContent(version?.ToString());
                 return;
             }
 
@@ -40,7 +40,7 @@ namespace Our.Umbraco.TagHelpers
                 output.SuppressOutput();
                 return;
             }
-            output.Content.SetHtmlContent(findAssembly.GetName().Version.ToString());
+            output.Content.SetHtmlContent(findAssembly.GetName()?.Version?.ToString());
         }
     }
 }

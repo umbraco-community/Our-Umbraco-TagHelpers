@@ -16,19 +16,19 @@ namespace Our.Umbraco.TagHelpers
     public class SurfaceControllerFormTagHelper : TagHelper
     {
         private readonly IDataProtectionProvider _dataProtectionProvider;
-        private IDictionary<string, string> _routeValues;
+        private IDictionary<string, string>? _routeValues;
 
         /// <summary>
         /// The name of the action method.
         /// </summary>
         [HtmlAttributeName("our-action")]
-        public string ControllerAction { get; set; }
+        public string? ControllerAction { get; set; }
 
         /// <summary>
         /// The name of the Umbraco controller minus the 'Controller' suffix.
         /// </summary>
         [HtmlAttributeName("our-controller")]
-        public string ControllerName { get; set; }
+        public string? ControllerName { get; set; }
 
         /// <summary>
         /// The name of the area.
@@ -40,7 +40,7 @@ namespace Our.Umbraco.TagHelpers
         /// Additional parameters for the route.
         /// </summary>
         [HtmlAttributeName("our-route-vals", DictionaryAttributePrefix = "our-route-val")]
-        public IDictionary<string, string> RouteValues
+        public IDictionary<string, string>? RouteValues
         {
             get
             {
@@ -62,7 +62,7 @@ namespace Our.Umbraco.TagHelpers
         /// </summary>
         [HtmlAttributeNotBound]
         [ViewContext]
-        public ViewContext ViewContext { get; set; }
+        public ViewContext? ViewContext { get; set; }
 
         public SurfaceControllerFormTagHelper(IDataProtectionProvider dataProtectionProvider)
         {

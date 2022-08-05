@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>net5.0;net6.0;</TargetFrameworks>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -29,6 +29,7 @@
 		<PackageIcon>TagHelperLogo.png</PackageIcon>
 		<PackageTags>Umbraco;TagHelper;TagHelpers;UmbracoCMS</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

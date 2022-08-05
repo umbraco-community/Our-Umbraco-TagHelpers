@@ -36,12 +36,12 @@ namespace Our.Umbraco.TagHelpers.Services
                     return new ClaimsIdentity();
 
                 CookieAuthenticationOptions cookieOptions = _cookieOptionsSnapshot.Get(global::Umbraco.Cms.Core.Constants.Security.BackOfficeAuthenticationType);
-                string backOfficeCookie = httpContext.Request.Cookies[cookieOptions.Cookie.Name!];
+                string? backOfficeCookie = httpContext.Request.Cookies[cookieOptions.Cookie.Name!];
 
                 if (string.IsNullOrEmpty(backOfficeCookie))
                     return new ClaimsIdentity();
 
-                AuthenticationTicket unprotected = cookieOptions.TicketDataFormat.Unprotect(backOfficeCookie!);
+                AuthenticationTicket? unprotected = cookieOptions.TicketDataFormat.Unprotect(backOfficeCookie!);
                 ClaimsIdentity backOfficeIdentity = unprotected!.Principal.GetUmbracoIdentity();
 
                 return backOfficeIdentity;

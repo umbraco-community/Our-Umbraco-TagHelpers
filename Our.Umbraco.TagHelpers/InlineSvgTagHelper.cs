@@ -30,14 +30,14 @@ namespace Our.Umbraco.TagHelpers
         /// NOTE: You cannot use this in conjuction with the media-item attribute
         /// </summary>
         [HtmlAttributeName("src")]
-        public string FileSource { get; set; }
+        public string? FileSource { get; set; }
 
         /// <summary>
         /// An IPublishedContent Umbraco Media Item that has an .svg file extension
         /// NOTE: You cannot use this in conjuction with the src attribute
         /// </summary>
         [HtmlAttributeName("media-item")]
-        public IPublishedContent MediaItem { get; set; }
+        public IPublishedContent? MediaItem { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
