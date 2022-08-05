@@ -4,8 +4,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:17329",
-      "sslPort": 44330
+      "applicationUrl": "http://localhost:46843",
+      "sslPort": 44370
     }
   },
   "profiles": {
@@ -16,23 +16,14 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Our.Umbraco.TagHelpers.Playground [Dev]": {
+    "Umbraco.Web.UI": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:44330;http://localhost:17329",
+      "applicationUrl": "https://localhost:44370;http://localhost:46843",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "Our.Umbraco.TagHelpers.Playground [Prod]": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "https://localhost:44330;http://localhost:17329",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production"
-      }
+      }      
     }
   }
 }
