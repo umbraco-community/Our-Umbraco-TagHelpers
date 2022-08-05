@@ -24,7 +24,7 @@ namespace Our.Umbraco.TagHelpers
         /// * = All authenticated users
         /// </summary>
         [HtmlAttributeName("our-user-exclude")]
-        public string ExcludeGroups { get; set; }
+        public string? ExcludeGroups { get; set; }
 
         /// <summary>
         /// A comma separated list of User Groups to include
@@ -32,7 +32,7 @@ namespace Our.Umbraco.TagHelpers
         /// * = All authenticated users
         /// </summary>
         [HtmlAttributeName("our-user-include")]
-        public string IncludeGroups { get; set; }
+        public string? IncludeGroups { get; set; }
 
         public UserTagHelper(IBackofficeUserAccessor backofficeUserAccessor)
         {
@@ -47,21 +47,21 @@ namespace Our.Umbraco.TagHelpers
             {
                 var groups = currentUser.GetRoles();
                 currentUserGroups.AddRange(groups);
-            }
 
-            // Process excluded roles
-            if (!string.IsNullOrWhiteSpace(this.ExcludeGroups) && IsUserInRole(currentUser, ExcludeGroups, currentUserGroups) == true)
-            {
-                output.SuppressOutput();
-                return;
-            }
+                // Process excluded roles
+                if (!string.IsNullOrWhiteSpace(this.ExcludeGroups) && IsUserInRole(currentUser, ExcludeGroups, currentUserGroups) == true)
+                {
+                    output.SuppressOutput();
+                    return;
+                }
 
-            // Process included roles
-            else if (!string.IsNullOrWhiteSpace(this.IncludeGroups) && IsUserInRole(currentUser, IncludeGroups, currentUserGroups) == false)
-            {
-                output.SuppressOutput();
-                return;
-            }
+                // Process included roles
+                else if (!string.IsNullOrWhiteSpace(this.IncludeGroups) && IsUserInRole(currentUser, IncludeGroups, currentUserGroups) == false)
+                {
+                    output.SuppressOutput();
+                    return;
+                }
+            }            
         }
 
         private bool IsUserInRole(ClaimsIdentity currentUser, string roleString, List<string> currentMemberRoles)
