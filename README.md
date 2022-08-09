@@ -344,4 +344,4 @@ With this tag helper the child DOM elements inside the `<our-link>` is wrapped w
 
 
 ## Attribution
-The logo for Our.Umbraco.TagHelpers is made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+The logo for Our.Umbraco.TagHelpers is made by [Freepik](https://www.freepik.com) from [flaticon.com](https://www.flaticon.com)
