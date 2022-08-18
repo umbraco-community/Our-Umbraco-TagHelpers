@@ -27,7 +27,7 @@
 		<RepositoryUrl>https://github.com/umbraco-community/Our-Umbraco-TagHelpers</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageIcon>TagHelperLogo.png</PackageIcon>
-		<PackageTags>Umbraco;TagHelper;TagHelpers;UmbracoCMS</PackageTags>
+		<PackageTags>Umbraco;TagHelper;TagHelpers;UmbracoCMS;umbraco-marketplace</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
