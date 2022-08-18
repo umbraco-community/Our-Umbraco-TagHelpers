@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Our.Umbraco.TagHelpers.Objects
+namespace Our.Umbraco.TagHelpers.Configuration
 {
     public class OurUmbracoTagHelpersConfiguration
     {
-        public InlineSvgTagHelperConfiguration InlineSvgTagHelper { get; set; }
+        public InlineSvgTagHelperConfiguration InlineSvgTagHelper { get; set; } = new InlineSvgTagHelperConfiguration();
     }
 
     public class InlineSvgTagHelperConfiguration

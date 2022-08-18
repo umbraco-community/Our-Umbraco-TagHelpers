@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Options;
-using Our.Umbraco.TagHelpers.Objects;
+using Our.Umbraco.TagHelpers.Configuration;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -97,7 +97,7 @@ namespace Our.Umbraco.TagHelpers
 
             string? cleanedFileContents = null;
 
-            if(Cache || _globalSettings.InlineSvgTagHelper.Cache)
+            if(Cache || (_globalSettings.InlineSvgTagHelper.Cache && !IgnoreAppSettings))
             {
                 var cacheName = string.Empty;
                 var cacheMins = CacheMinutes > 0 ? CacheMinutes : _globalSettings.InlineSvgTagHelper.CacheMinutes;
@@ -197,7 +197,7 @@ namespace Our.Umbraco.TagHelpers
                 @"syntax:error:",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-            if ((EnsureViewBox || _globalSettings.InlineSvgTagHelper.EnsureViewBox) || !string.IsNullOrEmpty(CssClass))
+            if ((EnsureViewBox || (_globalSettings.InlineSvgTagHelper.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
             {
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(cleanedFileContents);
@@ -208,10 +208,10 @@ namespace Our.Umbraco.TagHelpers
                     {
                         svgNode.AddClass(CssClass);
                     }
-                    if ((EnsureViewBox || _globalSettings.InlineSvgTagHelper.EnsureViewBox) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
+                    if ((EnsureViewBox || (_globalSettings.InlineSvgTagHelper.EnsureViewBox && !IgnoreAppSettings)) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
                     {
-                        var width = Convert.ToDecimal(svgNode.GetAttributeValue("width", "0"));
-                        var height = Convert.ToDecimal(svgNode.GetAttributeValue("height", "0"));
+                        var width = ExtractDecimalFromString(svgNode.GetAttributeValue("width", "0"));
+                        var height = ExtractDecimalFromString(svgNode.GetAttributeValue("height", "0"));
                         svgNode.SetAttributeValue("viewbox", $"0 0 {width} {height}");
                     }
                 }
@@ -219,6 +219,14 @@ namespace Our.Umbraco.TagHelpers
             }
 
             return cleanedFileContents;
+        }
+        private decimal ExtractDecimalFromString(string str)
+        {
+
+            Regex digits = new Regex(@"^\D*?((-?(\d+(\.\d+)?))|(-?\.\d+)).*");
+            Match mx = digits.Match(str);
+
+            return mx.Success ? Convert.ToDecimal(mx.Groups[1].Value) : 0;
         }
     }
 }
