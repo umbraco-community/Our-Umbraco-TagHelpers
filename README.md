@@ -339,6 +339,37 @@ Alternatively if you use the `<our-link>` without child DOM elements then it wil
 
 With this tag helper the child DOM elements inside the `<our-link>` is wrapped with the `<a>` tag
 
+## `<our-cache>`
+This tag helper element `<our-cache>` is a wrapper around the [DotNet CacheTagHelper](https://docs.microsoft.com/en-us/aspnet/core/mvc/views/tag-helpers/built-in/cache-tag-helper?view=aspnetcore-6.0) - it operates in exactly the same way, with the same options as the DotNet CacheTagHelper, except, it is automatically 'not enabled', when you are in Umbraco Preview or Umbraco Debug mode.
+
+### Without this tag helper
+
+Essentially this is a convenience for setting 
+
+'''cshtml
+<cache enabled="!UmbracoContext.IsDebug && !UmbracoContext.InPreviewMode">[Your Long Running Expensive Code Here]</cache>
+'''
+
+### With this tag helper
+
+'''cshtml
+<our-cache>[Your Long Running Expensive Code Here]</our-cache>
+'''
+
+### Clearing the Cache 'on publish'
+The DotNet CacheTagHelper really isn't designed to make it easy to clear the cache 'on command' it's designed to vary and then fall out of cache after a period of time, but what if you want your cache instantly refreshed when a publish takes place? This tag helper has the possibility to 'vary' the cache by the last Content/Media/Dictionary Cache Refresh date.
+
+'''cshtml
+<our-cache update-cache-key-on-publish="true">[Your Long Running Expensive Code Here]</our-cache>
+'''
+
+With this set to true any publish will trigger a new 'cache key' and therefore a fresh version of the TagOutput will be displayed, with this set, and if no ExpiresAfter is set on the Tag, we default to 24hrs as the lifetime of the Tag's cache.
+
+This is set to True by default, how opinionated of us. 
+
+(NB if you had a thousand tag helpers on your site, all caching large amounts of content, and new publishes to the site occurring every second - this might be detrimental to performance, so do think of the context of your site before setting this value)  
+
+
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
 
