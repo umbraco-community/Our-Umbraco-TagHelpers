@@ -37,11 +37,13 @@ namespace Our.Umbraco.TagHelpers
 			_umbracoContextFactory = umbracoContextFactory;
 			_runtimeCache = appCaches.RuntimeCache;
 		}
+
 		public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
 		{
 			using (UmbracoContextReference umbracoContextReference = _umbracoContextFactory.EnsureUmbracoContext())
 			{
 				var umbracoContext = umbracoContextReference.UmbracoContext;
+
 				// we don't want to enable the cache tag helper if Umbraco is in Preview, or in Debug mode
 				if (umbracoContext.InPreviewMode || umbracoContext.IsDebug)
 				{
@@ -66,8 +68,10 @@ namespace Our.Umbraco.TagHelpers
 					{
 						// ironically read the last cache refresh date from runtime cache, and set it to now if it's not there...
 						var umbLastCacheRefreshCacheKey = _runtimeCache.GetCacheItem(CacheKeyConstants.LastCacheRefreshDateKey, () => GetFallbackCacheRefreshDate()).ToString();
+						
 						// append to VaryBy key incase VaryBy key is set to some other parameter too
 						this.VaryBy = umbLastCacheRefreshCacheKey + "|" + this.VaryBy;
+						
 						// if an expiry date isn't set when using the CacheTagHelper, let's add one to be 24hrs, so when mulitple publishes occur, the versions of this taghelper don't hang around forever
 						if (this.ExpiresAfter == null)
                         {
@@ -80,16 +84,15 @@ namespace Our.Umbraco.TagHelpers
 			}
 
 		}
+
 		private string GetFallbackCacheRefreshDate()
 		{
-			//this fires if the 'appcache' doesn't have a LastCacheRefreshDate set by a publish
+			// this fires if the 'appcache' doesn't have a LastCacheRefreshDate set by a publish
 			// eg after an app pool recycle
 			// it doesn't really matter that this isn't the last datetime that something was actually published
 			// because time tends to always move forwards
 			// the next publish will set a new future LastCacheRefreshDate...
 			return DateTime.UtcNow.ToString("s");
-
 		}
-
 	}
 }
