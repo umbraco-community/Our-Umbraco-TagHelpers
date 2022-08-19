@@ -2,9 +2,6 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Our.Umbraco.TagHelpers.CacheKeys;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core;
