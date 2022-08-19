@@ -1,4 +1,6 @@
-﻿using Our.Umbraco.TagHelpers.Notifications;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Our.Umbraco.TagHelpers.Notifications;
+using Our.Umbraco.TagHelpers.Services;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Notifications;
@@ -10,9 +12,11 @@ namespace Our.Umbraco.TagHelpers.Composing
         // handle refreshing of content/media/dictionary cache notification to clear the cache key used for the CacheTagHelper
         public void Compose(IUmbracoBuilder builder)
         {
-            builder.AddNotificationHandler<ContentCacheRefresherNotification, HandleContentCacheRefresherNotification>();
-            builder.AddNotificationHandler<MediaCacheRefresherNotification, HandleMediaCacheRefresherNotification>();
-            builder.AddNotificationHandler<DictionaryCacheRefresherNotification, HandleDictionaryCacheRefresherNotification>();
+            builder.Services.AddSingleton<IUmbracoTagHelperCacheKeys, UmbracoTagHelperCacheKeys>();
+
+            builder.AddNotificationHandler<ContentCacheRefresherNotification, CacheTagRefresherNotifications>();
+            builder.AddNotificationHandler<MediaCacheRefresherNotification, CacheTagRefresherNotifications>();
+            builder.AddNotificationHandler<DictionaryCacheRefresherNotification, CacheTagRefresherNotifications>();
         }
     }
 }
