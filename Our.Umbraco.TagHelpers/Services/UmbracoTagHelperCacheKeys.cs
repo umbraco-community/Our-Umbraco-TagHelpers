@@ -5,6 +5,6 @@ namespace Our.Umbraco.TagHelpers.Services
 {
 	public class UmbracoTagHelperCacheKeys : IUmbracoTagHelperCacheKeys
 	{
-		public Dictionary<string,CacheTagKey> CacheKeys { get; set; } = new Dictionary<string,CacheTagKey>();
+		public Dictionary<string,CacheTagKey> CacheKeys { get; } = new Dictionary<string,CacheTagKey>();
 	}
 }

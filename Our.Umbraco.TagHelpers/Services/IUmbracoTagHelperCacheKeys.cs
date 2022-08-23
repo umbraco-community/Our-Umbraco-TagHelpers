@@ -5,6 +5,6 @@ namespace Our.Umbraco.TagHelpers.Services
 {
 	public interface IUmbracoTagHelperCacheKeys
 	{
-		Dictionary<string, CacheTagKey> CacheKeys { get; set; }
+		Dictionary<string, CacheTagKey> CacheKeys { get; }
 	}
 }
