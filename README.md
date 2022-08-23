@@ -357,15 +357,49 @@ Essentially this is a convenience for setting
 '''
 
 ### Clearing the Cache 'on publish'
-The DotNet CacheTagHelper really isn't designed to make it easy to clear the cache 'on command' it's designed to vary and then fall out of cache after a period of time, but what if you want your cache instantly refreshed when a publish takes place? This tag helper has the possibility to 'vary' the cache by the last Content/Media/Dictionary Cache Refresh date.
+The DotNet CacheTagHelper really isn't designed to make it easy to clear the cache 'on command' it's designed to vary and then fall out of cache after a period of time, but what if you want your cache instantly refreshed when a publish takes place? This tag helper has the possibility to 'vary' the cache when a piece of content/media or dictionary is published.
 
 '''cshtml
 <our-cache update-cache-key-on-publish="true">[Your Long Running Expensive Code Here]</our-cache>
 '''
 
-With this set to true any publish will trigger a new 'cache key' and therefore a fresh version of the TagOutput will be displayed, with this set, and if no ExpiresAfter is set on the Tag, we default to 24hrs as the lifetime of the Tag's cache.
+With this set to true any publish will remove the item from a list of tracked cached items and therefore a fresh version of the TagOutput will be displayed.
 
-This is set to True by default, how opinionated of us. 
+This is set to True by default, how opinionated of us, so you only need to explictly use the attrivute if you wish to set this to false and not clear the cache item on Umbraco content/media/dictionary publish.
+
+### Examples
+All examples will skip the cache for Umbraco preview mode and debug mode, and evicit cache items anytime Umbraco publishes content, media or dictionary items.
+
+```cshtml
+<our-cache expires-on="new DateTime(2025,1,29,17,02,0)">
+     <p>@DateTime.Now - A set Date in time</p>
+</our-cache>
+
+<our-cache expires-after="TimeSpan.FromSeconds(120)">
+     <p>@DateTime.Now - Every 120 seconds (2minutes)</p>
+</our-cache>
+
+<our-cache vary-by="@Model.UpdateDate.ToString()">
+    <!-- 
+    Note the original cache taghelper would only clear the cache 
+    when the current page model UpdateDate changed.
+
+    Now we will ALSO clear the cache
+    -->
+    <p>@DateTime.Now - When Model.UpdateDate changes</p>
+</our-cache>
+
+<our-cache vary-by="@Model.UpdateDate.ToString()">
+    <!-- Global navigation -->
+    <!-- Need to clear cache when phone number changes on different node -->
+</our-cache>
+
+<our-cache>
+    <!-- Default of 20mins Global navigation -->
+    <!-- A global naviagtion need to clear cache when phone number changes on different node -->
+    <partial name="Navigation" />
+</our-cache>
+```
 
 (NB if you had a thousand tag helpers on your site, all caching large amounts of content, and new publishes to the site occurring every second - this might be detrimental to performance, so do think of the context of your site before setting this value)  
 
