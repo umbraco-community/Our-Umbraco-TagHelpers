@@ -357,18 +357,16 @@ Essentially this is a convenience for setting
 '''
 
 ### Clearing the Cache 'on publish'
-The DotNet CacheTagHelper really isn't designed to make it easy to clear the cache 'on command' it's designed to vary and then fall out of cache after a period of time, but what if you want your cache instantly refreshed when a publish takes place? This tag helper has the possibility to 'vary' the cache when a piece of content/media or dictionary is published.
+The Umbraco convention with other Cache Helpers, eg Html.CachedPartial is to clear all memory caches whenever any item is published in the Umbraco Backoffice. By default the our-cache tag helper will do the same, however you can turn this part off on an individual TagHelper basis by setting update-cache-key-on-publish="false".
 
 '''cshtml
-<our-cache update-cache-key-on-publish="true">[Your Long Running Expensive Code Here]</our-cache>
+<our-cache update-cache-key-on-publish="false">[Your Long Running Expensive Code Here]</our-cache>
 '''
 
-With this set to true any publish will remove the item from a list of tracked cached items and therefore a fresh version of the TagOutput will be displayed.
-
-This is set to True by default, how opinionated of us, so you only need to explictly use the attrivute if you wish to set this to false and not clear the cache item on Umbraco content/media/dictionary publish.
+(NB if you had a thousand tag helpers on your site, all caching large amounts of content, and new publishes to the site occurring every second - this might be detrimental to performance, so do think of the context of your site before allowing the cache to be cleared on each publish)  
 
 ### Examples
-All examples will skip the cache for Umbraco preview mode and debug mode, and evicit cache items anytime Umbraco publishes content, media or dictionary items.
+All examples will skip the cache for Umbraco preview mode and debug mode, and evict cache items anytime Umbraco publishes content, media or dictionary items.
 
 ```cshtml
 <our-cache expires-on="new DateTime(2025,1,29,17,02,0)">
@@ -379,30 +377,18 @@ All examples will skip the cache for Umbraco preview mode and debug mode, and ev
      <p>@DateTime.Now - Every 120 seconds (2minutes)</p>
 </our-cache>
 
-<our-cache vary-by="@Model.UpdateDate.ToString()">
-    <!-- 
-    Note the original cache taghelper would only clear the cache 
-    when the current page model UpdateDate changed.
-
-    Now we will ALSO clear the cache
-    -->
-    <p>@DateTime.Now - When Model.UpdateDate changes</p>
-</our-cache>
-
-<our-cache vary-by="@Model.UpdateDate.ToString()">
-    <!-- Global navigation -->
-    <!-- Need to clear cache when phone number changes on different node -->
-</our-cache>
-
 <our-cache>
-    <!-- Default of 20mins Global navigation -->
-    <!-- A global naviagtion need to clear cache when phone number changes on different node -->
+    <!-- A global naviagtion needs to be updated across entire site when phone number changes on homepage node -->
     <partial name="Navigation" />
 </our-cache>
+
 ```
-
-(NB if you had a thousand tag helpers on your site, all caching large amounts of content, and new publishes to the site occurring every second - this might be detrimental to performance, so do think of the context of your site before setting this value)  
-
+This example will turn off the automatic clearing of the tag helper cache if 'any page' is published, but still clear the cache if the individual page is published:
+```cshtml
+<our-cache update-cache-key-on-publish="false" vary-by="@Model.UpdateDate.ToString()">
+     <p>@DateTime.Now - A set Date in time</p>
+</our-cache>
+```
 
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
