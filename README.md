@@ -360,7 +360,15 @@ Essentially this is a convenience for setting
 The Umbraco convention with other Cache Helpers, eg Html.CachedPartial is to clear all memory caches whenever any item is published in the Umbraco Backoffice. By default the our-cache tag helper will do the same, however you can turn this part off on an individual TagHelper basis by setting update-cache-key-on-publish="false".
 
 '''cshtml
-<our-cache update-cache-key-on-publish="false">[Your Long Running Expensive Code Here]</our-cache>
+<our-cache>[Your Long Running Expensive Code Here]</our-cache>
+'''
+is the same as:
+'''cshtml
+<our-cache update-cache-on-publish="true">[Your Long Running Expensive Code Here]</our-cache>
+'''
+But to turn it off:
+'''cshtml
+<our-cache update-cache-on-publish="false">[Your Long Running Expensive Code Here]</our-cache>
 '''
 
 (NB if you had a thousand tag helpers on your site, all caching large amounts of content, and new publishes to the site occurring every second - this might be detrimental to performance, so do think of the context of your site before allowing the cache to be cleared on each publish)  
@@ -378,14 +386,14 @@ All examples will skip the cache for Umbraco preview mode and debug mode, and ev
 </our-cache>
 
 <our-cache>
-    <!-- A global naviagtion needs to be updated across entire site when phone number changes on homepage node -->
+    <!-- A global navigation needs to be updated across entire site when phone number changes on homepage node -->
     <partial name="Navigation" />
 </our-cache>
 
 ```
 This example will turn off the automatic clearing of the tag helper cache if 'any page' is published, but still clear the cache if the individual page is published:
 ```cshtml
-<our-cache update-cache-key-on-publish="false" vary-by="@Model.UpdateDate.ToString()">
+<our-cache update-cache-on-publish="false" vary-by="@Model.UpdateDate.ToString()">
      <p>@DateTime.Now - A set Date in time</p>
 </our-cache>
 ```
