@@ -6,10 +6,12 @@ using Umbraco.Cms.Core.Notifications;
 
 namespace Our.Umbraco.TagHelpers.Notifications
 {
-	// For Use with the Our Cache TagHelper - to store a last cache updated datetime to use
-	// in the varyby key for the Cache TagHelper, to naively break the cache on publish.
-	// Used for ContentCacheRefresher (Load balanced scernarios not just Published event)
-	// Same for Dictionary Items and Media item
+	/// <summary>
+	/// For Use with the Our Cache TagHelper
+	/// We handle the published cache updating notification for content, media and dictionary
+	/// And then use our dictionary collection of tracked tag helper caches, created in the tag cache helper
+	/// loop through each one and clear the tag helpers cache
+	/// </summary>
 	public class CacheTagRefresherNotifications : 
 		INotificationHandler<ContentCacheRefresherNotification>,
         INotificationHandler<DictionaryCacheRefresherNotification>,

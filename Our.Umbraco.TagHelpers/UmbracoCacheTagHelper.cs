@@ -10,8 +10,8 @@ using Umbraco.Cms.Core.Web;
 namespace Our.Umbraco.TagHelpers
 {
     /// <summary>
-    /// A wrapper around .net core CacheTagHelper so you remember not to cache in preview or Umbraco debug mode
-    /// Also can create a new variance of the cache when anything is published in Umbraco if that is desirable
+    /// A wrapper around .net core CacheTagHelper, that is Umbraco Aware - so won't cache in Preview or Debug Mode
+    /// And will automatically clear it's when anything is published (optional)
     /// </summary>
     [HtmlTargetElement("our-cache")]
     public class UmbracoCacheTagHelper : CacheTagHelper
@@ -43,19 +43,23 @@ namespace Our.Umbraco.TagHelpers
                 // we don't want to enable the cache tag helper if Umbraco is in Preview, or in Debug mode
                 if (umbracoContext.InPreviewMode || umbracoContext.IsDebug)
                 {
-                    // Set the endabled flag to false & lest base class
-                    // of the cache tag helper do the same stuff as before
+                    // Set the enabled flag to false & let base class
+                    // of the cache tag helper do the disabling of the cache
                     this.Enabled = false;
                 }
                 else
                 {
-                    // Defaults to true - have to explicitly opt out with attribute set to false in Razor
+                    // Now whenever anything is published in Umbraco 'the old Umbraco Cache Helper convention' was to clear out all the view memory caches
+                    // we want to do the same by default for this tag helper
+                    // we can't track by convention as dot net tag helper cache key is hashed - but we can generte the hash key here, and add it to a dictionary
+                    // which we can loop through when the Umbraco cache is updated to clear the tag helper cache.
+                    // you can opt out of this by setting update-cache-key-on-publish="false" in the individual tag helper
                     if (UpdateCacheKeyOnPublish)
                     {
-                        // So before we go into our base class
-                        // Grab the cache key so we can keep track of it & put into some dictionary or collection
+                        // The base TagHelper would generate it's own CacheTagKey to create a unique hash
+                        // but if we call it here 'too' it will fortunately be the same hash.
+                        // so we can keep track of it & put into some dictionary or collection
                         // and clear all items out in that collection with our notifications on publish
-
                         var cacheKey = new CacheTagKey(this, context);
                         var key = cacheKey.GenerateKey();
                         var hashedKey = cacheKey.GenerateHashedKey();
