@@ -22,7 +22,7 @@ namespace Our.Umbraco.TagHelpers
         /// <summary>
         /// Whether to update the cache key when any content, media, dictionary item is published in Umbraco.
         /// </summary>
-        public bool UpdateCacheKeyOnPublish { get; set; } = true;
+        public bool UpdateCacheOnPublish { get; set; } = true;
 
         public UmbracoCacheTagHelper(CacheTagHelperMemoryCacheFactory factory,
             HtmlEncoder htmlEncoder,
@@ -53,8 +53,8 @@ namespace Our.Umbraco.TagHelpers
                     // we want to do the same by default for this tag helper
                     // we can't track by convention as dot net tag helper cache key is hashed - but we can generte the hash key here, and add it to a dictionary
                     // which we can loop through when the Umbraco cache is updated to clear the tag helper cache.
-                    // you can opt out of this by setting update-cache-key-on-publish="false" in the individual tag helper
-                    if (UpdateCacheKeyOnPublish)
+                    // you can opt out of this by setting update-cache-on-publish="false" in the individual tag helper
+                    if (UpdateCacheOnPublish)
                     {
                         // The base TagHelper would generate it's own CacheTagKey to create a unique hash
                         // but if we call it here 'too' it will fortunately be the same hash.
