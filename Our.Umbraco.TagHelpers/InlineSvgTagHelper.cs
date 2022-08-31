@@ -5,12 +5,13 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models.PublishedContent;
+using Umbraco.Cms.Core.Routing;
 using Umbraco.Extensions;
 
 namespace Our.Umbraco.TagHelpers
 {
     /// <summary>
-    /// This allows you to inline an SVG file into the DOM 
+    /// This allows you to inline an SVG file into the DOM
     /// from a file on disk or an Umbraco Media Item
     /// </summary>
     [HtmlTargetElement("our-svg")]
@@ -18,11 +19,13 @@ namespace Our.Umbraco.TagHelpers
     {
         private MediaFileManager _mediaFileManager;
         private IWebHostEnvironment _webHostEnvironment;
+        private IPublishedUrlProvider _urlProvider;
 
-        public InlineSvgTagHelper(MediaFileManager mediaFileManager, IWebHostEnvironment webHostEnvironment)
+        public InlineSvgTagHelper(MediaFileManager mediaFileManager, IWebHostEnvironment webHostEnvironment, IPublishedUrlProvider urlProvider)
         {
             _mediaFileManager = mediaFileManager;
             _webHostEnvironment = webHostEnvironment;
+            _urlProvider = urlProvider;
         }
 
         /// <summary>
@@ -59,8 +62,8 @@ namespace Our.Umbraco.TagHelpers
             {
                 // Check Umbraco Media Item that is picked/used
                 // has a file that uses a .svg file extension
-                var mediaItemPath = MediaItem.Url();
-                if(mediaItemPath.EndsWith(".svg", StringComparison.InvariantCultureIgnoreCase) == false)
+                var mediaItemPath = MediaItem.Url(_urlProvider);
+                if (mediaItemPath?.EndsWith(".svg", StringComparison.InvariantCultureIgnoreCase) != true)
                 {
                     output.SuppressOutput();
                     return;
@@ -101,11 +104,11 @@ namespace Our.Umbraco.TagHelpers
                     return;
                 }
 
-                fileContents = File.ReadAllText(file.PhysicalPath);
+                using var reader = new StreamReader(file.CreateReadStream());
+                fileContents = reader.ReadToEnd();
             }
 
-
-            // Sanatize SVG (Is there anything in Umbraco to reuse)
+            // Sanitize SVG (Is there anything in Umbraco to reuse)
             // https://stackoverflow.com/questions/65247336/is-there-anyway-to-sanitize-svg-file-in-c-any-libraries-anything/65375485#65375485
             var cleanedFileContents = Regex.Replace(fileContents,
                 @"<script.*?script>",
