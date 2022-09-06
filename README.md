@@ -339,6 +339,65 @@ Alternatively if you use the `<our-link>` without child DOM elements then it wil
 
 With this tag helper the child DOM elements inside the `<our-link>` is wrapped with the `<a>` tag
 
+## `<our-cache>`
+This tag helper element `<our-cache>` is a wrapper around the [DotNet CacheTagHelper](https://docs.microsoft.com/en-us/aspnet/core/mvc/views/tag-helpers/built-in/cache-tag-helper?view=aspnetcore-6.0) - it operates in exactly the same way, with the same options as the DotNet CacheTagHelper, except, it is automatically 'not enabled', when you are in Umbraco Preview or Umbraco Debug mode.
+
+### Without this tag helper
+
+Essentially this is a convenience for setting 
+
+'''cshtml
+<cache enabled="!UmbracoContext.IsDebug && !UmbracoContext.InPreviewMode">[Your Long Running Expensive Code Here]</cache>
+'''
+
+### With this tag helper
+
+'''cshtml
+<our-cache>[Your Long Running Expensive Code Here]</our-cache>
+'''
+
+### Clearing the Cache 'on publish'
+The Umbraco convention with other Cache Helpers, eg Html.CachedPartial is to clear all memory caches whenever any item is published in the Umbraco Backoffice. By default the our-cache tag helper will do the same, however you can turn this part off on an individual TagHelper basis by setting update-cache-key-on-publish="false".
+
+'''cshtml
+<our-cache>[Your Long Running Expensive Code Here]</our-cache>
+'''
+is the same as:
+'''cshtml
+<our-cache update-cache-on-publish="true">[Your Long Running Expensive Code Here]</our-cache>
+'''
+But to turn it off:
+'''cshtml
+<our-cache update-cache-on-publish="false">[Your Long Running Expensive Code Here]</our-cache>
+'''
+
+(NB if you had a thousand tag helpers on your site, all caching large amounts of content, and new publishes to the site occurring every second - this might be detrimental to performance, so do think of the context of your site before allowing the cache to be cleared on each publish)  
+
+### Examples
+All examples will skip the cache for Umbraco preview mode and debug mode, and evict cache items anytime Umbraco publishes content, media or dictionary items.
+
+```cshtml
+<our-cache expires-on="new DateTime(2025,1,29,17,02,0)">
+     <p>@DateTime.Now - A set Date in time</p>
+</our-cache>
+
+<our-cache expires-after="TimeSpan.FromSeconds(120)">
+     <p>@DateTime.Now - Every 120 seconds (2minutes)</p>
+</our-cache>
+
+<our-cache>
+    <!-- A global navigation needs to be updated across entire site when phone number changes on homepage node -->
+    <partial name="Navigation" />
+</our-cache>
+
+```
+This example will turn off the automatic clearing of the tag helper cache if 'any page' is published, but still clear the cache if the individual page is published:
+```cshtml
+<our-cache update-cache-on-publish="false" vary-by="@Model.UpdateDate.ToString()">
+     <p>@DateTime.Now - A set Date in time</p>
+</our-cache>
+```
+
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
 
