@@ -346,30 +346,30 @@ This tag helper element `<our-cache>` is a wrapper around the [DotNet CacheTagHe
 
 Essentially this is a convenience for setting 
 
-'''cshtml
+```cshtml
 <cache enabled="!UmbracoContext.IsDebug && !UmbracoContext.InPreviewMode">[Your Long Running Expensive Code Here]</cache>
-'''
+```
 
 ### With this tag helper
 
-'''cshtml
+```cshtml
 <our-cache>[Your Long Running Expensive Code Here]</our-cache>
-'''
+```
 
 ### Clearing the Cache 'on publish'
 The Umbraco convention with other Cache Helpers, eg Html.CachedPartial is to clear all memory caches whenever any item is published in the Umbraco Backoffice. By default the our-cache tag helper will do the same, however you can turn this part off on an individual TagHelper basis by setting update-cache-key-on-publish="false".
 
-'''cshtml
+```cshtml
 <our-cache>[Your Long Running Expensive Code Here]</our-cache>
-'''
+```
 is the same as:
-'''cshtml
+```cshtml
 <our-cache update-cache-on-publish="true">[Your Long Running Expensive Code Here]</our-cache>
-'''
+```
 But to turn it off:
-'''cshtml
+```cshtml
 <our-cache update-cache-on-publish="false">[Your Long Running Expensive Code Here]</our-cache>
-'''
+```
 
 (NB if you had a thousand tag helpers on your site, all caching large amounts of content, and new publishes to the site occurring every second - this might be detrimental to performance, so do think of the context of your site before allowing the cache to be cleared on each publish)  
 
