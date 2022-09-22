@@ -326,7 +326,7 @@ Note if the link set is an external link and you set the target of the link to b
 
 ### Simple Example
 ```cshtml
-<our-link="@Model.ctaLink">
+<our-link link="@Model.ctaLink">
     <h2>Hi There</h2>
 </our-link>
 ```
@@ -334,7 +334,7 @@ Note if the link set is an external link and you set the target of the link to b
 Alternatively if you use the `<our-link>` without child DOM elements then it will use the `Title` property of the link in the Multi Url Picker property editor to create the anchor tag.
 
 ```cshtml
-<our-link="@Model.ctaLink"></our-link>
+<our-link link="@Model.ctaLink"></our-link>
 ```
 
 With this tag helper the child DOM elements inside the `<our-link>` is wrapped with the `<a>` tag
