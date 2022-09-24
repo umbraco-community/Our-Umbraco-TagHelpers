@@ -52,7 +52,7 @@ namespace Our.Umbraco.TagHelpers
         /// A classic CSS class property to apply/append a CSS class or classes.
         /// </summary>
         [HtmlAttributeName("class")]
-        public string CssClass { get; set; }
+        public string? CssClass { get; set; }
 
         /// <summary>
         /// A boolean to ensure a viewbox is present within the SVG tag to ensure the vector is always responsive.
@@ -70,7 +70,7 @@ namespace Our.Umbraco.TagHelpers
 
         /// <summary>
         /// An integer to set the cache minutes. Default: 180 minutes.
-        /// NOTE: Use the appsettings configuration to apply this globally (e.g. "Our.Umbraco.TagHelpers": { "InlineSvgTagHelper": { "Cache": true } } ).
+        /// NOTE: Use the appsettings configuration to apply this globally (e.g. "Our.Umbraco.TagHelpers": { "InlineSvgTagHelper": { "CacheMinutes": 180 } } ).
         /// </summary>
         [HtmlAttributeName("cache-minutes")]
         public int CacheMinutes { get; set; }
