@@ -44,7 +44,7 @@ namespace Our.Umbraco.TagHelpers
         }
 
         /// <summary>
-        /// A filepath to a SVG on disk such as /assets/icon.svg
+        /// A filepath to an image on disk such as /assets/image.jpg, external URL's can also be used with limited functionality
         /// NOTE: You cannot use this in conjuction with the media-item attribute
         /// </summary>
         [HtmlAttributeName("src")]
@@ -84,61 +84,68 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("abovethefold")]
         public bool AboveTheFold { get; set; }
 
-        /// <summary>
-        /// A boolean to ignore the appsettings. 
-        /// NOTE: Applies to 'ensure-viewbox' & 'cache' only
-        /// </summary>
-        [HtmlAttributeName("ignore-appsettings")]
-        public bool IgnoreAppSettings { get; set; }
-
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            // Can only use media-item OR src
+            output.TagName = "img";
+
+            #region Can only use media-item OR src, don't render anything if both are provided
             // Can't use both properties together
             if (string.IsNullOrWhiteSpace(FileSource) == false && MediaItem is not null)
             {
                 // KABOOM !
-                // Can't decide which property to use to render inline SVG
+                // Can't decide which property to use to render image
                 // So just render nothing...
                 output.SuppressOutput();
                 return;
             }
+            #endregion
+
             var width = 0d;
             var height = 0d;
             var cssClasses = new List<string>();
             var imgSrc = string.Empty;
             var placeholderImgSrc = string.Empty;
             var jsLazyLoad = !_globalSettings.ImgTagHelper.UseNativeLazyLoading && !AboveTheFold;
-            IMedia media = default;
-
-            if (!string.IsNullOrEmpty(ImgClass))
-            {
-                cssClasses.Add(ImgClass);
-            }
+            var style = ImgStyle;
+            var quality = ImgQuality > 0 ? ImgQuality : 100;
 
             if (MediaItem is not null)
             {
-                media = _mediaService.GetById(MediaItem.Id);
-                width = ImgWidth;
+                #region Opting to use a media-item as the source image
+                var media = _mediaService.GetById(MediaItem.Id); // Get the media object from the media library service
+                var originalWidth = media.GetValue<double>("umbracoWidth"); // Determine the width from the originally uploaded image
+                var originalHeight = media.GetValue<double>("umbracoHeight"); // Determine the height from the originally uploaded image
+                width = ImgWidth > 0 ? ImgWidth : originalWidth; // If the element wasn't provided with a width property, use the width from the media object instead
                 if (!string.IsNullOrEmpty(ImgCropAlias))
                 {
+                    // The element contains a crop alias property, so pull through a cropped version of the original image
+                    // Also, calculate the height based on the given width using the crop profile so it's to scale
                     imgSrc = MediaItem.GetCropUrl(width: (int)width, cropAlias: ImgCropAlias);
-                    placeholderImgSrc = MediaItem.GetCropUrl(width: ImgWidth, cropAlias: ImgCropAlias, quality: 5);
+                    if (_globalSettings.ImgTagHelper.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                    {
+                        // Generate a low quality placeholder image if configured to do so
+                        placeholderImgSrc = MediaItem.GetCropUrl(width: ImgWidth, cropAlias: ImgCropAlias, quality: _globalSettings.ImgTagHelper.LazyLoadPlaceholderLowQualityImageQuality);
+                    }
                     var cropWidth = MediaItem.LocalCrops.GetCrop(ImgCropAlias).Width;
                     var cropHeight = MediaItem.LocalCrops.GetCrop(ImgCropAlias).Height;
                     height = (cropHeight / cropWidth) * width;
                 }
                 else
                 {
+                    // Pull through an image based on the given width and calculate the height so it's to scale.
                     imgSrc = MediaItem.GetCropUrl(width: (int)width);
-                    placeholderImgSrc = MediaItem.GetCropUrl(width: (int)width, quality: _globalSettings.ImgTagHelper.LazyLoadPlaceholderLowQualityImageQuality);
-                    var originalWidth = media.GetValue<double>("umbracoWidth");
-                    var originalHeight = media.GetValue<double>("umbracoHeight");
+                    if (_globalSettings.ImgTagHelper.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                    {
+                        // Generate a low quality placeholder image if configured to do so
+                        placeholderImgSrc = MediaItem.GetCropUrl(width: (int)width, quality: _globalSettings.ImgTagHelper.LazyLoadPlaceholderLowQualityImageQuality);
+                    }
                     height = (originalHeight / originalWidth) * width;
                 }
+                #endregion
             }
             else if (!string.IsNullOrEmpty(FileSource))
             {
+                #region Opting to use a file URL as the source image
                 width = ImgWidth;
                 height = ImgHeight;
                 imgSrc = FileSource;
@@ -168,17 +175,18 @@ namespace Our.Umbraco.TagHelpers
                 }
                 #endregion
 
+                #endregion
             }
 
+            #region Apply the width & height properties
+            if (width > 0 && height > 0)
+            {
+                output.Attributes.Add("width", width);
+                output.Attributes.Add("height", height);
+            }
+            #endregion
 
-
-
-
-
-            
-            var style = ImgStyle;
-
-            #region If width & height defined, add the aspect-ratio CSS property alongside the width & height attributes. 
+            #region Apply the aspect-ratio style if configured to do so. 
             /// Having width & height by themselves forces the image to initially load as that size during page load until a stylesheet kicks in.
             /// PageSpeed Insights requires all images to have a width & height.
             /// aspect-ratio sizes the element consistently, so the ratio of an element stays the same as it grows or shrinks.
@@ -195,25 +203,18 @@ namespace Our.Umbraco.TagHelpers
                 style += "width: 100%;";
                 output.Attributes.Add("style", style);
             }
-
-            if (width > 0 && height > 0)
-            {
-                output.Attributes.Add("width", width);
-                output.Attributes.Add("height", height);
-            }
             #endregion
 
+            #region If we're lazy loading via a JavaScript method, set a placeholder on the 'src' property and set the image to use 'data-src' instead.
 
-            var quality = ImgQuality > 0 ? ImgQuality : 100;
-
-            if (jsLazyLoad && width > 0)
+            if (jsLazyLoad)
             {
                 output.Attributes.Add("data-src", imgSrc);
                 if (_globalSettings.ImgTagHelper.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage) && !string.IsNullOrEmpty(placeholderImgSrc))
                 {
                     output.Attributes.Add("src", placeholderImgSrc);
                 }
-                else if(height > 0)
+                else if(width > 0 && height > 0)
                 {
                     output.Attributes.Add("src", $"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {width} {height}'%3E%3C/svg%3E");
                 }
@@ -223,10 +224,11 @@ namespace Our.Umbraco.TagHelpers
             {
                 output.Attributes.Add("src", imgSrc);
             }
+            #endregion
 
-            if (_globalSettings.ImgTagHelper.UseNativeLazyLoading)
+            #region If we're instead lazy loading via a browser method, add properties to assist the load order
+            if (_globalSettings.ImgTagHelper.UseNativeLazyLoading || !jsLazyLoad)
             {
-
                 if (AboveTheFold)
                 {
                     output.Attributes.Add("loading", "eager"); // Load the image as soon as the page loads.
@@ -239,15 +241,24 @@ namespace Our.Umbraco.TagHelpers
                     output.Attributes.Add("fetchpriority", "low"); // Downgrades the priority of the image given it's not currently visible on initial page load.
                 }
             }
+            #endregion
+
+            #region Apply CSS classes
+            if (!string.IsNullOrEmpty(ImgClass))
+            {
+                cssClasses.Add(ImgClass);
+            }
 
             if (cssClasses.Count > 0)
             {
                 output.Attributes.Add("class", string.Join(" ", cssClasses));
             }
+            #endregion
 
-            output.TagName = "img";
-
-            if(ImgSizes != null && ImgSizes.Any() && MediaItem != null)
+            #region If multiple responsive image variants have been supplied, wrap the img element with a picture element and source elements per variant.
+            // Only one image will be rendered at a given time based on the current screen width. 
+            // The configuration allows us to define whether images are configured "mobile first". This simply alternates between min-width & max-width media queries.
+            if (ImgSizes != null && ImgSizes.Any() && MediaItem != null)
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("<picture>");
@@ -264,30 +275,42 @@ namespace Our.Umbraco.TagHelpers
                         OurScreenSize.Small => _globalSettings.ImgTagHelper.MediaQueries.Small,
                         _ => 0
                     };
+
+                    #region Configure crops which can be set at variant level or inherit from the crop alias defined on the main img element itself. If neither have a crop alias, then don't use crops.
                     var cropAlias = !string.IsNullOrEmpty(size.CropAlias) ?
                         size.CropAlias :
                         !string.IsNullOrEmpty(ImgCropAlias) ?
                             ImgCropAlias :
                             null;
+                    #endregion
 
                     sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.ImgTagHelper.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth-1}")}px)\" />");
                 }
                 output.PreElement.SetHtmlContent(sb.ToString());
                 output.PostElement.SetHtmlContent("</picture>");
             }
-
+            #endregion
         }
 
-        public static string GetImageAltText(string url)
+        #region Private Methods
+        private static string GetImageAltText(string url)
         {
             try
             {
-                var baseUri = new Uri("http://doesntmatter");
-                Uri uri;
-                if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
-                    uri = new Uri(baseUri, url);
+                if (url.Contains("://"))
+                {
+                    var uri = new Uri(url);
+                    return Path.GetFileNameWithoutExtension(uri.LocalPath);
+                }
+                else
+                {
+                    var baseUri = new Uri("http://doesntmatter");
+                    Uri uri;
+                    if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                        uri = new Uri(baseUri, url);
 
-                return Path.GetFileNameWithoutExtension(uri.LocalPath);
+                    return Path.GetFileNameWithoutExtension(uri.LocalPath);
+                }
 
             }
             catch (Exception)
@@ -297,5 +320,6 @@ namespace Our.Umbraco.TagHelpers
 
             return "";
         }
+        #endregion
     }
 }
