@@ -13,6 +13,7 @@ using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_8_0_0;
 using Umbraco.Cms.Web.Common;
 using Umbraco.Extensions;
 
@@ -148,7 +149,9 @@ namespace Our.Umbraco.TagHelpers
                 #region Opting to use a file URL as the source image
                 width = ImgWidth;
                 height = ImgHeight;
-                imgSrc = FileSource;
+                /// TODO: Find a better way to auto generate the imgSrc URL in case the FileSource already contains a query string!
+
+                imgSrc = FileSource + "?width=" + width;
 
                 #region Autogenerate alt text
                 if (string.IsNullOrWhiteSpace(ImgAlt))
@@ -258,7 +261,7 @@ namespace Our.Umbraco.TagHelpers
             #region If multiple responsive image variants have been supplied, wrap the img element with a picture element and source elements per variant.
             // Only one image will be rendered at a given time based on the current screen width. 
             // The configuration allows us to define whether images are configured "mobile first". This simply alternates between min-width & max-width media queries.
-            if (ImgSizes != null && ImgSizes.Any() && MediaItem != null)
+            if (ImgSizes != null && ImgSizes.Any())
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("<picture>");
@@ -276,15 +279,35 @@ namespace Our.Umbraco.TagHelpers
                         _ => 0
                     };
 
-                    #region Configure crops which can be set at variant level or inherit from the crop alias defined on the main img element itself. If neither have a crop alias, then don't use crops.
-                    var cropAlias = !string.IsNullOrEmpty(size.CropAlias) ?
-                        size.CropAlias :
-                        !string.IsNullOrEmpty(ImgCropAlias) ?
-                            ImgCropAlias :
-                            null;
-                    #endregion
+                    var sourceHeight = 0;
 
-                    sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.ImgTagHelper.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth-1}")}px)\" />");
+                    if (MediaItem != null)
+                    {
+                        #region Configure crops which can be set at variant level or inherit from the crop alias defined on the main img element itself. If neither have a crop alias, then don't use crops.
+                        var cropAlias = !string.IsNullOrEmpty(size.CropAlias) ?
+                            size.CropAlias :
+                            !string.IsNullOrEmpty(ImgCropAlias) ?
+                                ImgCropAlias :
+                                null;
+                        #endregion
+
+                        if (!string.IsNullOrEmpty(cropAlias))
+                        {
+                            var cropWidth = MediaItem.LocalCrops.GetCrop(cropAlias).Width;
+                            var cropHeight = MediaItem.LocalCrops.GetCrop(cropAlias).Height;
+                            sourceHeight = (cropHeight / cropWidth) * size.ImageWidth;
+                        }
+
+                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.ImgTagHelper.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                    }
+
+                    if (!string.IsNullOrEmpty(FileSource) && ImgWidth > 0 && ImgHeight > 0)
+                    {
+                        sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
+                        /// TODO: Find a better way to auto generate the srcset URL in case the FileSource already contains a query string!
+                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{FileSource}?width={size.ImageWidth}\" media=\"({(_globalSettings.ImgTagHelper.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+
+                    }
                 }
                 output.PreElement.SetHtmlContent(sb.ToString());
                 output.PostElement.SetHtmlContent("</picture>");

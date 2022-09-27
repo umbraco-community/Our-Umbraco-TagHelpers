@@ -217,6 +217,9 @@ namespace Our.Umbraco.TagHelpers
                         var width = ExtractDecimalFromString(svgNode.GetAttributeValue("width", "0"));
                         var height = ExtractDecimalFromString(svgNode.GetAttributeValue("height", "0"));
                         svgNode.SetAttributeValue("viewbox", $"0 0 {width} {height}");
+
+                        svgNode.Attributes.Remove("width");
+                        svgNode.Attributes.Remove("height");
                     }
                 }
                 cleanedFileContents = doc.DocumentNode.OuterHtml;
