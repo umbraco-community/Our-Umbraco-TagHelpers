@@ -61,8 +61,15 @@ namespace Our.Umbraco.TagHelpers.Configuration
             ImageWidth = imageWidth;
             CropAlias = cropAlias;
         }
+        public OurImageSize(OurScreenSize screenSize, int imageWidth, int imageHeight)
+        {
+            ScreenSize = screenSize;
+            ImageWidth = imageWidth;
+            ImageHeight = imageHeight;
+        }
         public OurScreenSize ScreenSize { get; set; }
         public int ImageWidth { get; set; }
+        public int ImageHeight { get; set; }
         public string? CropAlias { get; set; }
     }
 
