@@ -1,0 +1,43 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Home>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@using Our.Umbraco.TagHelpers.Configuration;
+@{
+	Layout = null;
+}
+<style>
+	img {
+		width: auto;
+		height: auto;
+		max-width: 100%;
+	}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" integrity="sha512-q583ppKrCRc7N5O0n2nzUiJ+suUv7Et1JGels4bXOaMFQcamPk9HjdUknZuuFjBNs7tsMuadge5k9RzdmO+1GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<our-svg media-item="Model.ImageSvg" class="hello-world"></our-svg>
+
+<our-img
+	abovethefold="true"
+	media-item="Model.ImagePicture"
+	width="300"
+	sizes="@(new List<OurImageSize>()
+		{
+			new OurImageSize(OurScreenSize.ExtraLarge, 1200, "test1"),
+			new OurImageSize(OurScreenSize.Medium, 800, "test2"),
+			new OurImageSize(OurScreenSize.Small, 500, "test3"),
+		})" 
+	class="hello-world"
+/>
+<our-img
+	abovethefold="true"
+	media-item="Model.ImagePicture"
+	width="300"
+	cropalias="test2"
+	sizes="@(new List<OurImageSize>()
+		{
+			new OurImageSize(OurScreenSize.ExtraLarge, 1200),
+			new OurImageSize(OurScreenSize.Medium, 800),
+			new OurImageSize(OurScreenSize.Small, 500),
+		})" 
+	class="hello-world"
+/>
