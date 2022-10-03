@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Our.Umbraco.TagHelpers.Enums;
 
 namespace Our.Umbraco.TagHelpers.Configuration
 {
@@ -42,6 +38,11 @@ namespace Our.Umbraco.TagHelpers.Configuration
         public int LazyLoadPlaceholderLowQualityImageQuality { get; set; } = 5; 
         public bool ApplyAspectRatio { get; set; } = false;
         public bool MobileFirst { get; set; } = true;
+
+        /// <summary>
+        /// The property alias of the media type containing the alternative text value.
+        /// </summary>
+        public string AlternativeTextMediaTypePropertyAlias { get; set; } = "alternativeText";
     }
     public class MediaQuerySizes
     {
@@ -50,40 +51,5 @@ namespace Our.Umbraco.TagHelpers.Configuration
         public int Large { get; set; } = 992;
         public int ExtraLarge { get; set; } = 1200;
         public int ExtraExtraLarge { get; set; } = 1400;
-    }
-
-    public class OurImageSize
-    {
-        public OurImageSize() { }
-        public OurImageSize(OurScreenSize screenSize, int imageWidth, string? cropAlias = null)
-        {
-            ScreenSize = screenSize;
-            ImageWidth = imageWidth;
-            CropAlias = cropAlias;
-        }
-        public OurImageSize(OurScreenSize screenSize, int imageWidth, int imageHeight)
-        {
-            ScreenSize = screenSize;
-            ImageWidth = imageWidth;
-            ImageHeight = imageHeight;
-        }
-        public OurScreenSize ScreenSize { get; set; }
-        public int ImageWidth { get; set; }
-        public int ImageHeight { get; set; }
-        public string? CropAlias { get; set; }
-    }
-
-    public enum OurScreenSize
-    {
-        Small = 100,
-        Medium = 200,
-        Large = 300,
-        ExtraLarge = 400,
-        ExtraExtraLarge = 500
-    }
-    public enum ImagePlaceholderType
-    {
-        SVG,
-        LowQualityImage
     }
 }

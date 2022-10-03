@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Configuration;
+using Our.Umbraco.TagHelpers.Utils;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Umbraco.Cms.Core.Cache;
-using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Routing;
@@ -214,8 +214,8 @@ namespace Our.Umbraco.TagHelpers
                     }
                     if ((EnsureViewBox || (_globalSettings.InlineSvgTagHelper.EnsureViewBox && !IgnoreAppSettings)) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
                     {
-                        var width = ExtractDecimalFromString(svgNode.GetAttributeValue("width", "0"));
-                        var height = ExtractDecimalFromString(svgNode.GetAttributeValue("height", "0"));
+                        var width = StringUtils.GetDecimal(svgNode.GetAttributeValue("width", "0"));
+                        var height = StringUtils.GetDecimal(svgNode.GetAttributeValue("height", "0"));
                         svgNode.SetAttributeValue("viewbox", $"0 0 {width} {height}");
 
                         svgNode.Attributes.Remove("width");
@@ -226,14 +226,6 @@ namespace Our.Umbraco.TagHelpers
             }
 
             return cleanedFileContents;
-        }
-        private decimal ExtractDecimalFromString(string str)
-        {
-
-            Regex digits = new Regex(@"^\D*?((-?(\d+(\.\d+)?))|(-?\.\d+)).*");
-            Match mx = digits.Match(str);
-
-            return mx.Success ? Convert.ToDecimal(mx.Groups[1].Value) : 0;
         }
     }
 }

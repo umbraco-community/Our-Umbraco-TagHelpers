@@ -1,20 +1,22 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
+using Our.Umbraco.TagHelpers.Classes;
 using Our.Umbraco.TagHelpers.Configuration;
+using Our.Umbraco.TagHelpers.Enums;
+using Our.Umbraco.TagHelpers.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Umbraco.Cms.Core.Cache;
-using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_8_0_0;
-using Umbraco.Cms.Web.Common;
 using Umbraco.Extensions;
 
 namespace Our.Umbraco.TagHelpers
@@ -27,21 +29,13 @@ namespace Our.Umbraco.TagHelpers
     [HtmlTargetElement("our-img")]
     public class ImgTagHelper : TagHelper
     {
-        private MediaFileManager _mediaFileManager;
-        private IWebHostEnvironment _webHostEnvironment;
         private OurUmbracoTagHelpersConfiguration _globalSettings;
-        private AppCaches _appCaches;
         private IMediaService _mediaService;
-        private UmbracoHelper _umbracoHelper;
 
-        public ImgTagHelper(MediaFileManager mediaFileManager, IWebHostEnvironment webHostEnvironment, IOptions<OurUmbracoTagHelpersConfiguration> globalSettings, AppCaches appCaches, IMediaService mediaService, UmbracoHelper umbracoHelper)
+        public ImgTagHelper(IOptions<OurUmbracoTagHelpersConfiguration> globalSettings, IMediaService mediaService)
         {
-            _mediaFileManager = mediaFileManager;
-            _webHostEnvironment = webHostEnvironment;
             _globalSettings = globalSettings.Value;
-            _appCaches = appCaches;
             _mediaService = mediaService;
-            _umbracoHelper = umbracoHelper;
         }
 
         /// <summary>
@@ -64,26 +58,70 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("width")]
         public int ImgWidth { get; set; }
 
+        [HtmlAttributeName("width--s")]
+        public int ImgWidthSmall { get; set; }
+
+        [HtmlAttributeName("width--m")]
+        public int ImgWidthMedium { get; set; }
+
+        [HtmlAttributeName("width--l")]
+        public int ImgWidthLarge { get; set; }
+
+        [HtmlAttributeName("width--xl")]
+        public int ImgWidthExtraLarge { get; set; }
+
+        [HtmlAttributeName("width--xxl")]
+        public int ImgWidthExtraExtraLarge { get; set; }
+
         [HtmlAttributeName("height")]
         public int ImgHeight { get; set; }
+
+        [HtmlAttributeName("height--s")]
+        public int ImgHeightSmall { get; set; }
+
+        [HtmlAttributeName("height--m")]
+        public int ImgHeightMedium { get; set; }
+
+        [HtmlAttributeName("height--l")]
+        public int ImgHeightLarge { get; set; }
+
+        [HtmlAttributeName("height--xl")]
+        public int ImgHeightExtraLarge { get; set; }
+
+        [HtmlAttributeName("height--xxl")]
+        public int ImgHeightExtraExtraLarge { get; set; }
 
         [HtmlAttributeName("cropalias")]
         public string ImgCropAlias { get; set; }
 
+        [HtmlAttributeName("cropalias--s")]
+        public string ImgCropAliasSmall { get; set; }
+
+        [HtmlAttributeName("cropalias--m")]
+        public string ImgCropAliasMedium { get; set; }
+
+        [HtmlAttributeName("cropalias--l")]
+        public string ImgCropAliasLarge { get; set; }
+
+        [HtmlAttributeName("cropalias--xl")]
+        public string ImgCropAliasExtraLarge { get; set; }
+
+        [HtmlAttributeName("cropalias--xxl")]
+        public string ImgCropAliasExtraExtraLarge { get; set; }
+
         [HtmlAttributeName("style")]
         public string? ImgStyle { get; set; }
-
-        [HtmlAttributeName("quality")]
-        public int ImgQuality { get; set; }
 
         [HtmlAttributeName("class")]
         public string? ImgClass { get; set; }
 
-        [HtmlAttributeName("sizes")]
-        public List<OurImageSize> ImgSizes { get; set; }
-
         [HtmlAttributeName("abovethefold")]
         public bool AboveTheFold { get; set; }
+
+        protected HttpRequest Request => ViewContext.HttpContext.Request;
+
+        [ViewContext]
+        public ViewContext ViewContext { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
@@ -108,7 +146,6 @@ namespace Our.Umbraco.TagHelpers
             var placeholderImgSrc = string.Empty;
             var jsLazyLoad = !_globalSettings.ImgTagHelper.UseNativeLazyLoading && !AboveTheFold;
             var style = ImgStyle;
-            var quality = ImgQuality > 0 ? ImgQuality : 100;
 
             if (MediaItem is not null)
             {
@@ -142,6 +179,13 @@ namespace Our.Umbraco.TagHelpers
                     }
                     height = (originalHeight / originalWidth) * width;
                 }
+
+                #region Autogenerate alt text
+                if (string.IsNullOrWhiteSpace(ImgAlt))
+                {
+                    output.Attributes.Add("alt", GetImageAltText(MediaItem));
+                }
+                #endregion
                 #endregion
             }
             else if (!string.IsNullOrEmpty(FileSource))
@@ -149,17 +193,13 @@ namespace Our.Umbraco.TagHelpers
                 #region Opting to use a file URL as the source image
                 width = ImgWidth;
                 height = ImgHeight;
-                /// TODO: Find a better way to auto generate the imgSrc URL in case the FileSource already contains a query string!
 
-                imgSrc = FileSource + "?width=" + width;
+                imgSrc = AddQueryToUrl(FileSource, "width", width.ToString());
 
                 #region Autogenerate alt text
                 if (string.IsNullOrWhiteSpace(ImgAlt))
                 {
-                    if (!string.IsNullOrEmpty(FileSource))
-                    {
-                        output.Attributes.Add("alt", GetImageAltText(FileSource));
-                    }
+                    output.Attributes.Add("alt", GetImageAltText(FileSource));
                 }
                 #endregion
 
@@ -203,7 +243,7 @@ namespace Our.Umbraco.TagHelpers
                     output.Attributes.RemoveAll("style");
                 }
                 style += aspectRatio;
-                style += "width: 100%;";
+                style += "width: 100%; height: auto;";
                 output.Attributes.Add("style", style);
             }
             #endregion
@@ -217,7 +257,7 @@ namespace Our.Umbraco.TagHelpers
                 {
                     output.Attributes.Add("src", placeholderImgSrc);
                 }
-                else if(width > 0 && height > 0)
+                else if (width > 0 && height > 0)
                 {
                     output.Attributes.Add("src", $"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {width} {height}'%3E%3C/svg%3E");
                 }
@@ -261,13 +301,15 @@ namespace Our.Umbraco.TagHelpers
             #region If multiple responsive image variants have been supplied, wrap the img element with a picture element and source elements per variant.
             // Only one image will be rendered at a given time based on the current screen width. 
             // The configuration allows us to define whether images are configured "mobile first". This simply alternates between min-width & max-width media queries.
-            if (ImgSizes != null && ImgSizes.Any())
+            var imageSizes = GetImageSizes(MediaItem != null);
+
+            if (imageSizes != null && imageSizes.Any())
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("<picture>");
 
-                ImgSizes = _globalSettings.ImgTagHelper.MobileFirst ? ImgSizes.OrderByDescending(o => o.ScreenSize).ToList() : ImgSizes.OrderBy(o => o.ScreenSize).ToList();
-                foreach (var size in ImgSizes)
+                imageSizes = _globalSettings.ImgTagHelper.MobileFirst ? imageSizes.OrderByDescending(o => o.ScreenSize).ToList() : imageSizes.OrderBy(o => o.ScreenSize).ToList();
+                foreach (var size in imageSizes)
                 {
                     var minWidth = size.ScreenSize switch
                     {
@@ -279,7 +321,7 @@ namespace Our.Umbraco.TagHelpers
                         _ => 0
                     };
 
-                    var sourceHeight = 0;
+                    double sourceHeight = 0;
 
                     if (MediaItem != null)
                     {
@@ -295,7 +337,7 @@ namespace Our.Umbraco.TagHelpers
                         {
                             var cropWidth = MediaItem.LocalCrops.GetCrop(cropAlias).Width;
                             var cropHeight = MediaItem.LocalCrops.GetCrop(cropAlias).Height;
-                            sourceHeight = (cropHeight / cropWidth) * size.ImageWidth;
+                            sourceHeight = (StringUtils.GetDouble(cropHeight) / StringUtils.GetDouble(cropWidth)) * size.ImageWidth;
                         }
 
                         sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.ImgTagHelper.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
@@ -304,8 +346,8 @@ namespace Our.Umbraco.TagHelpers
                     if (!string.IsNullOrEmpty(FileSource) && ImgWidth > 0 && ImgHeight > 0)
                     {
                         sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
-                        /// TODO: Find a better way to auto generate the srcset URL in case the FileSource already contains a query string!
-                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{FileSource}?width={size.ImageWidth}\" media=\"({(_globalSettings.ImgTagHelper.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                        var sourceUrl = AddQueryToUrl(FileSource, "width", size.ImageWidth.ToString());
+                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{sourceUrl}\" media=\"({(_globalSettings.ImgTagHelper.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
 
                     }
                 }
@@ -316,7 +358,7 @@ namespace Our.Umbraco.TagHelpers
         }
 
         #region Private Methods
-        private static string GetImageAltText(string url)
+        private string GetImageAltText(string url)
         {
             try
             {
@@ -327,7 +369,7 @@ namespace Our.Umbraco.TagHelpers
                 }
                 else
                 {
-                    var baseUri = new Uri("http://doesntmatter");
+                    var baseUri = new Uri(Request.GetDisplayUrl());
                     Uri uri;
                     if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
                         uri = new Uri(baseUri, url);
@@ -342,6 +384,87 @@ namespace Our.Umbraco.TagHelpers
             }
 
             return "";
+        }
+        private string GetImageAltText(IPublishedContent image)
+        {
+            try
+            {
+                if (image == null) throw new Exception("image is null");
+
+                var alias = _globalSettings.ImgTagHelper.AlternativeTextMediaTypePropertyAlias;
+
+                if (image.HasProperty(alias) && image.HasValue(alias))
+                {
+                    return image.Value<string>(alias);
+                }
+                else
+                {
+                    return image.Name;
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return "";
+        }
+
+        private string AddQueryToUrl(string url, string key, string value)
+        {
+            Uri uri = null!;
+            if (url.Contains("://"))
+            {
+                uri = new Uri(url);
+            }
+            else
+            {
+                if (!Uri.TryCreate(url, UriKind.Absolute, out uri!))
+                    uri = new Uri(new Uri(Request.GetDisplayUrl()), url);
+            }
+
+            if (uri == null) return url;
+
+            var baseUri = uri.GetComponents(UriComponents.Scheme | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
+            var query = QueryHelpers.ParseQuery(uri.Query);
+
+            var items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
+
+            items.RemoveAll(x => x.Key == key);
+
+            var qb = new QueryBuilder(items);
+
+            qb.Add(key, value);
+
+            return baseUri + qb.ToQueryString();
+        }
+
+        private List<OurImageSize> GetImageSizes(bool isMedia = true)
+        {
+            var imageSizes = new List<OurImageSize>();
+
+            if(ImgWidthSmall > 0)
+            {
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Small, ImgWidthSmall, ImgCropAliasSmall) : new OurImageSize(Enums.OurScreenSize.Small, ImgWidthSmall, ImgHeightSmall));
+            }
+            if(ImgWidthMedium > 0)
+            {
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Medium, ImgWidthMedium, ImgCropAliasMedium) : new OurImageSize(Enums.OurScreenSize.Medium, ImgWidthMedium, ImgHeightMedium));
+            }
+            if(ImgWidthLarge > 0)
+            {
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Large, ImgWidthLarge, ImgCropAliasLarge) : new OurImageSize(Enums.OurScreenSize.Large, ImgWidthLarge, ImgHeightLarge));
+            }
+            if(ImgWidthExtraLarge > 0)
+            {
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.ExtraLarge, ImgWidthExtraLarge, ImgCropAliasExtraLarge) : new OurImageSize(Enums.OurScreenSize.ExtraLarge, ImgWidthExtraLarge, ImgHeightExtraLarge));
+            }
+            if(ImgWidthExtraExtraLarge > 0)
+            {
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.ExtraExtraLarge, ImgWidthExtraExtraLarge, ImgCropAliasExtraExtraLarge) : new OurImageSize(Enums.OurScreenSize.ExtraExtraLarge, ImgWidthExtraExtraLarge, ImgHeightExtraExtraLarge));
+            }
+
+            return imageSizes;
         }
         #endregion
     }

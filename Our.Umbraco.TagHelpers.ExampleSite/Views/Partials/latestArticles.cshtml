@@ -43,31 +43,30 @@
                             </picture>
                             *@
 
-                            @*IMAGE DEMO 3 - Media item using our-svg tag helper with size variants for certain screen sizes*@
-                            @*
+                            @*IMAGE DEMO 3 - Media item using our-img tag helper with size variants for certain screen sizes*@
+                            @**@
                             <our-img
                                 media-item="article.ListingImage"
                                 width="200"
+                                width--s="400"
+                                width--m="600"
                                 cropalias="mobile"
-                                sizes="@(new List<OurImageSize>(){
-                                    new OurImageSize(OurScreenSize.Medium, 600, "desktop"),
-                                    new OurImageSize(OurScreenSize.Small, 400, "mobile"),
-                                })"
+                                cropalias--m="desktop"
                             />
-                            *@
+                        
 
                             @*IMAGE DEMO 4 - Plain URL, no cropping, skewed images*@
-                            @*
+                            
                             <our-img 
                                 src="@article.ListingImage!.Url()"
                                 width="200"
+                                width--s="400"
+                                width--m="600"
                                 height="200"
-                                sizes="@(new List<OurImageSize>(){
-                                    new OurImageSize(OurScreenSize.Medium, 600, 300),
-                                    new OurImageSize(OurScreenSize.Small, 400, 400),
-                                })"
+                                height--s="400"
+                                height--m="300"
                             />
-                            *@
+                            
 
                         </div>
                         <h2 class="post-title">
