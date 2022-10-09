@@ -4,8 +4,8 @@ namespace Our.Umbraco.TagHelpers.Configuration
 {
     public class OurUmbracoTagHelpersConfiguration
     {
-        public InlineSvgTagHelperConfiguration InlineSvgTagHelper { get; set; } = new InlineSvgTagHelperConfiguration();
-        public ImgTagHelperConfiguration ImgTagHelper { get; set; } = new ImgTagHelperConfiguration();
+        public InlineSvgTagHelperConfiguration OurSVG { get; set; } = new InlineSvgTagHelperConfiguration();
+        public ImgTagHelperConfiguration OurImg { get; set; } = new ImgTagHelperConfiguration();
     }
 
     public class InlineSvgTagHelperConfiguration

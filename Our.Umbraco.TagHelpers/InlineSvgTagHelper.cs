@@ -100,10 +100,10 @@ namespace Our.Umbraco.TagHelpers
 
             string? cleanedFileContents = null;
 
-            if(Cache || (_globalSettings.InlineSvgTagHelper.Cache && !IgnoreAppSettings))
+            if(Cache || (_globalSettings.OurSVG.Cache && !IgnoreAppSettings))
             {
                 var cacheName = string.Empty;
-                var cacheMins = CacheMinutes > 0 ? CacheMinutes : _globalSettings.InlineSvgTagHelper.CacheMinutes;
+                var cacheMins = CacheMinutes > 0 ? CacheMinutes : _globalSettings.OurSVG.CacheMinutes;
 
                 if (MediaItem is not null)
                 {
@@ -201,7 +201,7 @@ namespace Our.Umbraco.TagHelpers
                 @"syntax:error:",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-            if ((EnsureViewBox || (_globalSettings.InlineSvgTagHelper.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
+            if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
             {
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(cleanedFileContents);
@@ -212,7 +212,7 @@ namespace Our.Umbraco.TagHelpers
                     {
                         svgNode.AddClass(CssClass);
                     }
-                    if ((EnsureViewBox || (_globalSettings.InlineSvgTagHelper.EnsureViewBox && !IgnoreAppSettings)) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
+                    if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
                     {
                         var width = StringUtils.GetDecimal(svgNode.GetAttributeValue("width", "0"));
                         var height = StringUtils.GetDecimal(svgNode.GetAttributeValue("height", "0"));
