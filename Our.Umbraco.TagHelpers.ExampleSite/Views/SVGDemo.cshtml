@@ -1,0 +1,20 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.SvgDemo>
+
+@using Clean.Core.Models.ViewModels
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels
+
+
+@{
+    Layout = "master.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Partials/pageHeader.cshtml", new PageHeaderViewModel(Model.Name, Model.Title, Model.Subtitle, Model.MainImage))
+
+<article>
+    <div our-if="Model.SVg1 != null">
+        <our-svg media-item="Model.SVg1"></our-svg>
+    </div>
+    <div our-if="Model.SVg2 != null">
+        <our-svg media-item="Model.SVg2" ignore-appsettings="false" ensure-viewbox="false"></our-svg>
+    </div>
+</article>
