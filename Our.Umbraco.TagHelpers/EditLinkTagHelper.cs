@@ -52,7 +52,7 @@ namespace Our.Umbraco.TagHelpers
 
             // Check if the user is logged in to the backoffice
             // and they have access to the content section
-            if (_backofficeUserAccessor.BackofficeUser.IsAllowedToSeeEditLink())
+            if (_backofficeUserAccessor?.BackofficeUser != null && _backofficeUserAccessor.BackofficeUser.IsAllowedToSeeEditLink())
             {
                 // Try & get Umbraco Current Node int ID (Only do this if ContentId has NOT been set)
                 if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) && ContentId == int.MinValue)
