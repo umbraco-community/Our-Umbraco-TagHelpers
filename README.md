@@ -182,10 +182,43 @@ If you do not specify a template and use `<our-lang-switcher />` it will use the
 This tag helper element `<our-svg>` will read the file contents of an SVG file and output it as an inline SVG in the DOM.
 It can be used in one of two ways, either by specifying the `src` attribute to a physcial static file served from wwwRoot or by specifying the `media-item` attribute to use a picked IPublishedContent Media Item.
 
+### Basic usage:
 ```cshtml
 <our-svg src="/assets/icon.svg" />
 <our-svg media-item="@Model.Logo" />
 ```
+
+### Advanced usage: *(as of version 1.x.x)
+
+Additional properties have been added to cache the output and also to ensure the SVG contains a viewbox property instead of the width & height properties to aid in making the vector image responsive within a parent HTML element. 
+```cshtml
+<our-svg src="/assets/icon.svg" class="my-css-class" ensure-viewbox="true" cache="true" cache-minutes="180" ignore-appsettings="true" />
+<our-svg media-item="@Model.Logo" class="my-css-class" ensure-viewbox="true" cache="true" cache-minutes="180" ignore-appsettings="true" />
+```
+
+- `class` - Allows for a CSS class upon the SVG element. This is a `string` value.
+- `ensure-viewbox` - Enables the feature to "fix" the output SVG which always ensures the SVG utilises a viewbox rather than width & height. This is a `boolean` value.
+- `cache` - Enables the feature to cache the output at runtime level. This is a `boolean` value.
+- `cache-minutes` - Defines the amount of time (in minutes) to cache the output. To be used in conjunction with the `cache` property. This is an `integer` value.
+- `ignore-appsettings` - When enabled, the all settings appropiate to this tag helper which are defined within `appsettings.json` are completely ignored. For example, if global caching is enabled we can simply disable caching of individual elements (unless the `cache` property is `true`). This is a `boolean` value.
+
+### Global settings via appsettings.json
+
+Applying any of the below configurations within your `appsettings.json` file will apply global settings to all elements using this tag helper. See the `ignore-appsettings` to override these global settings at element level. The values shown below are the hard-coded default values.
+
+    {
+      "Our.Umbraco.TagHelpers": {
+        "OurSVG": {
+          "EnsureViewBox": false,
+          "Cache": false,
+          "CacheMinutes": 180
+        }
+      }
+    }
+
+> **Note:** SVG caches are cleared on application restart, or by resaving the media in the media library.
+
+    
 
 ## `<our-fallback>`
 This tag helper element `<our-fallback>` uses the same fallback mode logic that is only available on the `Value()` method of the `IPublishedContent` interface that uses a string for the property name to lookup. In addition if the fallback value from a language or ancestors is not available we are still able to fallback to the content inside the tag.
