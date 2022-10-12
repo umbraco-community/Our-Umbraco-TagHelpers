@@ -398,6 +398,117 @@ This example will turn off the automatic clearing of the tag helper cache if 'an
 </our-cache>
 ```
 
+## `<our-img>`
+Introduced in version 1.x.x. This tag helper element `<our-img>` will produce performance orientated `<img>` or `<picture>`.
+
+It can be used in one of two ways, either by specifying the `src` attribute to a physical static file served from wwwRoot or by specifying the `media-item` attribute to use a picked IPublishedContent Media Item.
+
+### Properties
+Properties appended with s, m, l, xl & xxl translate to screen widths defined by the default configuration or via the relevant properties in the `appsettings.json` (see the next section for more details).
+- `src` - `string` based absolute or relative file URL. e.g. `/assets/image.jpg`.
+- `media-item` - `MediaWithCrops` based class property from the view model. e.g. `Model.Image`.
+- `alt` - Native alternative text property.
+- `style` - Native style property.
+- `class` - Native CSS class property.
+- `abovethefold` - Set to `true` if the image typically appears on screen during inital page load to raise its page load lifecycle priority level. 
+- `width` - Native width property. Use in conjunction with the `height` property.
+- `width--s` - Image width for small screens. Use in conjunction with the `height--s` property.
+- `width--m` - Image width for medium screens. Use in conjunction with the `height--m` property.
+- `width--l` - Image width for large screens. Use in conjunction with the `height--l` property.
+- `width--xl` - Image width for extra large screens. Use in conjunction with the `height--xl` property.
+- `width--xxl` - Image width for extra extra large screens. Use in conjunction with the `height--xxl` property.
+- `height` - Native height property. Use in conjunction with the `width` property.
+- `height--s` - Image height for small screens. Use in conjunction with the `width--s` property.
+- `height--m` - Image height for medium screens. Use in conjunction with the `width--m` property.
+- `height--l` - Image height for large screens. Use in conjunction with the `width--l` property.
+- `height--xl` - Image height for extra large screens. Use in conjunction with the `width--xl` property.
+- `height--xxl` - Image height for extra extra large screens. Use in conjunction with the `width--xxl` property.
+- `cropalias` - Crop alias to be used by default. 
+- `cropalias--s` - Crop alias to be used on small screens.
+- `cropalias--m` - Crop alias to be used on medium screens.
+- `cropalias--l` - Crop alias to be used on large screens.
+- `cropalias--xl` - Crop alias to be used on extra large screens.
+- `cropalias--xxl` - Crop alias to be used on extra extra large screens.
+
+### Global settings via appsettings.json
+
+Applying any of the below configurations within your `appsettings.json` file will apply global settings to all elements using this tag helper. The values shown below are the hard-coded default values.
+
+    {
+      "Our.Umbraco.TagHelpers": {
+        "OurIMG": {
+          "MobileFirst": true, // Alternates between min-width & max-width media queries. When enabled, min-width is used.
+          "MediaQueries": { // Window breakpoint widths in pixels
+            "Small": 576,
+            "Medium": 768,
+            "Large": 992,
+            "ExtraLarge": 1200,
+            "ExtraExtraLarge": 1400
+          },
+          "UseNativeLazyLoading": true, // If enabled, loading="true" is used. If disabled, the 'src' property is replaced with 'data-src' which most lazy loading JavaScript libraries will interpret and lazy load the image.
+          "LazyLoadCssClass": "lazyload", // If 'UseNativeLazyLoading' is disabled, the class property is given an additional class for JavaScript libraries to target. Note: 'lazyload' is used by the lazysizes library.
+          "LazyLoadPlaceholder": "SVG", // If 'UseNativeLazyLoading' is disabled, the 'src' property is given either an empty SVG (if value is "SVG") or a lower quality version of the original image is used (if value is "LowQualityImage")
+          "LazyLoadPlaceholderLowQualityImageQuality": 5, // If 'UseNativeLazyLoading' is disabled and 'LazyLoadPlaceholder' is "LowQualityImage", what image quality should be rendered. Numeric values 1-100 accepted.  
+          "ApplyAspectRatio": false, // If enabled, the aspect-ratio CSS style is applied to the style property, and the width & height properties are removed.
+          "AlternativeTextMediaTypePropertyAlias": "alternativeText" // The media property alias to pull through the alt text value. If not found, the media title or filename will be used instead.
+        }
+      }
+    }
+
+### Examples
+#### Example 1
+This will produce a simple `<img>` tag with an alt tag either defined within the media properties in Umbraco, or auto generated based on the file name.
+```cshtml
+<our-img media-item="Model.Image" />
+```
+**Output:**
+```cshtml
+<img alt="Some alt text" width="1920" height="1280" src="/media/path/image.jpg?width=1920&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
+```
+
+#### Example 2
+This will produce an `<img>` tag with: 
+- an alt tag as defined within the tag, 
+- the width, 
+- the height (calculated by the aspect ratio of the orginal dimensions), 
+- no lazy loading with a higher fetch priority in the page load lifecycle.
+```cshtml
+<our-img media-item="Model.Image" width="200" alt="My custom alt text" abovethefold="true" />
+```
+**Output:**
+```cshtml
+<img alt="My custom alt text" width="200" height="133.33333333333331" src="/media/path/image.jpg?width=200&amp;rnd=133087885756657361" loading="eager" fetchpriority="high">
+```
+
+#### Example 3
+This will produce an `<img>` tag with: 
+- JavaScript based lazy loading as instructed by the "UseNativeLazyLoading" appsetting set to `false`. This sets the image URL as `data-src` property instead of `src`. Additionally, the `src` property is instead given an empty SVG with the same aspect ratio. Finally, the CSS class `lazyload` has been added.
+- the width, 
+- the height (calculated by the aspect ratio of the orginal dimensions).
+```cshtml
+<our-img media-item="article.ListingImage" width="200" />
+```
+**Output:**
+```cshtml
+<img alt="Some alt text" width="200" height="133.33333333333331" data-src="/media/uv2bljv1/meetup-organizers-at-codegarden.jpg?width=200&amp;rnd=133087885756657361" src="data:image/svg&#x2B;xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 200 133.33333333333331&#x27;%3E%3C/svg%3E" class="lazyload" />
+```
+
+#### Example 4
+
+```cshtml
+<our-img media-item="Model.Image" width="200" width--s="400" width--m="600" cropalias="mobile" cropalias--m="desktop" />
+```
+**Output:**
+```cshtml
+<picture>
+    <source srcset="/media/path/image.jpg?width=600&amp;height=300&amp;rnd=133087885756657361" media="(min-width: 768px)" width="600" height="300">
+    <source srcset="/media/path/image.jpg?width=400&amp;height=400&amp;rnd=133087885756657361" media="(min-width: 576px)" width="400" height="400">
+    <img alt="Some alt text" width="200" height="200" src="/media/path/image.jpg?width=200&amp;height=200&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
+</picture>
+```
+
+
+
 ## Video 📺
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
 
