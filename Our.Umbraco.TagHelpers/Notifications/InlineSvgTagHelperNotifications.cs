@@ -32,7 +32,7 @@ namespace Our.Umbraco.TagHelpers.Notifications
                     if (_appCaches.RuntimeCache.SearchByKey(cacheKey).Any())
                     {
                         _appCaches.RuntimeCache.ClearByKey(cacheKey);
-                        _logger.LogDebug($"Removed {mediaItem.Name} from RuntimeCache");
+                        _logger.LogDebug("Removed {MediaItemName} from RuntimeCache", mediaItem.Name);
                     }
                 }
             }
