@@ -21,6 +21,7 @@ namespace Our.Umbraco.TagHelpers.Tests
     {
         private TagHelperContext _context = null!;
         private TagHelperOutput _output = null!;
+        private IOptions<OurUmbracoTagHelpersConfiguration> _settings = null!;
 
         [SetUp]
         public void Setup()
@@ -37,11 +38,7 @@ namespace Our.Umbraco.TagHelpers.Tests
                 content.SetContent("Something else");
                 return Task.FromResult<TagHelperContent>(content);
             });
-        }
 
-        [Test]
-        public void NoOutputIfNoMediaOrFileSet()
-        {
             var settings = new OurUmbracoTagHelpersConfiguration()
             {
                 OurSVG =
@@ -51,9 +48,15 @@ namespace Our.Umbraco.TagHelpers.Tests
                     CacheMinutes = 180
                 }
             };
-            IOptions<OurUmbracoTagHelpersConfiguration> tagHelperSettings = Options.Create(settings);
-       
-            var tagHelper = new InlineSvgTagHelper(null, null, null, tagHelperSettings, null);
+            _settings = Options.Create(settings);
+
+        }
+
+        [Test]
+        public void NoOutputIfNoMediaOrFileSet()
+        {
+                    
+            var tagHelper = new InlineSvgTagHelper(null, null, null, _settings, null);
 
             tagHelper.Process(_context, _output);
 
@@ -64,7 +67,7 @@ namespace Our.Umbraco.TagHelpers.Tests
         public void NoOutputIfBothMediaAndFileSet()
         {
             var umbContent = Mock.Of<IPublishedContent>(c => c.ContentType.ItemType == PublishedItemType.Media);
-            var tagHelper = new InlineSvgTagHelper(null, null, null, null, null)
+            var tagHelper = new InlineSvgTagHelper(null, null, null, _settings, null)
             {
                 FileSource = "test.svg",
                 MediaItem = umbContent
@@ -78,7 +81,7 @@ namespace Our.Umbraco.TagHelpers.Tests
         [Test]
         public void NoOutputIfFileNotSvg()
         {
-            var tagHelper = new InlineSvgTagHelper(null, null, null, null, null)
+            var tagHelper = new InlineSvgTagHelper(null, null, null, _settings, null)
             {
                 FileSource = "test.notsvg"
             };
@@ -94,7 +97,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var fileProvider = new Mock<IFileProvider>();
             fileProvider.Setup(p => p.GetFileInfo(It.IsAny<string>())).Returns(Mock.Of<IFileInfo>(f => !f.Exists));
             var hostEnv = Mock.Of<IWebHostEnvironment>(e => e.WebRootFileProvider == fileProvider.Object);
-            var tagHelper = new InlineSvgTagHelper(null, hostEnv, null, null, null)
+            var tagHelper = new InlineSvgTagHelper(null, hostEnv, null, _settings, null)
             {
                 FileSource = "test.svg"
             };
@@ -110,7 +113,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var fileProvider = new Mock<IFileProvider>();
             fileProvider.Setup(p => p.GetFileInfo(It.IsAny<string>())).Returns(Mock.Of<IFileInfo>(f => f.Exists && f.CreateReadStream() == new MemoryStream(Encoding.UTF8.GetBytes("test svg"))));
             var hostEnv = Mock.Of<IWebHostEnvironment>(e => e.WebRootFileProvider == fileProvider.Object);
-            var tagHelper = new InlineSvgTagHelper(null, hostEnv, null, null, null)
+            var tagHelper = new InlineSvgTagHelper(null, hostEnv, null, _settings, null)
             {
                 FileSource = "test.svg"
             };
@@ -128,7 +131,7 @@ namespace Our.Umbraco.TagHelpers.Tests
         {
             var urlProvider = new Mock<IPublishedUrlProvider>();
             urlProvider.Setup(p => p.GetMediaUrl(It.IsAny<IPublishedContent>(), It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns((string)null!);
-            var tagHelper = new InlineSvgTagHelper(null, null, urlProvider.Object, null, null)
+            var tagHelper = new InlineSvgTagHelper(null, null, urlProvider.Object, _settings, null)
             {
                 MediaItem = Mock.Of<IPublishedContent>(c => c.ContentType.ItemType == PublishedItemType.Media)
             };
@@ -144,7 +147,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var umbContent = Mock.Of<IPublishedContent>(c => c.ContentType.ItemType == PublishedItemType.Media);
             var urlProvider = new Mock<IPublishedUrlProvider>();
             urlProvider.Setup(p => p.GetMediaUrl(umbContent, It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns("test.notsvg");
-            var tagHelper = new InlineSvgTagHelper(null, null, urlProvider.Object, null, null)
+            var tagHelper = new InlineSvgTagHelper(null, null, urlProvider.Object, _settings, null)
             {
                 MediaItem = umbContent
             };
@@ -164,8 +167,8 @@ namespace Our.Umbraco.TagHelpers.Tests
             var tagHelper = new InlineSvgTagHelper(
                 new MediaFileManager(fileSystem, null, null, null, null, Mock.Of<IOptions<ContentSettings>>()),
                 null,
-                urlProvider.Object, 
-                null, 
+                urlProvider.Object,
+                _settings, 
                 null)
             {
                 MediaItem = umbContent
@@ -186,8 +189,8 @@ namespace Our.Umbraco.TagHelpers.Tests
             var tagHelper = new InlineSvgTagHelper(
                 new MediaFileManager(fileSystem, null, null, null, null, Mock.Of<IOptions<ContentSettings>>()),
                 null,
-                urlProvider.Object, 
-                null, 
+                urlProvider.Object,
+                _settings, 
                 null)
             {
                 MediaItem = umbContent
@@ -209,7 +212,7 @@ namespace Our.Umbraco.TagHelpers.Tests
                 .Setup(p => p.GetFileInfo(It.IsAny<string>()))
                 .Returns(Mock.Of<IFileInfo>(f => f.Exists && f.CreateReadStream() == new MemoryStream(Encoding.UTF8.GetBytes("<a xlink:href=\"javascript:alert('test');\">Click here</a><script attr=\"test\">test</script>end"))));
             var hostEnv = Mock.Of<IWebHostEnvironment>(e => e.WebRootFileProvider == fileProvider.Object);
-            var tagHelper = new InlineSvgTagHelper(null, hostEnv, null, null, null)
+            var tagHelper = new InlineSvgTagHelper(null, hostEnv, null, _settings, null)
             {
                 FileSource = "test.svg"
             };
