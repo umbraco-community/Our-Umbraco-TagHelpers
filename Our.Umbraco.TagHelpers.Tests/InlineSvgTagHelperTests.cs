@@ -4,6 +4,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
+using Our.Umbraco.TagHelpers.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,7 +42,18 @@ namespace Our.Umbraco.TagHelpers.Tests
         [Test]
         public void NoOutputIfNoMediaOrFileSet()
         {
-            var tagHelper = new InlineSvgTagHelper(null, null, null, null, null);
+            var settings = new OurUmbracoTagHelpersConfiguration()
+            {
+                OurSVG =
+                {
+                    Cache = false,
+                    EnsureViewBox = false,
+                    CacheMinutes = 180
+                }
+            };
+            IOptions<OurUmbracoTagHelpersConfiguration> tagHelperSettings = Options.Create(settings);
+       
+            var tagHelper = new InlineSvgTagHelper(null, null, null, tagHelperSettings, null);
 
             tagHelper.Process(_context, _output);
 
