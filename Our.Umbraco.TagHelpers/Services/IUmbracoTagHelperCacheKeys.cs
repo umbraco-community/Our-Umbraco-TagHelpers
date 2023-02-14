@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Our.Umbraco.TagHelpers.Services
 {
 	public interface IUmbracoTagHelperCacheKeys
 	{
-		Dictionary<string, CacheTagKey> CacheKeys { get; }
+        ConcurrentDictionary<string, CacheTagKey> CacheKeys { get; }
 	}
 }

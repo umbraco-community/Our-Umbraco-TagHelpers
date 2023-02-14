@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Our.Umbraco.TagHelpers.Services;
+using System.Collections.Generic;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core;
@@ -62,7 +63,7 @@ namespace Our.Umbraco.TagHelpers
                         // and clear all items out in that collection with our notifications on publish
                         var cacheKey = new CacheTagKey(this, context);
                         var key = cacheKey.GenerateKey();
-                        var hashedKey = cacheKey.GenerateHashedKey();
+                        _ = cacheKey.GenerateHashedKey();
                         _cacheKeys.CacheKeys.TryAdd(key, cacheKey);
                     }
                 }
