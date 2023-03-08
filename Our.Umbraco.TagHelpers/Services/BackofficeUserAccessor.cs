@@ -42,9 +42,9 @@ namespace Our.Umbraco.TagHelpers.Services
                     return new ClaimsIdentity();
 
                 AuthenticationTicket? unprotected = cookieOptions.TicketDataFormat.Unprotect(backOfficeCookie!);
-                ClaimsIdentity backOfficeIdentity = unprotected!.Principal.GetUmbracoIdentity();
+                ClaimsIdentity? backOfficeIdentity = unprotected?.Principal.GetUmbracoIdentity();
 
-                return backOfficeIdentity;
+                return backOfficeIdentity ?? new ClaimsIdentity();
             }
         }
     }
