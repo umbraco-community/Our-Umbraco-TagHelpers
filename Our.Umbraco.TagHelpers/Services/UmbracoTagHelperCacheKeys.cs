@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Our.Umbraco.TagHelpers.Services
 {
@@ -9,6 +9,6 @@ namespace Our.Umbraco.TagHelpers.Services
 	/// </summary>
 	public class UmbracoTagHelperCacheKeys : IUmbracoTagHelperCacheKeys
 	{
-		public Dictionary<string,CacheTagKey> CacheKeys { get; } = new Dictionary<string,CacheTagKey>();
+		public ConcurrentDictionary<string,CacheTagKey> CacheKeys { get; } = new ConcurrentDictionary<string,CacheTagKey>();
 	}
 }
