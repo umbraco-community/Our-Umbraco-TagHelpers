@@ -185,7 +185,12 @@ namespace Our.Umbraco.TagHelpers
                 {
                     output.Attributes.Add("alt", GetImageAltText(MediaItem));
                 }
-                #endregion
+				#endregion
+				#region Use the alt text the user specified
+				else
+				{
+                    output.Attributes.Add("alt", ImgAlt);
+                }
                 #endregion
             }
             else if (!string.IsNullOrEmpty(FileSource))
@@ -201,10 +206,16 @@ namespace Our.Umbraco.TagHelpers
                 {
                     output.Attributes.Add("alt", GetImageAltText(FileSource));
                 }
-                #endregion
+				#endregion
+				#region Use the alt text the user specified
+				else
+				{
+					output.Attributes.Add("alt", ImgAlt);
+				}
+				#endregion
 
-                #region If width & height are not defined then return a basic <img> with just a src, alt & class (if provided)
-                if (ImgWidth == 0 || ImgHeight == 0)
+				#region If width & height are not defined then return a basic <img> with just a src, alt & class (if provided)
+				if (ImgWidth == 0 || ImgHeight == 0)
                 {
                     output.Attributes.Add("src", FileSource);
 
