@@ -190,6 +190,8 @@ namespace Our.Umbraco.TagHelpers
                     output.Attributes.Add("alt", ImgAlt);
                 }
                 #endregion
+                
+                #endregion
             }
             else if (!string.IsNullOrEmpty(FileSource))
             {
