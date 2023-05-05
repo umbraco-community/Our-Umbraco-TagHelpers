@@ -180,15 +180,13 @@ namespace Our.Umbraco.TagHelpers
                     height = (originalHeight / originalWidth) * width;
                 }
 
-                #region Autogenerate alt text
+                #region Autogenerate alt text if unspecfied
                 if (string.IsNullOrWhiteSpace(ImgAlt))
                 {
                     output.Attributes.Add("alt", GetImageAltText(MediaItem));
                 }
-				#endregion
-				#region Use the alt text the user specified
-				else
-				{
+                else
+                {
                     output.Attributes.Add("alt", ImgAlt);
                 }
                 #endregion
@@ -201,18 +199,16 @@ namespace Our.Umbraco.TagHelpers
 
                 imgSrc = AddQueryToUrl(FileSource, "width", width.ToString());
 
-                #region Autogenerate alt text
+                #region Autogenerate alt text if unspecfied
                 if (string.IsNullOrWhiteSpace(ImgAlt))
                 {
                     output.Attributes.Add("alt", GetImageAltText(FileSource));
                 }
-				#endregion
-				#region Use the alt text the user specified
-				else
-				{
-					output.Attributes.Add("alt", ImgAlt);
-				}
-				#endregion
+                else
+                {
+                    output.Attributes.Add("alt", ImgAlt);
+                }
+                #endregion
 
 				#region If width & height are not defined then return a basic <img> with just a src, alt & class (if provided)
 				if (ImgWidth == 0 || ImgHeight == 0)
