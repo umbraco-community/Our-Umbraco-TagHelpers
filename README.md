@@ -402,12 +402,12 @@ You can also add `Fallback` for the link to become optional, if there is no link
 
 ```cshtml
 <our-link link="@Model.ctaLink" Fallback="true" FallbackElement="div">
-<span>some text</span>
+    <span>some text</span>
 </our-link>
 
 @*No link will result in*@
 <div>
-<span>some text</span>
+    <span>some text</span>
 </div>
 ```
 
