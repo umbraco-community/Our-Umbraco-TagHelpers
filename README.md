@@ -409,7 +409,13 @@ You can also add `Fallback` for the link to become optional, if there is no link
 <div>
     <span>some text</span>
 </div>
-```
+
+<our-link link="@Model.ctaLink" Fallback="true">
+    <span>some text</span>
+</our-link>
+
+@*No link and no fallback HTML tag name specified will result in*@
+<span>some text</span>
 
 ## `<our-cache>`
 
