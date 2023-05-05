@@ -10,21 +10,41 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("Link")]
         public Link? Link { get; set; }
 
+        /// <summary>
+        /// If the link should render child content even if there is no link
+        /// </summary>
+        [HtmlAttributeName("Fallback")]
+        public bool Fallback { get; set; }
+
+        /// <summary>
+        /// element to replace the anchor with when there is no link i.e div
+        /// </summary>
+        [HtmlAttributeName("FallbackElement")]
+        public string? FallbackElement { get; set; }
+
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            // Ensure we have a Url set on the LinkPicker property editor in Umbraco
-            if (string.IsNullOrWhiteSpace(Link?.Url))
-            {
-                output.SuppressOutput();
-                return;
-            }
-
             // If the <our-link /> is self closing
             // Ensure that our <a></a> always has a matching end tag
             output.TagMode = TagMode.StartTagAndEndTag;
-
             output.TagName = "a";
+
             var childContent = await output.GetChildContentAsync();
+
+            // Ensure we have a Url set on the LinkPicker property editor in Umbraco
+            if (string.IsNullOrWhiteSpace(Link?.Url))
+            {
+                if (Fallback && !childContent.IsEmptyOrWhiteSpace)
+                {
+                    output.TagName = FallbackElement;
+                }
+                else
+                {
+                    output.SuppressOutput();
+                }
+
+                return;
+            }
 
             // If we use the TagHelper <umb-link></umb-link>
             // Without child DOM elements then it will use the Link Name property inside the <a> it generates
