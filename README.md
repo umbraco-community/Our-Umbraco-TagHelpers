@@ -333,9 +333,7 @@ If you add an attribute of `use-default-styles`, it will render the link fixed t
 Perhaps you have changed your umbraco path to something different, you can use the `edit-url` attribute to change the umbraco edit content url:
 
 ```html
-<our-edit-link edit-url="/mysecretumbracopath#/content/content/edit/"
-  >Edit</our-edit-link
->
+<our-edit-link edit-url="/mysecretumbracopath#/content/content/edit/">Edit</our-edit-link>
 ```
 
 ### Open in a new tab
