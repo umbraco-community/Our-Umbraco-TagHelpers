@@ -416,6 +416,7 @@ You can also add `Fallback` for the link to become optional, if there is no link
 
 @*No link and no fallback HTML tag name specified will result in*@
 <span>some text</span>
+```
 
 ## `<our-cache>`
 
