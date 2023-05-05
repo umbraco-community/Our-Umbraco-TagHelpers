@@ -209,8 +209,8 @@ namespace Our.Umbraco.TagHelpers
                     output.Attributes.Add("alt", ImgAlt);
                 }
                 #endregion
-
-				#region If width & height are not defined then return a basic <img> with just a src, alt & class (if provided)
+                
+                #region If width & height are not defined then return a basic <img> with just a src, alt & class (if provided)
 				if (ImgWidth == 0 || ImgHeight == 0)
                 {
                     output.Attributes.Add("src", FileSource);
