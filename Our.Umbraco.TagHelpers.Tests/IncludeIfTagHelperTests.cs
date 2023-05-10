@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using Our.Umbraco.TagHelpers;
 using System.Threading.Tasks;
+using Our.Umbraco.TagHelpers.Tests.Helpers;
 
 namespace Our.Umbraco.TagHelpers.Tests
 {
@@ -15,8 +13,8 @@ namespace Our.Umbraco.TagHelpers.Tests
         {
             // Arrange
             var id = "unique-id";
-            var tagHelperContext = GetTagHelperContext(id);
-            var tagHelperOutput = GetTagHelperOutput(
+            var tagHelperContext = TestContextHelpers.GetTagHelperContext(id);
+            var tagHelperOutput = TestContextHelpers.GetTagHelperOutput(
                 attributes: new TagHelperAttributeList(),
                 childContent: childContent);
             tagHelperOutput.Content.SetContent(childContent);
@@ -30,33 +28,6 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             // Assert
             Assert.AreEqual(expected, content);
-        }
-
-        private static TagHelperContext GetTagHelperContext(string id = "testid")
-        {
-            return new TagHelperContext(
-                tagName: "p",
-                allAttributes: new TagHelperAttributeList(),
-                items: new Dictionary<object, object>(),
-                uniqueId: id);
-        }
-
-        private static TagHelperOutput GetTagHelperOutput(
-            string tagName = "p",
-            TagHelperAttributeList attributes = null,
-            string childContent = "some child content")
-        {
-            attributes = attributes ?? new TagHelperAttributeList { { "attr", "value" } };
-
-            return new TagHelperOutput(
-                tagName,
-                attributes,
-                getChildContentAsync: (useCachedResult, encoder) =>
-                {
-                    var tagHelperContent = new DefaultTagHelperContent();
-                    var content = tagHelperContent.SetHtmlContent(childContent);
-                    return Task.FromResult<TagHelperContent>(content);
-                });
         }
     }
 }
