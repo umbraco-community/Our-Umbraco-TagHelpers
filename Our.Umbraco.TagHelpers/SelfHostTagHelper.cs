@@ -44,7 +44,7 @@ namespace Our.Umbraco.TagHelpers
                 output.Attributes.SetAttribute("href", selfHostedFile.Url);
             }
 
-            output.Attributes.Remove(new TagHelperAttribute("umb-self-host"));
+            output.Attributes.Remove(new TagHelperAttribute("our-self-host"));
             output.Attributes.Remove(new TagHelperAttribute("folder"));
             output.Attributes.Remove(new TagHelperAttribute("ext"));
         }

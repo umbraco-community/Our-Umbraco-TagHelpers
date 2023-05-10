@@ -442,7 +442,7 @@ This is a tag helper attribute that can be applied to any element using a `src` 
 This will download the linked file to your local filesystem, and swap out the src attribute with a reference to the now locally hosted file.
 
 ### Folder location for downloaded files
-By default the files will be saved in `~/assets/`, and keep the folder path of the url. The root folder can be configured in appsettings.json, by adding a value at `Our.Umbraco.TagHelpers.SelfHost.RootFolder` specifying the desired rootfolder. The default value is `~/assets/`.
+By default the files will be saved in `~/assets/`, and keep the folder path of the url. The root folder can be configured in appsettings.json, by adding a value at `Our.Umbraco.TagHelpers:OurSelfHost:RootFolder` specifying the desired rootfolder. The default value is `~/assets/`.
 
 You can further divide the files into folders, by adding a `folder` attribute to the script tag, eg:
 ```cshtml

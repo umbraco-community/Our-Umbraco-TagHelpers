@@ -6,7 +6,7 @@ using Umbraco.Cms.Core;
 namespace Our.Umbraco.TagHelpers.Extensions
 {
     [Obsolete("This should be removed, when the package gets upgraded past Umbraco 10")]
-    internal static class WebHostEnvironmentExtensions
+    public static class WebHostEnvironmentExtensions
     {
 
         /// <summary>

@@ -2,10 +2,10 @@
 {
     public class SelfHostedFile
     {
-        public string? ExternalUrl { get; internal set; }
-        public string? FileName { get; internal set; }
-        public string? FolderPath { get; internal set; }
-        public string? Url { get; internal set; }
+        public string? ExternalUrl { get; set; }
+        public string? FileName { get; set; }
+        public string? FolderPath { get; set; }
+        public string? Url { get; set; }
 
         public override string? ToString()
         {

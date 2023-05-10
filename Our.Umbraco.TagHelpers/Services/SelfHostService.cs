@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Models;
 using System;
@@ -18,19 +19,19 @@ namespace Our.Umbraco.TagHelpers.Services
         private readonly IProfilingLogger _logger;
         private readonly IAppPolicyCache _runtimeCache;
         private readonly IWebHostEnvironment _hostingEnvironment;
-        private readonly IConfiguration _config;
+        private readonly OurUmbracoTagHelpersConfiguration _globalSettings;
 
         public SelfHostService(
             IProfilingLogger logger,
             IAppPolicyCache appPolicyCache,
             IWebHostEnvironment hostingEnvironment,
-            IConfiguration config
+            IOptions<OurUmbracoTagHelpersConfiguration> globalSettings
             )
         {
             _logger = logger;
             _runtimeCache = appPolicyCache;
             _hostingEnvironment = hostingEnvironment;
-            _config = config;
+            _globalSettings = globalSettings.Value;
         }
 
         public async Task<SelfHostedFile> SelfHostFile(string url, string? subfolder = null, string? fileExtension = null)
@@ -54,9 +55,9 @@ namespace Our.Umbraco.TagHelpers.Services
             });
         }
 
-        private string GetFolderPath(Uri uri, string? subfolder = null)
+        public string GetFolderPath(Uri uri, string? subfolder = null)
         {
-            var folderPath = _config["Our.Umbraco.TagHelpers.SelfHost.RootFolder"].IfNullOrWhiteSpace("~/assets"); ;
+            var folderPath = _globalSettings.OurSelfHost.RootFolder;
 
             if (subfolder.IsNullOrWhiteSpace() == false) folderPath += subfolder.EnsureStartsWith("/");
 
@@ -65,7 +66,7 @@ namespace Our.Umbraco.TagHelpers.Services
             return folderPath;
         }
 
-        private string GetRemoteFolderPath(Uri uri)
+        public string GetRemoteFolderPath(Uri uri)
         {
             var segments = uri?.Segments;
 
@@ -90,7 +91,7 @@ namespace Our.Umbraco.TagHelpers.Services
             var localPath = _hostingEnvironment.MapPathWebRoot(file.FolderPath);
             var localFilePath = _hostingEnvironment.MapPathWebRoot(filePath);
 
-            if (!File.Exists(localFilePath))
+            if (!File.Exists(localFilePath) && file.ExternalUrl is not null)
             {
                 using (_logger.TraceDuration<ISelfHostService>($"Start downloading SelfHostedFile: {file.ExternalUrl} to {localFilePath}", $"Finished downloading SelfHostedFile: {file.ExternalUrl} to {localFilePath}"))
                 {
