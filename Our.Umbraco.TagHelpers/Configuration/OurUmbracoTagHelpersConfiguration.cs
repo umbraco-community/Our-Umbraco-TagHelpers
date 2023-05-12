@@ -5,7 +5,9 @@ namespace Our.Umbraco.TagHelpers.Configuration
     public class OurUmbracoTagHelpersConfiguration
     {
         public InlineSvgTagHelperConfiguration OurSVG { get; set; } = new InlineSvgTagHelperConfiguration();
-		public ImgTagHelperConfiguration OurImg { get; set; } = new ImgTagHelperConfiguration();
+        public ImgTagHelperConfiguration OurImg { get; set; } = new ImgTagHelperConfiguration();
+
+        public SelfHostTagHelperConfiguration OurSelfHost { get; set; } = new SelfHostTagHelperConfiguration();
     }
 
     public class InlineSvgTagHelperConfiguration
@@ -14,33 +16,33 @@ namespace Our.Umbraco.TagHelpers.Configuration
         public bool Cache { get; set; } = false;
         public int CacheMinutes { get; set; } = 180;
     }
-    
-	public class ImgTagHelperConfiguration
+
+    public class ImgTagHelperConfiguration
     {
         /// <summary>
         /// Define the typical responsive breakpoints (S,M,L,XL,XXL) in which your website uses during screen resize
         /// </summary>
         public MediaQuerySizes MediaQueries { get; set; } = new MediaQuerySizes();
-		
+
         /// <summary>
         /// If true, let the browser handle image lazy loading, otherwise disable to use a 3rd party JavaScript based library
         /// </summary>
         public bool UseNativeLazyLoading { get; set; } = true;
-		
+
         /// <summary>
         /// Applicable if UseNativeLazyLoading is false
         /// </summary>
         public string LazyLoadCssClass { get; set; } = "lazyload";
-		
+
         /// <summary>
         /// Applicable if UseNativeLazyLoading is false
         /// </summary>
         public ImagePlaceholderType LazyLoadPlaceholder { get; set; } = ImagePlaceholderType.SVG;
-		
+
         /// <summary>
         /// Applicable if UseNativeLazyLoading is false & LazyLoadPlaceholder is LowQualityImage
         /// </summary>
-        public int LazyLoadPlaceholderLowQualityImageQuality { get; set; } = 5; 
+        public int LazyLoadPlaceholderLowQualityImageQuality { get; set; } = 5;
         public bool ApplyAspectRatio { get; set; } = false;
         public bool MobileFirst { get; set; } = true;
 
@@ -56,5 +58,10 @@ namespace Our.Umbraco.TagHelpers.Configuration
         public int Large { get; set; } = 992;
         public int ExtraLarge { get; set; } = 1200;
         public int ExtraExtraLarge { get; set; } = 1400;
+    }
+
+    public class SelfHostTagHelperConfiguration
+    {
+        public string RootFolder { get; set; } = "~/assets";
     }
 }

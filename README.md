@@ -615,6 +615,35 @@ This will produce an `<img>` tag with:
 </picture>
 ```
 
+## `our-self-host`
+This is a tag helper attribute that can be applied to any element using a `src` or `href` attribute in the razor template or partial. It will automatically download and self hosting of third party assets, like javascript, css or images. This was written by Soren Kottal for 24Days.in Umbraco Advent calendar 2022 article - https://24days.in/umbraco-cms/2022/static-assets-taghelper/
+
+### Simple Example
+```cshtml
+<script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" our-self-host>
+```
+
+This will download the linked file to your local filesystem, and swap out the src attribute with a reference to the now locally hosted file.
+
+### Folder location for downloaded files
+By default the files will be saved in `~/assets/`, and keep the folder path of the url. The root folder can be configured in appsettings.json, by adding a value at `Our.Umbraco.TagHelpers:OurSelfHost:RootFolder` specifying the desired rootfolder. The default value is `~/assets/`.
+
+You can further divide the files into folders, by adding a `folder` attribute to the script tag, eg:
+```cshtml
+<script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" our-self-host folder="libraries">
+```
+This will save the file in `~/assets/libraries/alpinejs@3.10.5/dist/cdn.min.js`.
+
+### Handling extensionless urls to files
+In case the url is extensionless, like `https://unpkg.com/alpinejs`, you can add an `ext` attribute, for specifying the extension of the file, eg:
+```cshtml
+<script src="https://unpkg.com/alpinejs" our-self-host ext="js">
+```
+This will save the file as `~/assets/alpinejs.js`, enabling eg. MIME types for .js files.
+
+### Caching
+The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
+
 ## Video 📺
 
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
