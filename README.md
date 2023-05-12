@@ -626,20 +626,20 @@ This is a tag helper attribute that can be applied to any element using a `src` 
 This will download the linked file to your local filesystem, and swap out the src attribute with a reference to the now locally hosted file.
 
 ### Folder location for downloaded files
-By default the files will be saved in `~/assets/`, and keep the folder path of the url. The root folder can be configured in appsettings.json, by adding a value at `Our.Umbraco.TagHelpers:OurSelfHost:RootFolder` specifying the desired rootfolder. The default value is `~/assets/`.
+By default the files will be saved in `/assets/`, and keep the folder path of the url. The root folder can be configured in appsettings.json, by adding a value at `Our.Umbraco.TagHelpers:OurSelfHost:RootFolder` specifying the desired rootfolder. The default value is `/assets/`.
 
 You can further divide the files into folders, by adding a `folder` attribute to the script tag, eg:
 ```cshtml
 <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" our-self-host folder="libraries">
 ```
-This will save the file in `~/assets/libraries/alpinejs@3.10.5/dist/cdn.min.js`.
+This will save the file in `/assets/libraries/alpinejs@3.10.5/dist/cdn.min.js`.
 
 ### Handling extensionless urls to files
 In case the url is extensionless, like `https://unpkg.com/alpinejs`, you can add an `ext` attribute, for specifying the extension of the file, eg:
 ```cshtml
 <script src="https://unpkg.com/alpinejs" our-self-host ext="js">
 ```
-This will save the file as `~/assets/alpinejs.js`, enabling eg. MIME types for .js files.
+This will save the file as `/assets/alpinejs.js`, enabling eg. MIME types for .js files.
 
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
