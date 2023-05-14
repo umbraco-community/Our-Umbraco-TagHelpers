@@ -644,6 +644,30 @@ This will save the file as `~/assets/alpinejs.js`, enabling eg. MIME types for .
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
 
+## `<our-umb-form>`
+
+This tag helper element `<our-umb-form>` will render an Umbraco Form in your view.
+
+### Basic usage
+
+```cshtml
+<our-umb-form form-guid="23e14f1c-3701-4b40-9cb5-c2e99b6ad23e" />
+```
+
+### Advanced usage
+
+You can specify the theme used to render your form.
+
+```cshtml
+<our-umb-form form-guid="@Model.Value("formProperty")" theme="bootstrap3-horizontal" />
+```
+
+You can also choose not to have the scripts associated with the form rendered.
+
+```cshtml
+<our-umb-form form-guid="@Model.Value("formProperty")" theme="bootstrap3-horizontal" exclude-scripts="true" />
+```
+
 ## Video 📺
 
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
