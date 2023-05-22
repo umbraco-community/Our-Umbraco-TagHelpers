@@ -62,6 +62,6 @@ namespace Our.Umbraco.TagHelpers.Configuration
 
     public class SelfHostTagHelperConfiguration
     {
-        public string RootFolder { get; set; } = "~/assets";
+        public string RootFolder { get; set; } = "/assets";
     }
 }
