@@ -118,6 +118,9 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("abovethefold")]
         public bool AboveTheFold { get; set; }
 
+        [HtmlAttributeName("ignore-crops")]
+        public bool IgnoreCrops { get; set; }
+
         protected HttpRequest Request => ViewContext.HttpContext.Request;
 
         [ViewContext]
@@ -154,7 +157,7 @@ namespace Our.Umbraco.TagHelpers
                 var originalWidth = media.GetValue<double>("umbracoWidth"); // Determine the width from the originally uploaded image
                 var originalHeight = media.GetValue<double>("umbracoHeight"); // Determine the height from the originally uploaded image
                 width = ImgWidth > 0 ? ImgWidth : originalWidth; // If the element wasn't provided with a width property, use the width from the media object instead
-                if (!string.IsNullOrEmpty(ImgCropAlias))
+                if (!string.IsNullOrEmpty(ImgCropAlias) && !IgnoreCrops)
                 {
                     // The element contains a crop alias property, so pull through a cropped version of the original image
                     // Also, calculate the height based on the given width using the crop profile so it's to scale
@@ -170,14 +173,28 @@ namespace Our.Umbraco.TagHelpers
                 }
                 else
                 {
-                    // Pull through an image based on the given width and calculate the height so it's to scale.
-                    imgSrc = MediaItem.GetCropUrl(width: (int)width);
-                    if (_globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                    if (IgnoreCrops)
                     {
-                        // Generate a low quality placeholder image if configured to do so
-                        placeholderImgSrc = MediaItem.GetCropUrl(width: (int)width, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                        imgSrc = MediaItem.GetCropUrl(width: (int)ImgWidth, height: (int)ImgHeight);
+                        if (_globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                        {
+                            // Generate a low quality placeholder image if configured to do so
+                            placeholderImgSrc = MediaItem.GetCropUrl(width: (int)ImgWidth, height: (int)ImgHeight, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                        }
+                        width = ImgWidth;
+                        height = ImgHeight != 0 ? ImgHeight : (originalHeight / originalWidth) * width;
                     }
-                    height = (originalHeight / originalWidth) * width;
+                    else
+                    {
+                        // Pull through an image based on the given width and calculate the height so it's to scale.
+                        imgSrc = MediaItem.GetCropUrl(width: (int)width);
+                        if (_globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                        {
+                            // Generate a low quality placeholder image if configured to do so
+                            placeholderImgSrc = MediaItem.GetCropUrl(width: (int)width, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                        }
+                        height = (originalHeight / originalWidth) * width;
+                    }
                 }
 
                 #region Autogenerate alt text if unspecfied
@@ -312,7 +329,7 @@ namespace Our.Umbraco.TagHelpers
             #region If multiple responsive image variants have been supplied, wrap the img element with a picture element and source elements per variant.
             // Only one image will be rendered at a given time based on the current screen width. 
             // The configuration allows us to define whether images are configured "mobile first". This simply alternates between min-width & max-width media queries.
-            var imageSizes = GetImageSizes(MediaItem != null);
+            var imageSizes = GetImageSizes(MediaItem != null && !IgnoreCrops);
 
             if (imageSizes != null && imageSizes.Any())
             {
@@ -344,21 +361,41 @@ namespace Our.Umbraco.TagHelpers
                                 null;
                         #endregion
 
-                        if (!string.IsNullOrEmpty(cropAlias))
+                        if (!string.IsNullOrEmpty(cropAlias) && !IgnoreCrops)
                         {
                             var cropWidth = MediaItem.LocalCrops.GetCrop(cropAlias).Width;
                             var cropHeight = MediaItem.LocalCrops.GetCrop(cropAlias).Height;
                             sourceHeight = (StringUtils.GetDouble(cropHeight) / StringUtils.GetDouble(cropWidth)) * size.ImageWidth;
+
+                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
                         }
 
-                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                        else if (IgnoreCrops)
+                        {
+                            imgSrc = MediaItem.GetCropUrl(width: (int)ImgWidth, height: (int)ImgHeight);
+                            if (_globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                            {
+                                // Generate a low quality placeholder image if configured to do so
+                                placeholderImgSrc = MediaItem.GetCropUrl(width: (int)ImgWidth, height: (int)ImgHeight, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                            }
+                            width = ImgWidth;
+                            height = ImgHeight;
+
+                            sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
+
+                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, height: size.ImageHeight, cropAlias: cropAlias)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{size.ImageHeight}\"" : "")} />");
+                        }
+                        else
+                        {
+                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(FileSource) && ImgWidth > 0 && ImgHeight > 0)
                     {
                         sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
                         var sourceUrl = AddQueryToUrl(FileSource, "width", size.ImageWidth.ToString());
-                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{sourceUrl}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{sourceUrl}&height={sourceHeight}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
 
                     }
                 }
