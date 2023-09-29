@@ -85,6 +85,31 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("ignore-appsettings")]
         public bool IgnoreAppSettings { get; set; }
 
+
+
+        private string CalculateSvgContentCacheKey () {
+            if (MediaItem is not null)
+            {
+                return string.Concat("MediaItem-SvgContents (", MediaItem.Key.ToString(), ")");
+            }
+
+            if (string.IsNullOrWhiteSpace(FileSource) == false)
+            {
+                return string.Concat("File-SvgContents (", FileSource, ")");
+            }
+
+            return string.Empty;
+        }
+
+        private string CalculateSetAttrsCacheKey (string cleanedFileContents)
+            => $"SvgWithAttributes ({CssClass?.GetHashCode()}_{cleanedFileContents.GetHashCode()})";
+
+        private int FetchCacheMinutes ()
+            => CacheMinutes > 0 ? CacheMinutes : _globalSettings.OurSVG.CacheMinutes;
+
+        private bool FetchEnsureViewBoxStatus () =>
+            EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings);
+
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             // Can only use media-item OR src
@@ -99,23 +124,14 @@ namespace Our.Umbraco.TagHelpers
             }
 
             string? cleanedFileContents = null;
-
-            if(Cache || (_globalSettings.OurSVG.Cache && !IgnoreAppSettings))
+            var doCache = Cache || (_globalSettings.OurSVG.Cache && !IgnoreAppSettings);
+            if (doCache)
             {
-                var cacheName = string.Empty;
-                var cacheMins = CacheMinutes > 0 ? CacheMinutes : _globalSettings.OurSVG.CacheMinutes;
+                var cacheKey = CalculateSvgContentCacheKey();
+                var cacheMins = FetchCacheMinutes();
 
-                if (MediaItem is not null)
-                {
-                    cacheName = string.Concat("MediaItem-SvgContents (", MediaItem.Key.ToString(), ")");
-                }
-                else if (string.IsNullOrWhiteSpace(FileSource) == false)
-                {
-                    cacheName = string.Concat("File-SvgContents (", FileSource, ")");
-                }
-
-                cleanedFileContents = _appCaches.RuntimeCache.GetCacheItem(cacheName, () =>
-                {
+                cleanedFileContents = _appCaches.RuntimeCache.GetCacheItem(cacheKey, () =>
+				{
                     return GetFileContents();
                 }, TimeSpan.FromMinutes(cacheMins));
             }
@@ -130,15 +146,28 @@ namespace Our.Umbraco.TagHelpers
                 return;
             }
 
-            // Set CSS Class, Viewbox, and/or width/height
-            cleanedFileContents = ParseAndSetAttrs(cleanedFileContents);
+            string svgWithAttributes;
+            if (doCache)
+            {
+                var cacheKey = CalculateSetAttrsCacheKey(cleanedFileContents);
+                var cacheMins = FetchCacheMinutes();
+
+                svgWithAttributes = _appCaches.RuntimeCache.GetCacheItem(cacheKey, () =>
+				{
+                    return ParseAndSetAttrs(cleanedFileContents);
+                }, TimeSpan.FromMinutes(cacheMins));
+            } 
+			else
+            {
+                svgWithAttributes = ParseAndSetAttrs(cleanedFileContents);
+            }
 
             // Remove the src attribute or media-item from the <svg>
             output.Attributes.RemoveAll("src");
             output.Attributes.RemoveAll("media-item");
 
             output.TagName = null; // Remove <our-svg>
-            output.Content.SetHtmlContent(cleanedFileContents);
+            output.Content.SetHtmlContent(svgWithAttributes);
        }
 
         private string? GetFileContents()
@@ -213,18 +242,29 @@ namespace Our.Umbraco.TagHelpers
         /// <param name="cleanedFileContents">SVG file contents</param>
         /// <returns>SVG file contents with attributes</returns>
         private string ParseAndSetAttrs (string cleanedFileContents) {
-            if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
+            var doEnsureViewBox = FetchEnsureViewBoxStatus();
+            var hasCssClass = !string.IsNullOrEmpty(CssClass);
+
+            // No work to do (save the unnecessary LoadHtml)
+            if (!doEnsureViewBox && !hasCssClass)
             {
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(cleanedFileContents);
-                var svgs = doc.DocumentNode.SelectNodes("//svg");
-                foreach (var svgNode in svgs)
+                return cleanedFileContents;
+            }
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(cleanedFileContents);
+            var svgs = doc.DocumentNode.SelectNodes("//svg");
+            foreach (var svgNode in svgs)
+            {
+                if (hasCssClass)
                 {
-                    if (!string.IsNullOrEmpty(CssClass))
-                    {
-                        svgNode.AddClass(CssClass);
-                    }
-                    if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
+                    svgNode.AddClass(CssClass);
+                }
+
+                if (doEnsureViewBox)
+                {
+                    var hasDimensionsAndNoViewbox = svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox");
+                    if (hasDimensionsAndNoViewbox)
                     {
                         var width = StringUtils.GetDecimal(svgNode.GetAttributeValue("width", "0"));
                         var height = StringUtils.GetDecimal(svgNode.GetAttributeValue("height", "0"));
@@ -234,8 +274,8 @@ namespace Our.Umbraco.TagHelpers
                         svgNode.Attributes.Remove("height");
                     }
                 }
-                cleanedFileContents = doc.DocumentNode.OuterHtml;
             }
+            cleanedFileContents = doc.DocumentNode.OuterHtml;
 
             return cleanedFileContents;
         }
