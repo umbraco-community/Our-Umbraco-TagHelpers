@@ -201,6 +201,17 @@ namespace Our.Umbraco.TagHelpers
                 @"syntax:error:",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+            cleanedFileContents = ParseAndSetAttrs(cleanedFileContents);
+
+            return cleanedFileContents;
+        }
+
+        /// <summary>
+        /// Set CSS Class, Viewbox, and/or width/height
+        /// </summary>
+        /// <param name="cleanedFileContents">SVG file contents</param>
+        /// <returns>SVG file contents with attributes</returns>
+        private string ParseAndSetAttrs (string cleanedFileContents) {
             if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
             {
                 HtmlDocument doc = new HtmlDocument();
