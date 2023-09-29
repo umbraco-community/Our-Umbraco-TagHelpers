@@ -130,6 +130,9 @@ namespace Our.Umbraco.TagHelpers
                 return;
             }
 
+            // Set CSS Class, Viewbox, and/or width/height
+            cleanedFileContents = ParseAndSetAttrs(cleanedFileContents);
+
             // Remove the src attribute or media-item from the <svg>
             output.Attributes.RemoveAll("src");
             output.Attributes.RemoveAll("media-item");
@@ -200,8 +203,6 @@ namespace Our.Umbraco.TagHelpers
                 @"javascript:",
                 @"syntax:error:",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            cleanedFileContents = ParseAndSetAttrs(cleanedFileContents);
 
             return cleanedFileContents;
         }
