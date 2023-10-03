@@ -314,12 +314,63 @@ namespace Our.Umbraco.TagHelpers
             // The configuration allows us to define whether images are configured "mobile first". This simply alternates between min-width & max-width media queries.
             var imageSizes = GetImageSizes(MediaItem != null);
 
+            // Avoid rendering a WebP alternative if the image is a GIF
+            var imageFormat = MediaItem != null ? MediaItem.Url().Split('.').Last() : FileSource?.Split('.').Last(); 
+            var renderWebP = imageFormat != "gif";
+
             if (imageSizes != null && imageSizes.Any())
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("<picture>");
 
                 imageSizes = _globalSettings.OurImg.MobileFirst ? imageSizes.OrderByDescending(o => o.ScreenSize).ToList() : imageSizes.OrderBy(o => o.ScreenSize).ToList();
+
+                if (renderWebP)
+                {
+                    foreach (var size in imageSizes)
+                    {
+                        var minWidth = size.ScreenSize switch
+                        {
+                            OurScreenSize.ExtraExtraLarge => _globalSettings.OurImg.MediaQueries.ExtraExtraLarge,
+                            OurScreenSize.ExtraLarge => _globalSettings.OurImg.MediaQueries.ExtraLarge,
+                            OurScreenSize.Large => _globalSettings.OurImg.MediaQueries.Large,
+                            OurScreenSize.Medium => _globalSettings.OurImg.MediaQueries.Medium,
+                            OurScreenSize.Small => _globalSettings.OurImg.MediaQueries.Small,
+                            _ => 0
+                        };
+
+                        double sourceHeight = 0;
+
+                        if (MediaItem != null)
+                        {
+                            #region Configure crops which can be set at variant level or inherit from the crop alias defined on the main img element itself. If neither have a crop alias, then don't use crops.
+                            var cropAlias = !string.IsNullOrEmpty(size.CropAlias) ?
+                                size.CropAlias :
+                                !string.IsNullOrEmpty(ImgCropAlias) ?
+                                    ImgCropAlias :
+                                    null;
+                            #endregion
+
+                            if (!string.IsNullOrEmpty(cropAlias))
+                            {
+                                var cropWidth = MediaItem.LocalCrops.GetCrop(cropAlias).Width;
+                                var cropHeight = MediaItem.LocalCrops.GetCrop(cropAlias).Height;
+                                sourceHeight = (StringUtils.GetDouble(cropHeight) / StringUtils.GetDouble(cropWidth)) * size.ImageWidth;
+                            }
+
+                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias, furtherOptions: "&format=webp")}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} type=\"image/webp\" />");
+                        }
+
+                        if (!string.IsNullOrEmpty(FileSource) && ImgWidth > 0 && ImgHeight > 0)
+                        {
+                            sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
+                            var sourceUrl = AddQueryToUrl(FileSource, "width", size.ImageWidth.ToString());
+
+                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{sourceUrl}&amp;format=webp\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} type=\"image/webp\" />");
+                        }
+                    }
+                }
+
                 foreach (var size in imageSizes)
                 {
                     var minWidth = size.ScreenSize switch
@@ -358,10 +409,11 @@ namespace Our.Umbraco.TagHelpers
                     {
                         sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
                         var sourceUrl = AddQueryToUrl(FileSource, "width", size.ImageWidth.ToString());
+                        
                         sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{sourceUrl}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
-
                     }
                 }
+                
                 output.PreElement.SetHtmlContent(sb.ToString());
                 output.PostElement.SetHtmlContent("</picture>");
             }
@@ -420,7 +472,6 @@ namespace Our.Umbraco.TagHelpers
 
             return "";
         }
-
         private string AddQueryToUrl(string url, string key, string value)
         {
             Uri uri = null!;
