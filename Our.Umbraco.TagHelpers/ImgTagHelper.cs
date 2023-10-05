@@ -146,6 +146,7 @@ namespace Our.Umbraco.TagHelpers
             var placeholderImgSrc = string.Empty;
             var jsLazyLoad = !_globalSettings.OurImg.UseNativeLazyLoading && !AboveTheFold;
             var style = ImgStyle;
+            var hasLqip = _globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage);
 
             if (MediaItem is not null)
             {
@@ -154,12 +155,13 @@ namespace Our.Umbraco.TagHelpers
                 var originalWidth = media.GetValue<double>("umbracoWidth"); // Determine the width from the originally uploaded image
                 var originalHeight = media.GetValue<double>("umbracoHeight"); // Determine the height from the originally uploaded image
                 width = ImgWidth > 0 ? ImgWidth : originalWidth; // If the element wasn't provided with a width property, use the width from the media object instead
+
                 if (!string.IsNullOrEmpty(ImgCropAlias))
                 {
                     // The element contains a crop alias property, so pull through a cropped version of the original image
                     // Also, calculate the height based on the given width using the crop profile so it's to scale
                     imgSrc = MediaItem.GetCropUrl(width: (int)width, cropAlias: ImgCropAlias);
-                    if (_globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                    if (hasLqip)
                     {
                         // Generate a low quality placeholder image if configured to do so
                         placeholderImgSrc = MediaItem.GetCropUrl(width: ImgWidth, cropAlias: ImgCropAlias, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
@@ -170,14 +172,28 @@ namespace Our.Umbraco.TagHelpers
                 }
                 else
                 {
-                    // Pull through an image based on the given width and calculate the height so it's to scale.
-                    imgSrc = MediaItem.GetCropUrl(width: (int)width);
-                    if (_globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage))
+                    if (ImgHeight > 0)
                     {
-                        // Generate a low quality placeholder image if configured to do so
-                        placeholderImgSrc = MediaItem.GetCropUrl(width: (int)width, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                        imgSrc = MediaItem.GetCropUrl(width: (int)ImgWidth, height: (int)ImgHeight);
+                        if (hasLqip)
+                        {
+                            // Generate a low quality placeholder image if configured to do so
+                            placeholderImgSrc = MediaItem.GetCropUrl(width: (int)ImgWidth, height: (int)ImgHeight, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                        }
+                        width = ImgWidth;
+                        height = ImgHeight != 0 ? ImgHeight : (originalHeight / originalWidth) * width;
                     }
-                    height = (originalHeight / originalWidth) * width;
+                    else
+                    {
+                        // Pull through an image based on the given width and calculate the height so it's to scale.
+                        imgSrc = MediaItem.GetCropUrl(width: (int)width);
+                        if (hasLqip)
+                        {
+                            // Generate a low quality placeholder image if configured to do so
+                            placeholderImgSrc = MediaItem.GetCropUrl(width: (int)width, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                        }
+                        height = (originalHeight / originalWidth) * width;
+                    }
                 }
 
                 #region Autogenerate alt text if unspecfied
@@ -264,7 +280,7 @@ namespace Our.Umbraco.TagHelpers
             if (jsLazyLoad)
             {
                 output.Attributes.Add("data-src", imgSrc);
-                if (_globalSettings.OurImg.LazyLoadPlaceholder.Equals(ImagePlaceholderType.LowQualityImage) && !string.IsNullOrEmpty(placeholderImgSrc))
+                if (hasLqip && !string.IsNullOrEmpty(placeholderImgSrc))
                 {
                     output.Attributes.Add("src", placeholderImgSrc);
                 }
@@ -349,9 +365,20 @@ namespace Our.Umbraco.TagHelpers
                             var cropWidth = MediaItem.LocalCrops.GetCrop(cropAlias).Width;
                             var cropHeight = MediaItem.LocalCrops.GetCrop(cropAlias).Height;
                             sourceHeight = (StringUtils.GetDouble(cropHeight) / StringUtils.GetDouble(cropWidth)) * size.ImageWidth;
-                        }
 
-                        sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                        }
+                        else
+                        {
+                            if (size.ImageHeight > 0)
+                            {
+                                sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, height: size.ImageHeight)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\" height=\"{size.ImageHeight}\" />");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\" />");
+                            }
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(FileSource) && ImgWidth > 0 && ImgHeight > 0)
@@ -456,23 +483,23 @@ namespace Our.Umbraco.TagHelpers
 
             if(ImgWidthSmall > 0)
             {
-                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Small, ImgWidthSmall, ImgCropAliasSmall) : new OurImageSize(Enums.OurScreenSize.Small, ImgWidthSmall, ImgHeightSmall));
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Small, ImgWidthSmall, ImgHeightSmall, ImgCropAliasSmall) : new OurImageSize(Enums.OurScreenSize.Small, ImgWidthSmall, ImgHeightSmall));
             }
             if(ImgWidthMedium > 0)
             {
-                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Medium, ImgWidthMedium, ImgCropAliasMedium) : new OurImageSize(Enums.OurScreenSize.Medium, ImgWidthMedium, ImgHeightMedium));
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Medium, ImgWidthMedium, ImgHeightMedium, ImgCropAliasMedium) : new OurImageSize(Enums.OurScreenSize.Medium, ImgWidthMedium, ImgHeightMedium));
             }
             if(ImgWidthLarge > 0)
             {
-                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Large, ImgWidthLarge, ImgCropAliasLarge) : new OurImageSize(Enums.OurScreenSize.Large, ImgWidthLarge, ImgHeightLarge));
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.Large, ImgWidthLarge, ImgHeightLarge, ImgCropAliasLarge) : new OurImageSize(Enums.OurScreenSize.Large, ImgWidthLarge, ImgHeightLarge));
             }
             if(ImgWidthExtraLarge > 0)
             {
-                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.ExtraLarge, ImgWidthExtraLarge, ImgCropAliasExtraLarge) : new OurImageSize(Enums.OurScreenSize.ExtraLarge, ImgWidthExtraLarge, ImgHeightExtraLarge));
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.ExtraLarge, ImgWidthExtraLarge, ImgHeightExtraLarge, ImgCropAliasExtraLarge) : new OurImageSize(Enums.OurScreenSize.ExtraLarge, ImgWidthExtraLarge, ImgHeightExtraLarge));
             }
             if(ImgWidthExtraExtraLarge > 0)
             {
-                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.ExtraExtraLarge, ImgWidthExtraExtraLarge, ImgCropAliasExtraExtraLarge) : new OurImageSize(Enums.OurScreenSize.ExtraExtraLarge, ImgWidthExtraExtraLarge, ImgHeightExtraExtraLarge));
+                imageSizes.Add(isMedia ? new OurImageSize(Enums.OurScreenSize.ExtraExtraLarge, ImgWidthExtraExtraLarge, ImgHeightExtraExtraLarge, ImgCropAliasExtraExtraLarge) : new OurImageSize(Enums.OurScreenSize.ExtraExtraLarge, ImgWidthExtraExtraLarge, ImgHeightExtraExtraLarge));
             }
 
             return imageSizes;
