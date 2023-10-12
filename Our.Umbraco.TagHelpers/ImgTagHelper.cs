@@ -215,7 +215,7 @@ namespace Our.Umbraco.TagHelpers
                 width = ImgWidth;
                 height = ImgHeight;
 
-                imgSrc = AddQueryToUrl(FileSource, "width", width.ToString());
+                imgSrc = AddQueryToUrl(FileSource, "width", width.ToString()) + "&height=" + height.ToString();
 
                 #region Autogenerate alt text if unspecfied
                 if (string.IsNullOrWhiteSpace(ImgAlt))
@@ -384,7 +384,7 @@ namespace Our.Umbraco.TagHelpers
                     if (!string.IsNullOrEmpty(FileSource) && ImgWidth > 0 && ImgHeight > 0)
                     {
                         sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
-                        var sourceUrl = AddQueryToUrl(FileSource, "width", size.ImageWidth.ToString());
+                        var sourceUrl = AddQueryToUrl(FileSource, "width", size.ImageWidth.ToString()) + "&height=" + size.ImageHeight;
                         sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{sourceUrl}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
 
                     }
