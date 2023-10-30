@@ -644,6 +644,37 @@ This will save the file as `/assets/alpinejs.js`, enabling eg. MIME types for .j
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
 
+## `our-tag`
+This tag helper attribute can be seamlessly integrated with any DOM element within the Razor file. It allows content editors to oversee SEO by designating the appropriate HTML tags for distinct elements. Consider a scenario where you have an item in your block list named 'Heading Tag' - maybe it's from a predefined dropdown? This is saved as a straightforward string. Your block view then fetches this value through the model, making it accessible for the 'our-tag' tag helper.
+
+### Example 1
+```
+// Model.Heading = "This is my heading"
+// Model.HeadingTag = "H1"
+<h2 class="my-heading" our-tag="@Model.HeadingTag">@Model.Heading</h2>
+```
+
+#### Output
+The hardcoded `h2` has been replaced with an `h1` element tag.
+```
+<h1 class="my-heading">This is my heading</h1>
+```
+
+### Example 2
+```
+// Model.Heading = "This is my heading"
+// Model.HeadingTag = ""
+<h2 class="my-heading" our-tag="@Model.HeadingTag">@Model.Heading</h2>
+```
+
+#### Output
+Defaults to the original hardcoded element tag:
+```
+<h2 class="my-heading">This is my heading</h2>
+```
+
+
+
 ## Video 📺
 
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
