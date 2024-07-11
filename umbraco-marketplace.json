@@ -2,43 +2,10 @@
     "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
 
     "AuthorDetails": {
-        "Description": "Warren works at Umbraco HQ as Developer Advocate 🥑 and loves to tinker and hack. Note this package is provided in a personal capacity.",
-        "Url": "http://warrenbuckley.co.uk",
-        "ImageUrl": "https://umbraco.com/media/50jeg3uq/warren.jpg",
-        "Contributors": [
-            {
-                "Name": "Andy Boot",
-                "Url": "https://github.com/AndyBoot"
-            },
-            {
-                "Name": "Paul Seal",
-                "Url": "https://github.com/prjseal"
-            },
-            {
-                "Name": "Marc Goodson",
-                "Url": "https://github.com/marcemarc"
-            },
-            {
-                "Name": "Matthew Wise",
-                "Url": "https://github.com/Matthew-Wise"
-            },
-            {
-                "Name": "Ronald Barendse",
-                "Url": "https://github.com/ronaldbarendse"
-            }, 
-            {
-                "Name": "Chriztian Steinmeier",
-                "Url": "https://github.com/greystate"
-            }, 
-            {
-                "Name": "Rachel Drake",
-                "Url": "https://github.com/profcinders"
-            },            
-            {
-                "Name": "Nik Rimington",
-                "Url": "https://github.com/NikRimington"
-            }
-        ]
+        "Description": "Warren is a freelance Umbraco developer who loves to tinker and hack and is available for hire. He has been working with Umbraco since the days of the yahoo mailing list (aka way too long).",
+        "Url": "https://hackmakedo.com",
+        "ImageUrl": "https://hackmakedo.com/images/warren_square.jpg",
+        "SyncContributorsFromRepository": true
     },
     "Category": "Developer Tools",    
     "DiscussionForumUrl": "https://github.com/umbraco-community/Our-Umbraco-TagHelpers/discussions",
