@@ -5,10 +5,11 @@ namespace Our.Umbraco.TagHelpers.Classes
     internal class OurImageSize
     {
         public OurImageSize() { }
-        public OurImageSize(OurScreenSize screenSize, int imageWidth, string? cropAlias = null)
+        public OurImageSize(OurScreenSize screenSize, int imageWidth, int imageHeight, string? cropAlias = null)
         {
             ScreenSize = screenSize;
             ImageWidth = imageWidth;
+            ImageHeight = imageHeight;
             CropAlias = cropAlias;
         }
         public OurImageSize(OurScreenSize screenSize, int imageWidth, int imageHeight)
