@@ -550,7 +550,7 @@ Applying any of the below configurations within your `appsettings.json` file wil
 
 #### Example 1
 
-This will produce a simple `<img>` tag with an alt tag either defined within the media properties in Umbraco, or auto generated based on the file name.
+This will produce a simple `<img>` tag with an alt tag either defined within the media properties in Umbraco, or auto generated based on the file name. `width` and `height` are worked out based on image crops set on the media item.
 
 ```cshtml
 <our-img media-item="Model.Image" />
@@ -614,6 +614,40 @@ This will produce an `<img>` tag with:
     <img alt="Some alt text" width="200" height="200" src="/media/path/image.jpg?width=200&amp;height=200&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
 </picture>
 ```
+
+#### Example 5
+
+`ignore-crops` to use provided size
+
+```cshtml
+<our-img media-item="Model.Image" width="100" height="100" ignore-crops="true" />
+```
+
+**Output:**
+
+```cshtml
+<img alt="Some alt text" width="100" height="100" src="/media/path/image.jpg?width=100&amp;height="100"&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
+```
+
+
+#### Example 6
+
+`ignore-crops` to use provided responsive sizes
+
+```cshtml
+<our-img media-item="Model.Image" width="400" height="400" width--s="500" height--s="500" width--m="600" height--m="300" />
+```
+
+**Output:**
+
+```cshtml
+<picture>
+    <source srcset="/media/path/image.jpg?width=600&amp;height=300&amp;rnd=133087885756657361" media="(min-width: 768px)" width="600" height="300">
+    <source srcset="/media/path/image.jpg?width=500&amp;height=500&amp;rnd=133087885756657361" media="(min-width: 576px)" width="500" height="500">
+    <img alt="Some alt text" width="400" height="400" src="/media/path/image.jpg?width=400&amp;height=400&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
+</picture>
+```
+
 
 ## `our-self-host`
 This is a tag helper attribute that can be applied to any element using a `src` or `href` attribute in the razor template or partial. It will automatically download and self hosting of third party assets, like javascript, css or images. This was written by Soren Kottal for 24Days.in Umbraco Advent calendar 2022 article - https://24days.in/umbraco-cms/2022/static-assets-taghelper/
