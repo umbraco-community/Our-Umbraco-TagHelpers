@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Utils;
@@ -27,6 +28,7 @@ namespace Our.Umbraco.TagHelpers
         private IPublishedUrlProvider _urlProvider;
         private OurUmbracoTagHelpersConfiguration _globalSettings;
         private AppCaches _appCaches;
+        private readonly ILogger<InlineSvgTagHelper> _logger;
 
         public InlineSvgTagHelper(MediaFileManager mediaFileManager, IWebHostEnvironment webHostEnvironment, IPublishedUrlProvider urlProvider, IOptions<OurUmbracoTagHelpersConfiguration> globalSettings, AppCaches appCaches, ILogger<InlineSvgTagHelper> logger)
         {
