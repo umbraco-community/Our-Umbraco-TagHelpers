@@ -233,6 +233,7 @@ namespace Our.Umbraco.TagHelpers
                     {
                         _logger.LogWarning(exc, "Invalid svg markup");
                     }
+                    return string.Empty;
                 }
             }
 
