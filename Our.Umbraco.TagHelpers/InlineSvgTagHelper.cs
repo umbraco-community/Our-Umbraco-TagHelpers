@@ -28,13 +28,14 @@ namespace Our.Umbraco.TagHelpers
         private OurUmbracoTagHelpersConfiguration _globalSettings;
         private AppCaches _appCaches;
 
-        public InlineSvgTagHelper(MediaFileManager mediaFileManager, IWebHostEnvironment webHostEnvironment, IPublishedUrlProvider urlProvider, IOptions<OurUmbracoTagHelpersConfiguration> globalSettings, AppCaches appCaches)
+        public InlineSvgTagHelper(MediaFileManager mediaFileManager, IWebHostEnvironment webHostEnvironment, IPublishedUrlProvider urlProvider, IOptions<OurUmbracoTagHelpersConfiguration> globalSettings, AppCaches appCaches, ILogger<InlineSvgTagHelper> logger)
         {
             _mediaFileManager = mediaFileManager;
             _webHostEnvironment = webHostEnvironment;
             _urlProvider = urlProvider;
             _globalSettings = globalSettings.Value;
             _appCaches = appCaches;
+            _logger = logger;
         }
 
         /// <summary>
@@ -204,25 +205,33 @@ namespace Our.Umbraco.TagHelpers
             if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
             {
                 HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(cleanedFileContents);
-                var svgs = doc.DocumentNode.SelectNodes("//svg");
-                foreach (var svgNode in svgs)
-                {
-                    if (!string.IsNullOrEmpty(CssClass))
+                try {
+                    doc.LoadHtml(cleanedFileContents);
+                    var svgs = doc.DocumentNode.SelectNodes("//svg");
+                    foreach (var svgNode in svgs)
                     {
-                        svgNode.AddClass(CssClass);
+                        if (!string.IsNullOrEmpty(CssClass))
+                        {
+                            svgNode.AddClass(CssClass);
+                        }
+                        if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
+                        {
+                            var width = StringUtils.GetDecimal(svgNode.GetAttributeValue("width", "0"));
+                            var height = StringUtils.GetDecimal(svgNode.GetAttributeValue("height", "0"));
+                            svgNode.SetAttributeValue("viewbox", $"0 0 {width} {height}");
+    
+                            svgNode.Attributes.Remove("width");
+                            svgNode.Attributes.Remove("height");
+                        }
                     }
-                    if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) && svgNode.Attributes.Contains("width") && svgNode.Attributes.Contains("height") && !svgNode.Attributes.Contains("viewbox"))
+                    cleanedFileContents = doc.DocumentNode.OuterHtml;
+                }
+                catch(Exception exc) {
+                    if(_logger.IsEnabled(LogLevel.Warning))
                     {
-                        var width = StringUtils.GetDecimal(svgNode.GetAttributeValue("width", "0"));
-                        var height = StringUtils.GetDecimal(svgNode.GetAttributeValue("height", "0"));
-                        svgNode.SetAttributeValue("viewbox", $"0 0 {width} {height}");
-
-                        svgNode.Attributes.Remove("width");
-                        svgNode.Attributes.Remove("height");
+                        _logger.LogWarning(exc, "Invalid svg markup");
                     }
                 }
-                cleanedFileContents = doc.DocumentNode.OuterHtml;
             }
 
             return cleanedFileContents;
