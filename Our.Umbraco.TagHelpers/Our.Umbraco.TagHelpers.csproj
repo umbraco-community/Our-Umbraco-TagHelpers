@@ -41,7 +41,7 @@
 		<PackageReference Include="Umbraco.Cms.Web.Common" Version="9.1.0" />
 	  
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-		<PackageReference Include="GitVersion.MsBuild" Version="5.8.1" PrivateAssets="All" />
+		<!-- <PackageReference Include="GitVersion.MsBuild" Version="5.8.1" PrivateAssets="All" /> -->
 	</ItemGroup>
 
 	<ItemGroup>
