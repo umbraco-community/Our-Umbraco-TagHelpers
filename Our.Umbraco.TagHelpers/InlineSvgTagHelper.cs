@@ -104,7 +104,7 @@ namespace Our.Umbraco.TagHelpers
         private string CalculateSetAttrsCacheKey (string cleanedFileContents)
             => $"SvgWithAttributes ({CssClass?.GetHashCode()}_{cleanedFileContents.GetHashCode()})";
 
-        private int FetchCacheMinutes ()
+        private int FetchCacheMinutes()
             => CacheMinutes > 0 ? CacheMinutes : _globalSettings.OurSVG.CacheMinutes;
 
         private bool FetchEnsureViewBoxStatus () =>
