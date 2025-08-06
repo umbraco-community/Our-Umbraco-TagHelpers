@@ -87,7 +87,7 @@ namespace Our.Umbraco.TagHelpers
 
 
 
-        private string CalculateSvgContentCacheKey () {
+        private string CalculateSvgContentCacheKey() {
             if (MediaItem is not null)
             {
                 return string.Concat("MediaItem-SvgContents (", MediaItem.Key.ToString(), ")");
