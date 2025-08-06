@@ -241,7 +241,7 @@ namespace Our.Umbraco.TagHelpers
         /// </summary>
         /// <param name="cleanedFileContents">SVG file contents</param>
         /// <returns>SVG file contents with attributes</returns>
-        private string ParseAndSetAttrs (string cleanedFileContents) {
+        private string ParseAndSetAttrs(string cleanedFileContents) {
             var doEnsureViewBox = FetchEnsureViewBoxStatus();
             var hasCssClass = !string.IsNullOrEmpty(CssClass);
 
