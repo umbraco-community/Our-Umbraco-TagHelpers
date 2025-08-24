@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Routing;
@@ -166,7 +165,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             urlProvider.Setup(p => p.GetMediaUrl(umbContent, It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns("test.svg");
             var fileSystem = Mock.Of<IFileSystem>(fs => !fs.FileExists(It.IsAny<string>()));
             var tagHelper = new InlineSvgTagHelper(
-                new MediaFileManager(fileSystem, null, null, null, null, Mock.Of<IOptions<ContentSettings>>()),
+                new MediaFileManager(fileSystem, null, null, null, null),
                 null,
                 urlProvider.Object,
                 _settings, 
@@ -189,7 +188,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             urlProvider.Setup(p => p.GetMediaUrl(umbContent, It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns("test.svg");
             var fileSystem = Mock.Of<IFileSystem>(fs => fs.FileExists(It.IsAny<string>()) && fs.OpenFile(It.IsAny<string>()) == new MemoryStream(Encoding.UTF8.GetBytes("test svg")));
             var tagHelper = new InlineSvgTagHelper(
-                new MediaFileManager(fileSystem, null, null, null, null, Mock.Of<IOptions<ContentSettings>>()),
+                new MediaFileManager(fileSystem, null, null, null, null),
                 null,
                 urlProvider.Object,
                 _settings, 

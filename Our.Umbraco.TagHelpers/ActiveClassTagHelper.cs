@@ -4,6 +4,9 @@ using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System;
+using System.Threading.Tasks;
+using Umbraco.Cms.Core.Routing;
+using Umbraco.Cms.Core.Services;
 
 namespace Our.Umbraco.TagHelpers
 {
@@ -24,10 +27,12 @@ namespace Our.Umbraco.TagHelpers
         private const string tagHelperAttributes = tagHelperAttributeName + ", " + tagHelperAttributeHrefName;
 
         private IUmbracoContextAccessor _umbracoContextAccessor;
+        private readonly IDocumentUrlService _documentUrlService;
 
-        public ActiveClassTagHelper(IUmbracoContextAccessor umbracoContextAccessor)
+        public ActiveClassTagHelper(IUmbracoContextAccessor umbracoContextAccessor, IDocumentUrlService documentUrlService)
         {
             _umbracoContextAccessor = umbracoContextAccessor;
+            _documentUrlService = documentUrlService;
         }
 
         /// <summary>
@@ -45,7 +50,7 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("our-active-href")]
         public string? ActiveLink { get; set; }
 
-        public override void Process(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             // Remove the attribute 
             // We don't want it in the markup we send down to the page
@@ -65,7 +70,10 @@ namespace Our.Umbraco.TagHelpers
             if (Uri.TryCreate(href, UriKind.Absolute, out Uri? link) || Uri.TryCreate(ctx.PublishedRequest.Uri, href, out link))
             {
                 // Get the node based of the value in the HREF
-                var nodeOfLink = ctx.Content.GetByRoute(link.AbsolutePath);
+                // GetByRoute on IPublishedContentCache is obsolete now - need to use DocumentUrlService instead
+                var documentKeyFromUrl = _documentUrlService.GetDocumentKeyByRoute(link.AbsolutePath, null, null, false);
+                var nodeOfLink = documentKeyFromUrl is not null ? ctx.Content.GetById(documentKeyFromUrl.Value) : null;
+                
                 if (nodeOfLink == null)
                 {
                     return;

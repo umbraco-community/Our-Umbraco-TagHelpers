@@ -48,7 +48,5 @@ namespace Our.Umbraco.TagHelpers
             output.Attributes.Remove(new TagHelperAttribute("folder"));
             output.Attributes.Remove(new TagHelperAttribute("ext"));
         }
-
-
     }
 }
