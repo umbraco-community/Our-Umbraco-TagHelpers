@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using Umbraco.Cms.Core;
+using Umbraco.Extensions;
 
 namespace Our.Umbraco.TagHelpers.Extensions
 {
@@ -20,7 +21,7 @@ namespace Our.Umbraco.TagHelpers.Extensions
         public static bool HasAccessToContentSection(this ClaimsIdentity identity)
         {
             return identity?.Claims != null && identity.Claims.Any(x =>
-                    x.Type == Constants.Security.AllowedApplicationsClaimType
+                    x.Type == Constants.Security.AllowedApplicationsClaimType //TODO: OBSOLETE THING TO LOOK INTO
                     && x.Value == Constants.Conventions.PermissionCategories.ContentCategory);
         }
     }
