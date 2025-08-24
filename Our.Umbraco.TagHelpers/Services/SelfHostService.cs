@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Configuration;
-using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Models;
 using System;
 using System.IO;
