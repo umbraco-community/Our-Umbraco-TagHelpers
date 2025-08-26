@@ -1,0 +1,25 @@
+<h2>our-user-include and our-user-exclude</h2>
+<p>
+    This is a tag helper attribute that can be applied to any DOM element in the razor template or partial. It will show or hide its element and children on the page when passing a comma seperated string of user groups that the current logged in Umbraco backoffice user is in, for the exclude or include variants.
+</p>
+<p>
+    There are two special User Groups you can use:
+</p>
+<ul>
+    <li> * - All anonymous users</li>
+    <li>? - All authenticated users</li>
+    <li>Use the alias of the User Group</li>
+</ul>
+
+<h4>Include</h4>
+<div our-user-include="admin">Only users in the <strong>✅ Admin</strong> group will see this.</div>
+<div our-user-include="admin,editor">Only users in the <strong>✅ Admin</strong> or <strong>✅ Editor</strong> user group will see this.</div>
+<div our-user-include="?">Only <strong>✅ Anonymous</strong> users will see this.</div>
+<div our-user-include="*">Only <strong>✅ logged in</strong> users will see this.</div>
+
+
+<h4>Exclude</h4>
+<div our-user-exclude="editor">Everyone except <strong>❌ Editor</strong> users can see this.</div>
+<div our-user-exclude="editor">Everyone except <strong>❌ Admin</strong> or <strong>❌ Editor</strong> users can see this.</div>
+<div our-user-exclude="?">Everyone except <strong>❌ Anonymous</strong> users will see this.</div>
+<div our-user-exclude="*">Everyone except <strong>❌ logged in</strong> users will see this.</div>
