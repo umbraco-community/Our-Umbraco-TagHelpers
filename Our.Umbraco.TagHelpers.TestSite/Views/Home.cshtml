@@ -1,5 +1,4 @@
 ﻿@using Our.Umbraco.TagHelpers.TestSite.Models
-@using Umbraco.Cms.Web.Common.PublishedModels;
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
 	Layout = "layout.cshtml";
@@ -27,6 +26,7 @@
 <hr/>
 
 <!-- our-fallback -->
+<partial name="Partials/taghelper-samples/our-fallback" model="Model"/>
 <hr/>
 
 <!-- our-version -->
