@@ -16,3 +16,9 @@
 <!-- BeginUmbracoForm replacement -->
 <partial name="Partials/taghelper-samples/SurfaceControllerForm" model="new ContactFormViewModel()" />
 <hr />
+
+<!-- our-lang-switcher -->
+<partial name="Partials/taghelper-samples/our-lang-switcher" />
+<!-- Varying Header Content to verify different domains for switcher -->
+<h2>Header Value: @Model.Value("header")</h2>
+<hr />

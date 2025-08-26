@@ -1,3 +1,7 @@
 * {
     font-family: "Geist", sans-serif;
 }
+
+.selected {
+    font-weight: 800;
+}
