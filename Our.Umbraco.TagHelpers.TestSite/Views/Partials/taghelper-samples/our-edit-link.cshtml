@@ -1,0 +1,22 @@
+<h2>our-edit-link</h2>
+<p>
+    This is a tag helper element which renders an edit link on the front end only if the current user is logged into umbraco and has access to the content section.
+</p>
+<p>
+    The link will open the current page in the umbraco backoffice. You can override the umbraco url if you are using a different url for the backoffice.
+</p>
+
+<div>
+    <our-edit-link>Edit this Page</our-edit-link>
+</div>
+
+<div>
+    <our-edit-link target="_blank">Edit this Page in new tab</our-edit-link>
+</div>
+
+<div>
+    <our-edit-link content-key="b0c59e4c-158c-4fd4-9beb-ebe907693e4a">Edit a specific page that not itself</our-edit-link>
+</div>
+
+
+<our-edit-link use-default-styles>Edit down bottom left</our-edit-link>
