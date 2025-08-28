@@ -1,3 +1,5 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
+
 <h2>our-svg</h2>
 <p>
     This tag helper element our-svg will read the file contents of an SVG file and 
@@ -11,7 +13,10 @@
     <our-svg src="/samples/partying-face.svg" ensure-viewbox="true" />
 </div>
 
+<div style="border:2px solid green; max-width: 25vw">
+    <our-svg media-item="Model.Logo" ensure-viewbox="true" />
+</div>
+
 <ul>
-    <li>TODO: Show one with a Media Picker</li>
     <li>TODO: With Cache</li>
 </ul>
