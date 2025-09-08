@@ -50,6 +50,22 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		// properties
 
 		///<summary>
+		/// CTA Link: A link to some important call to action
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("ctaLink")]
+		public virtual global::Umbraco.Cms.Core.Models.Link CtaLink => this.Value<global::Umbraco.Cms.Core.Models.Link>(_publishedValueFallback, "ctaLink");
+
+		///<summary>
+		/// Empty Link: Used to test our-link with fallback
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		[ImplementPropertyType("emptyLink")]
+		public virtual global::Umbraco.Cms.Core.Models.Link EmptyLink => this.Value<global::Umbraco.Cms.Core.Models.Link>(_publishedValueFallback, "emptyLink");
+
+		///<summary>
 		/// Header
 		///</summary>
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "")]
