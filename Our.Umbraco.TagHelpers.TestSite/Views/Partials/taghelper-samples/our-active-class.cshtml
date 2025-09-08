@@ -1,0 +1,17 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+<h2>our-active-class</h2>
+
+@foreach (var item in Model.Root().Children)
+{
+    <a href="@item.Url()" class="nav-link" our-active-class="nav-link--active">@item.Name</a>
+}
+
+<ul>
+    @foreach (var item in Model.Root().Children)
+    {
+        <li our-active-href="@item.Url()" our-active-class="selected">
+            <a href="@item.Url()" class="nav-link">@item.Name</a>
+        </li>
+    }
+</ul>

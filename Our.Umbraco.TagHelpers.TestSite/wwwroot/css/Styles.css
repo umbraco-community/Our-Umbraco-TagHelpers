@@ -4,4 +4,10 @@
 
 .selected {
     font-weight: 800;
+    color:green;
+}
+
+.nav-link--active {
+    font-weight: 800;
+    color: red;
 }
