@@ -451,19 +451,25 @@ namespace Our.Umbraco.TagHelpers
         private string AddQueryToUrl(string url, string key, string value)
         {
             Uri uri = null!;
+            bool isRelativeUrl = false;
+            
             if (url.Contains("://"))
             {
                 uri = new Uri(url);
             }
             else
             {
+                isRelativeUrl = true;
                 if (!Uri.TryCreate(url, UriKind.Absolute, out uri!))
                     uri = new Uri(new Uri(Request.GetDisplayUrl()), url);
             }
 
             if (uri == null) return url;
 
-            var baseUri = uri.GetComponents(UriComponents.Scheme | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
+            var baseUri = isRelativeUrl
+                ? uri.GetComponents(UriComponents.Path, UriFormat.UriEscaped)
+                : uri.GetComponents(UriComponents.Scheme | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
+            
             var query = QueryHelpers.ParseQuery(uri.Query);
 
             var items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
