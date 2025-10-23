@@ -97,6 +97,38 @@
                 <our-img media-item="Model.Image" width="200" width--s="400" width--m="600" cropalias="mobile" cropalias--m="desktop" />
             </td>
         </tr>
+        <!-- Relative Path with / -->
+        <tr>
+            <td>
+                <h4>Relative Path (File Source)</h4>
+                Using a relative URL starting with /, with responsive breakpoints
+            </td>
+            <td>
+                <span class="code-label">Input:</span>
+                <pre class="code-block">
+&lt;our-img src="/samples/cute-unicorn.jpg"
+          width="340" height="170"
+          width--xl="420" height--xl="210"
+          width--xxl="480" height--xxl="240" /&gt;
+</pre>
+                <span class="code-label">Output:</span>
+                <pre class="code-block">
+&lt;picture&gt;
+    &lt;source srcset="/samples/cute-unicorn.jpg?width=480&amp;height=240" media="(min-width: 1400px)" width="480" height="240"&gt;
+    &lt;source srcset="/samples/cute-unicorn.jpg?width=420&amp;height=210" media="(min-width: 1200px)" width="420" height="210"&gt;
+    &lt;img alt="cute-unicorn" width="340" height="170" 
+         src="/samples/cute-unicorn.jpg?width=340&amp;height=170" 
+         loading="lazy" decoding="async" fetchpriority="low"&gt;
+&lt;/picture&gt;
+</pre>
+            </td>
+            <td>
+                <our-img src="/samples/cute-unicorn.jpg"
+                         width="340" height="170"
+                         width--xl="420" height--xl="210"
+                         width--xxl="480" height--xxl="240" />
+            </td>
+        </tr>
     </tbody>
 </table>
 
