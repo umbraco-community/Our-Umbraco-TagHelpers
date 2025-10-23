@@ -1,0 +1,68 @@
+﻿@using Our.Umbraco.TagHelpers.TestSite.Models
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+	Layout = "layout.cshtml";
+}
+
+<!-- our-dictionary -->
+<partial name="Partials/taghelper-samples/our-dictionary" />
+<hr />
+
+<!-- our-if -->
+<partial name="Partials/taghelper-samples/our-if" />
+<hr />
+
+<!-- BeginUmbracoForm replacement -->
+<partial name="Partials/taghelper-samples/SurfaceControllerForm" model="new ContactFormViewModel()" />
+<hr />
+
+<!-- our-lang-switcher -->
+<partial name="Partials/taghelper-samples/our-lang-switcher" />
+<!-- Varying Header Content to verify different domains for switcher -->
+<h2>Header Value: @Model.Value("header")</h2>
+<hr />
+
+<!-- our-svg -->
+<partial name="Partials/taghelper-samples/our-svg" model="Model" />
+<hr/>
+
+<!-- our-fallback -->
+<partial name="Partials/taghelper-samples/our-fallback" model="Model" />
+<hr/>
+
+<!-- our-version -->
+<partial name="Partials/taghelper-samples/our-version" />
+<hr />
+
+<!-- our-member-include and our-member-exclude -->
+<partial name="Partials/taghelper-samples/our-member-include-exclude" />
+<hr />
+
+<!-- our-user-include and our-user-exclude -->
+<partial name="Partials/taghelper-samples/our-user-include-exclude" />
+<hr />
+
+<!-- our-edit-link -->
+<partial name="Partials/taghelper-samples/our-edit-link" model="Model" />
+<hr />
+
+<!-- our-active-class -->
+<partial name="Partials/taghelper-samples/our-active-class" model="Model" />
+<hr />
+
+<!-- our-link -->
+<partial name="Partials/taghelper-samples/our-link" />
+<hr />
+
+<!-- our-cache -->
+<partial name="Partials/taghelper-samples/our-cache" />
+<hr />
+
+<!-- our-img -->
+<partial name="Partials/taghelper-samples/our-img" />
+<hr />
+
+<!-- our-self-host -->
+<partial name="Partials/taghelper-samples/our-self-host" />
+<hr />
+

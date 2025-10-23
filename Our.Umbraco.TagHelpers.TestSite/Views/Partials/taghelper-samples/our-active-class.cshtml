@@ -1,0 +1,29 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+<h2>our-active-class</h2>
+<h3>NOTE: This does not worked with domain cultures mapped to it currently</h3>
+
+<h2>Applied to anchor tags</h2>
+@foreach (var item in Model.Root().Children())
+{
+    <a href="@item.Url()" class="nav-link" our-active-class="nav-link--active">@item.Name</a>
+}
+
+<h2>Applied to other DOM elements</h2>
+<ul>
+    @foreach (var item in Model.Root().Children())
+    {
+        <li our-active-href="@item.Url()" our-active-class="selected">
+            <a href="@item.Url()" class="nav-link">@item.Name</a>
+            <ul>
+                @foreach (var child in item.Children())
+                {
+                    <li our-active-href="@child.Url()" our-active-class="selected">
+                        <a href="@child.Url()">@child.Name</a>
+                    </li>
+                }
+            </ul>
+            
+        </li>
+    }
+</ul>

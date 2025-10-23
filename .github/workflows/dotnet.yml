@@ -13,23 +13,21 @@ jobs:
 
     steps:    
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.7
+      uses: gittools/actions/gitversion/setup@v4.1.0
       with:
-        versionSpec: '5.x'
+        versionSpec: '6.x'
     
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '5.0.x'
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: |
+          5.0.x
+          6.0.x
+          9.0.x
         
     - name: Restore dependencies
       run: dotnet restore
@@ -37,10 +35,10 @@ jobs:
       
     - name: Determine Version with GitVersion (MSBuild in Proj will do this)
       id:   gitversion
-      uses: gittools/actions/gitversion/execute@v0.9.7
+      uses: gittools/actions/gitversion/execute@v4.1.0
       with:
-        useConfigFile: true
-        configFilePath: ./GitVersion.yml
+        configFilePath: GitVersion.yml
+        updateAssemblyInfo: true
 
     - name: Display GitVersion outputs - Help for debugging for now
       run: |
@@ -90,7 +88,7 @@ jobs:
       working-directory: Our.Umbraco.TagHelpers
       
     - name: Upload nuget file as build artifact      
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: Nuget Build Output
         path: ./build.out/  

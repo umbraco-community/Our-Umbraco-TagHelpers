@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Our.Umbraco.TagHelpers.Tests.Helpers;
 using Umbraco.Cms.Core.Models;
 
@@ -33,7 +34,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             LinkTagHelper tagHelper = new() { Link = _onSiteLink };
 
             var markup = await GetMarkupAsync(tagHelper, output);
-            Assert.AreEqual($"<a href=\"/\">{expectedContent}</a>", markup);
+            ClassicAssert.AreEqual($"<a href=\"/\">{expectedContent}</a>", markup);
         }
 
         [TestCase("", "example")]
@@ -47,7 +48,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             LinkTagHelper tagHelper = new() { Link = _externalLink };
 
             var markup = await GetMarkupAsync(tagHelper, output);
-            Assert.AreEqual($"<a href=\"/\" target=\"_blank\" rel=\"noopener\">{expectedContent}</a>", markup);
+            ClassicAssert.AreEqual($"<a href=\"/\" target=\"_blank\" rel=\"noopener\">{expectedContent}</a>", markup);
         }
 
         [Test]
@@ -59,7 +60,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             LinkTagHelper tagHelper = new() { Link = new() };
 
             var markup = await GetMarkupAsync(tagHelper, output);
-            Assert.AreEqual(string.Empty, markup);
+            ClassicAssert.AreEqual(string.Empty, markup);
         }
 
         [Test]
@@ -71,7 +72,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             LinkTagHelper tagHelper = new() { Link = null };
 
             var markup = await GetMarkupAsync(tagHelper, output);
-            Assert.AreEqual(string.Empty, markup);
+            ClassicAssert.AreEqual(string.Empty, markup);
         }
 
         [TestCase("", "")]
@@ -85,7 +86,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             LinkTagHelper tagHelper = new() { Link = null, Fallback = true };
 
             var markup = await GetMarkupAsync(tagHelper, output);
-            Assert.AreEqual(expectedContent, markup);
+            ClassicAssert.AreEqual(expectedContent, markup);
         }
 
         [TestCase("", "")]
@@ -99,7 +100,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             LinkTagHelper tagHelper = new() { Link = null, Fallback = true, FallbackElement = "div" };
 
             var markup = await GetMarkupAsync(tagHelper, output);
-            Assert.AreEqual(expectedContent, markup);
+            ClassicAssert.AreEqual(expectedContent, markup);
         }
 
         private async Task<string> GetMarkupAsync(LinkTagHelper tagHelper, TagHelperOutput output)

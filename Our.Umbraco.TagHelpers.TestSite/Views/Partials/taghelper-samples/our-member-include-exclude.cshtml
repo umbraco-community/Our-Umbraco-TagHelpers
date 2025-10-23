@@ -1,0 +1,29 @@
+<h2>our-member-include and our-member-exclude</h2>
+<p>
+    This is a tag helper attribute that can be applied to any DOM element in the razor template or partial. It will show or hide its element and children on the page when passing a comma seperated string of member groups that the current logged in member is in, for the exclude or include variants.
+</p>
+<p>
+    There are two special Member Groups you can use:
+</p>
+<ul>
+    <li> * - All anonymous users</li>
+    <li>? - All authenticated users</li>
+    <li>Use the alias of the Member Group</li>
+</ul>
+
+<h4>Include</h4>
+<div our-member-include="Staff">Only members of <strong>✅ Staff</strong> Member Group will see this.</div>
+<div our-member-include="Staff,Admins">Only members of <strong>✅ Staff</strong> OR <strong>✅ Admins</strong> member group will see this.</div>
+<div our-member-include="?">Only <strong>✅ Anonymous</strong> members will see this.</div>
+<div our-member-include="*">Only <strong>✅ logged</strong> in members will see this.</div>
+
+<h4>Exclude</h4>
+<div our-member-exclude="Staff">Everyone except <strong>❌ Staff</strong> members can see this.</div>
+<div our-member-exclude="?">Everyone except <strong>❌ Anonymous</strong> users will see this.</div>
+<div our-member-exclude="*">Everyone except <strong>❌ logged in</strong> users will see this.</div>
+
+<hr/>
+
+<partial name="membership/login" />
+
+<partial name="membership/login-status" />

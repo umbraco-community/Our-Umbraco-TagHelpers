@@ -5,8 +5,9 @@ using Umbraco.Extensions;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System;
 using System.Threading.Tasks;
-using Umbraco.Cms.Core.Routing;
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.Navigation;
 
 namespace Our.Umbraco.TagHelpers
 {
@@ -28,11 +29,13 @@ namespace Our.Umbraco.TagHelpers
 
         private IUmbracoContextAccessor _umbracoContextAccessor;
         private readonly IDocumentUrlService _documentUrlService;
+        private readonly IDocumentNavigationQueryService _documentNavigationQueryService;
 
-        public ActiveClassTagHelper(IUmbracoContextAccessor umbracoContextAccessor, IDocumentUrlService documentUrlService)
+        public ActiveClassTagHelper(IUmbracoContextAccessor umbracoContextAccessor, IDocumentUrlService documentUrlService, IDocumentNavigationQueryService documentNavigationQueryService)
         {
             _umbracoContextAccessor = umbracoContextAccessor;
             _documentUrlService = documentUrlService;
+            _documentNavigationQueryService = documentNavigationQueryService;
         }
 
         /// <summary>
@@ -64,14 +67,22 @@ namespace Our.Umbraco.TagHelpers
             {
                 return;
             }
-
+            
+            // GOAL
+            // 1. Get the URL of the link we are linking to
+            // 2. Get the node key that matches that URL
+            // 3. Get the current node being rendered for the context/page
+            // 4. Compare if the node of the link we are linking to is the current node or an ancestor
+            // 5. If so add the CSS class to the output
+            
             // Try & parse href as URI, as it could be relative or absolute
-            // or contain a quersystring we only want the path part
+            // or contain a querystring we only want the path part
             if (Uri.TryCreate(href, UriKind.Absolute, out Uri? link) || Uri.TryCreate(ctx.PublishedRequest.Uri, href, out link))
             {
                 // Get the node based of the value in the HREF
                 // GetByRoute on IPublishedContentCache is obsolete now - need to use DocumentUrlService instead
-                var documentKeyFromUrl = _documentUrlService.GetDocumentKeyByRoute(link.AbsolutePath, null, null, false);
+                var culture = ctx.PublishedRequest.Culture;
+                var documentKeyFromUrl = _documentUrlService.GetDocumentKeyByRoute(link.AbsolutePath, culture, Constants.System.Root, false);
                 var nodeOfLink = documentKeyFromUrl is not null ? ctx.Content.GetById(documentKeyFromUrl.Value) : null;
                 
                 if (nodeOfLink == null)

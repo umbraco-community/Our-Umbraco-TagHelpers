@@ -1,0 +1,15 @@
+<h2>our-version</h2>
+<p>
+    This tag helper element our-version prints out version number for a given Assembly 
+    name loaded into the current AppDomain or if none is given then the EntryAssembly 
+    version is displayed, which would be the Umbraco website project you are building.
+</p>
+
+
+<ul>
+    <!-- Prints out the Website Project Assembly Version -->
+    <li>Website Project Assembly Version: <our-version /></li>
+    <li>Our.Umbraco.Taghelpers: <our-version assembly="Our.Umbraco.TagHelpers" /></li>
+    <li>Umbraco.Core: <our-version assembly="Umbraco.Core" /></li>
+    <li>Non existent: <our-version assembly="MadeUp.Assembly" /></li>
+</ul>

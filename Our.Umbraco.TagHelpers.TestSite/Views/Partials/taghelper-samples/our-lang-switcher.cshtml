@@ -1,0 +1,23 @@
+﻿<h2>our-lang-switcher</h2>
+<p>
+    This tag helper element our-lang-switcher will create a simple unordered 
+    list of all languages and domains, in order to create a simple language switcher. 
+    As this produces a lot of HTML markup that is opinionated with certain 
+    class names and elements, you may wish to change and control the markup it produces.
+</p>
+<p>
+    With this tag helper the child DOM elements inside the our-lang-switcher 
+    element is used as a Mustache templating language to control the markup.
+</p>
+
+<our-lang-switcher>
+    <div class="lang-switcher">
+        {{#Languages}}
+        <div class="lang-switcher__item">
+            <a href="{{Url}}" lang="{{Culture}}" hreflang="{{Culture}}" class="lang-switcher__link {{#IsCurrentLang}}selected{{/IsCurrentLang}}">{{Name}}</a>
+        </div>
+        {{/Languages}}
+    </div>
+</our-lang-switcher>
+
+<our-lang-switcher />

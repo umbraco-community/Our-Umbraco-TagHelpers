@@ -1,0 +1,16 @@
+<h2>our-dictionary</h2>
+<p>
+    This is a tag helper element <strong>our-dictionary</strong> that will use the current page's 
+    request Language/Culture to use a dictionary translation from the Umbraco translation section.
+</p>
+<ul>
+    <li>Find dictionary key</li>
+    <li>Find translation for Current Culture/Language of the page</li>
+    <li>If no translation found see if we have fallback attribute set fallback-lang or umb-dictionary-fallback-lang</li>
+    <li>Attempt to find dictionary item for that ISO language fallback</li>
+    <li>No translation found - leave default/value inside tag untouched for final fallback</li>
+</ul>
+
+<h3><our-dictionary key="home">My Header</our-dictionary></h3>
+<h3><our-dictionary key="test" fallback-lang="da">Value does not exist in EN</our-dictionary></h3>
+<h3><our-dictionary key="nonExistantKey">I will render as no key exists</our-dictionary></h3>

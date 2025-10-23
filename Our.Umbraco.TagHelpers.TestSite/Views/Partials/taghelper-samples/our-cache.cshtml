@@ -1,0 +1,27 @@
+<h2>our-cache</h2>
+<p>
+    All examples will skip the cache for Umbraco preview mode 
+    and debug mode, and evict cache items anytime Umbraco publishes content, media or dictionary items.
+</p>
+
+<our-cache expires-on="new DateTime(2026,1,29,17,02,0)">
+    <p>@DateTime.Now - A set Date in time</p>
+</our-cache>
+
+<our-cache expires-after="TimeSpan.FromSeconds(120)">
+    <p>@DateTime.Now - Every 120 seconds (2minutes)</p>
+</our-cache>
+
+<our-cache>
+    <!-- A global navigation needs to be updated across entire site when a phone number property changes on homepage node -->
+    <!-- <partial name="Navigation" /> -->
+</our-cache>
+
+<p>
+    This example will turn off the automatic clearing of the tag helper 
+    cache if 'any page' is published, but still clear the cache if the individual page is published:
+</p>
+
+<our-cache update-cache-on-publish="false" vary-by="@Model.UpdateDate.ToString()">
+    <p>@DateTime.Now - A set Date in time</p>
+</our-cache>
