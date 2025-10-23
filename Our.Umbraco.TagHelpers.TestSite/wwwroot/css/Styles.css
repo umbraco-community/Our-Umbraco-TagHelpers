@@ -2,7 +2,7 @@
     font-family: "Geist", sans-serif;
 }
 
-.selected {
+.selected > a {
     font-weight: 800;
     color:green;
 }
