@@ -76,7 +76,7 @@ namespace Our.Umbraco.TagHelpers
             // 5. If so add the CSS class to the output
             
             // Try & parse href as URI, as it could be relative or absolute
-            // or contain a quersystring we only want the path part
+            // or contain a querystring we only want the path part
             if (Uri.TryCreate(href, UriKind.Absolute, out Uri? link) || Uri.TryCreate(ctx.PublishedRequest.Uri, href, out link))
             {
                 // Get the node based of the value in the HREF
