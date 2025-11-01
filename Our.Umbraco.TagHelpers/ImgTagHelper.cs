@@ -8,12 +8,12 @@ using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Classes;
 using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Enums;
-using Our.Umbraco.TagHelpers.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Services;
@@ -160,15 +160,15 @@ namespace Our.Umbraco.TagHelpers
                 {
                     // The element contains a crop alias property, so pull through a cropped version of the original image
                     // Also, calculate the height based on the given width using the crop profile so it's to scale
-                    imgSrc = MediaItem.GetCropUrl(width: (int)width, cropAlias: ImgCropAlias);
+                    var croppedImage = GetImageUrlAndDimensions(MediaItem, (int)width, ImgCropAlias);
+                    imgSrc = croppedImage.Url;
+                    height = croppedImage.Height;
+
                     if (hasLqip)
                     {
                         // Generate a low quality placeholder image if configured to do so
-                        placeholderImgSrc = MediaItem.GetCropUrl(width: ImgWidth, cropAlias: ImgCropAlias, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
+                        placeholderImgSrc = MediaItem.GetCropUrl(width: (int)width, cropAlias: ImgCropAlias, quality: _globalSettings.OurImg.LazyLoadPlaceholderLowQualityImageQuality);
                     }
-                    var cropWidth = MediaItem.LocalCrops.GetCrop(ImgCropAlias).Width;
-                    var cropHeight = MediaItem.LocalCrops.GetCrop(ImgCropAlias).Height;
-                    height = (cropHeight / cropWidth) * width;
                 }
                 else
                 {
@@ -362,11 +362,11 @@ namespace Our.Umbraco.TagHelpers
 
                         if (!string.IsNullOrEmpty(cropAlias))
                         {
-                            var cropWidth = MediaItem.LocalCrops.GetCrop(cropAlias).Width;
-                            var cropHeight = MediaItem.LocalCrops.GetCrop(cropAlias).Height;
-                            sourceHeight = (StringUtils.GetDouble(cropHeight) / StringUtils.GetDouble(cropWidth)) * size.ImageWidth;
+                            var croppedImage = GetImageUrlAndDimensions(MediaItem, size.ImageWidth, cropAlias);
+                            imgSrc = croppedImage.Url;
+                            sourceHeight = croppedImage.Height;
 
-                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{MediaItem.GetCropUrl(width: size.ImageWidth, cropAlias: cropAlias)}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
+                            sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{imgSrc}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
                         }
                         else
                         {
@@ -452,7 +452,7 @@ namespace Our.Umbraco.TagHelpers
         {
             Uri uri = null!;
             bool isRelativeUrl = false;
-            
+
             if (url.Contains("://"))
             {
                 uri = new Uri(url);
@@ -469,7 +469,7 @@ namespace Our.Umbraco.TagHelpers
             var baseUri = isRelativeUrl
                 ? uri.GetComponents(UriComponents.Path, UriFormat.UriEscaped)
                 : uri.GetComponents(UriComponents.Scheme | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
-            
+
             var query = QueryHelpers.ParseQuery(uri.Query);
 
             var items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
@@ -509,6 +509,17 @@ namespace Our.Umbraco.TagHelpers
             }
 
             return imageSizes;
+        }
+
+        private (string Url, int Width, int Height) GetImageUrlAndDimensions(MediaWithCrops media, int width, string? cropAlias = null)
+        {
+            var imgSrc = media.GetCropUrl(width: width, cropAlias: cropAlias);
+
+            // H5YR! to mistyn8 for the following suggestion of extracting the height from the auto generated URL rather than using LocalCrops
+            var q = HttpUtility.ParseQueryString(imgSrc.Split("?")[1] ?? string.Empty);
+            var height = int.TryParse(q["height"], out var cropHeight) ? cropHeight : 0;
+
+            return (imgSrc, width, height);
         }
         #endregion
     }
