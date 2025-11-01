@@ -73,20 +73,8 @@ This is a tag helper attribute that can be applied to any DOM element in the raz
 
 ## `<our-macro>`
 
-This tag helper element `<our-macro>` will render an Umbraco Macro Partial View and will use the current page/request for the Macro rendering & context.
-
-If you wish, you can modify this behaviour and pass the context/content node that the Macro will render with using an optional attribute `content` on the `<our-macro>` tag and passing an `IPublishedContent` into the attribute. This allows the same Macro Partial View Macro code/snippet to work in various scenarios when the content node/context is changed.
-
-Additionally custom Macro Parameters that can be passed through and consumed by Macro Partial Views are specified in the following way. The key/alias of the Macro Parameter must be prefixed with the following `bind:`
-
-So to pass/set a value for the macro parameter `startNodeId` then I will need to set an attribute on the element as follows `bind:startNodeId`
-
-```cshtml
-<our-macro alias="ListChildrenFromCurrentPage" />
-<our-macro alias="ListChildrenFromCurrentPage" Content="Model" />
-<our-macro alias="ListChildrenFromCurrentPage" Content="Model.FirstChild()" />
-<our-macro alias="ChildPagesFromStartNode" bind:startNodeId="umb://document/a878d58b392040e6ae9432533ac66ad9" />
-```
+> [!WARNING]
+> The tag helper element `<our-macro>` has been removed in version 2.0.0 since Umbraco 14.0.0 deprecated the use of macros.
 
 ## BeginUmbracoForm Replacement
 

@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Services;
 using System;
+using NUnit.Framework.Legacy;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Logging;
 
@@ -51,7 +52,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var result = _service.GetRemoteFolderPath(uri);
 
             // Assert
-            Assert.AreEqual(expectedFolderPath, result);
+            ClassicAssert.AreEqual(expectedFolderPath, result);
         }
 
         [Test]
@@ -65,7 +66,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var result = _service.GetRemoteFolderPath(uri);
 
             // Assert
-            Assert.AreEqual(expectedFolderPath, result);
+            ClassicAssert.AreEqual(expectedFolderPath, result);
         }
     }
 }

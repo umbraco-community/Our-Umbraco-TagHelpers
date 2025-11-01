@@ -1,0 +1,27 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
+
+<h2>our-link</h2>
+
+<our-link link="@Model.CtaLink">
+    <h2>Hi There</h2>
+</our-link>
+
+<our-link link="@Model.CtaLink"></our-link>
+
+<our-link link="@Model.EmptyLink" Fallback="true" FallbackElement="div">
+    <span>Some text tha will fallback to wrapping div with a span inside</span>
+</our-link>
+
+@* No link will result in *@
+@*
+<div>
+    <span>some text</span>
+</div>
+*@
+
+<our-link link="@Model.EmptyLink" Fallback="true">
+    <span>Some text tha will fallback to span</span>
+</our-link>
+
+@*No link and no fallback HTML tag name specified will result in*@
+@* <span>some text</span> *@

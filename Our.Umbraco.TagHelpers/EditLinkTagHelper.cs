@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Services;
+using System;
 using System.Text;
 using Umbraco.Cms.Core.Web;
 
@@ -25,16 +26,11 @@ namespace Our.Umbraco.TagHelpers
         }
 
         /// <summary>
-        /// The id of the current content item
+        /// A string of the GUID/Key of the content item to link to
+        /// If not set it will use the current page's key
         /// </summary>
-        [HtmlAttributeName("content-id")]
-        public int ContentId { get; set; } = int.MinValue;
-
-        /// <summary>
-        /// Override the umbraco edit content url if yours is different
-        /// </summary>
-        [HtmlAttributeName("edit-url")]
-        public string EditUrl { get; set; } = "/umbraco#/content/content/edit/";
+        [HtmlAttributeName("content-key")]
+        public string ContentKey { get; set; } = string.Empty;
 
         /// <summary>
         /// A boolean to say whether or not you would like to use the default styling.
@@ -54,14 +50,18 @@ namespace Our.Umbraco.TagHelpers
             // and they have access to the content section
             if (_backofficeUserAccessor?.BackofficeUser != null && _backofficeUserAccessor.BackofficeUser.IsAllowedToSeeEditLink())
             {
-                // Try & get Umbraco Current Node int ID (Only do this if ContentId has NOT been set)
-                if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) && ContentId == int.MinValue)
+                // Try & get Umbraco Current Node Key (Only do this if ContentKey has NOT been set)
+                if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) && string.IsNullOrWhiteSpace(ContentKey))
                 {
-                    ContentId = umbracoContext.PublishedRequest.PublishedContent.Id;
+                    if (umbracoContext.PublishedRequest?.PublishedContent is not null)
+                    {
+                        ContentKey = umbracoContext.PublishedRequest.PublishedContent.Key.ToString();
+                    }
                 }
 
                 // Backoffice URL to content item
-                var editLinkUrl = $"{EditUrl}{ContentId}";
+                // /umbraco/section/content/workspace/document/edit/b0c59e4c-158c-4fd4-9beb-ebe907693f1c
+                var editLinkUrl = $"/umbraco/section/content/workspace/document/edit/{ContentKey}";
 
                 if (UseDefaultStyles)
                 {

@@ -1,0 +1,142 @@
+<h2>our-img</h2>
+
+<style>
+    .our-img-demo { width: 100%; border-collapse: collapse; }
+    .our-img-demo img { max-width: 400px; height: auto; }
+    .our-img-demo th, .our-img-demo td { padding: 8px; border: 1px solid #ccc; vertical-align: top; }
+    .our-img-demo pre.code-block { background-color: #f5f5f5; padding: 8px; border-radius: 4px; text-wrap-mode: wrap; font-family: Consolas, monospace; font-size: 0.9rem; }
+    .our-img-demo .code-label { font-weight: bold; margin-bottom: 4px; display: block; font-size: 0.85rem; color: #555; }
+</style>
+
+<table class="our-img-demo">
+    <thead>
+        <tr>
+            <th>Example</th>
+            <th>Code</th>
+            <th>Rendered Image</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Basic Media Item -->
+        <tr>
+            <td>
+                <h4>Basic Media Item</h4>
+                Auto alt text, width & height, native lazy loading
+            </td>
+            <td>
+                <span class="code-label">Input:</span>
+<pre class="code-block">
+&lt;our-img media-item="Model.Image" /&gt;
+</pre>
+                <span class="code-label">Output:</span>
+<pre class="code-block">
+&lt;img alt="Some alt text" width="1920" height="1280" 
+     src="/media/path/image.jpg?width=1920&amp;rnd=133087885756657361" 
+     loading="lazy" decoding="async" fetchpriority="low"&gt;
+</pre>
+            </td>
+            <td>
+                <our-img media-item="Model.Image" />
+            </td>
+        </tr>
+
+        <!-- Custom alt & Above the Fold -->
+        <tr>
+            <td>
+                <h4>Simple Scaled Media With Custom Alt Text</h4>
+                Eager loading, high fetch priority
+            </td>
+            <td>
+                <span class="code-label">Input:</span>
+<pre class="code-block">
+&lt;our-img media-item="Model.Image" 
+          width="200" 
+          alt="Custom Alt Text" 
+          abovethefold="true" /&gt;
+</pre>
+                <span class="code-label">Output:</span>
+<pre class="code-block">
+&lt;img alt="Custom Alt Text" width="200" height="133.33" 
+     src="/media/path/image.jpg?width=200&amp;rnd=133087885756657361" 
+     loading="eager" fetchpriority="high"&gt;
+</pre>
+            </td>
+            <td>
+                <our-img media-item="Model.Image" width="200" alt="Custom Alt Text" abovethefold="true" />
+            </td>
+        </tr>
+
+        <!-- Responsive with Crops -->
+        <tr>
+            <td>
+                <h4>Responsive with Crops</h4>
+                Outputs &lt;picture&gt; with responsive &lt;source&gt; tags and auto alt
+            </td>
+            <td>
+                <span class="code-label">Input:</span>
+<pre class="code-block">
+&lt;our-img media-item="Model.Image" 
+          width="200" 
+          width--s="400" 
+          width--m="600" 
+          cropalias="mobile" 
+          cropalias--m="desktop" /&gt;
+</pre>
+                <span class="code-label">Output:</span>
+<pre class="code-block">
+&lt;picture&gt;
+    &lt;source srcset="/media/path/image.jpg?width=600&amp;height=300" media="(min-width: 768px)" width="600" height="300"&gt;
+    &lt;source srcset="/media/path/image.jpg?width=400&amp;height=400" media="(min-width: 576px)" width="400" height="400"&gt;
+    &lt;img alt="Some alt text" width="200" height="200" 
+         src="/media/path/image.jpg?width=200&amp;height=200" 
+         loading="lazy" decoding="async" fetchpriority="low"&gt;
+&lt;/picture&gt;
+</pre>
+            </td>
+            <td>
+                <our-img media-item="Model.Image" width="200" width--s="400" width--m="600" cropalias="mobile" cropalias--m="desktop" />
+            </td>
+        </tr>
+        <!-- Relative Path with / -->
+        <tr>
+            <td>
+                <h4>Relative Path (File Source)</h4>
+                Using a relative URL starting with /, with responsive breakpoints
+            </td>
+            <td>
+                <span class="code-label">Input:</span>
+                <pre class="code-block">
+&lt;our-img src="/samples/cute-unicorn.jpg"
+          width="340" height="170"
+          width--xl="420" height--xl="210"
+          width--xxl="480" height--xxl="240" /&gt;
+</pre>
+                <span class="code-label">Output:</span>
+                <pre class="code-block">
+&lt;picture&gt;
+    &lt;source srcset="/samples/cute-unicorn.jpg?width=480&amp;height=240" media="(min-width: 1400px)" width="480" height="240"&gt;
+    &lt;source srcset="/samples/cute-unicorn.jpg?width=420&amp;height=210" media="(min-width: 1200px)" width="420" height="210"&gt;
+    &lt;img alt="cute-unicorn" width="340" height="170" 
+         src="/samples/cute-unicorn.jpg?width=340&amp;height=170" 
+         loading="lazy" decoding="async" fetchpriority="low"&gt;
+&lt;/picture&gt;
+</pre>
+            </td>
+            <td>
+                <our-img src="/samples/cute-unicorn.jpg"
+                         width="340" height="170"
+                         width--xl="420" height--xl="210"
+                         width--xxl="480" height--xxl="240" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="padding: 10px; font-style: italic;">
+    <h3>Notes</h3>
+    <ul>
+        <li>The rendered images reflect the appsettings.json configurations for lazy loading, breakpoints, and aspect ratios.</li>
+        <li>Resize your browser window to see responsive &lt;picture&gt; sources kick in for the last example.</li>
+        <li>The alt text is automatically pulled from media properties unless overridden.</li>
+    </ul>
+</div>

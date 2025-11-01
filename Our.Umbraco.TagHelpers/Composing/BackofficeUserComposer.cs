@@ -5,7 +5,7 @@ using Umbraco.Cms.Core.DependencyInjection;
 
 namespace Our.Umbraco.TagHelpers.Composing
 {
-    public class CustomComposer : IComposer
+    public class BackofficeUserComposer : IComposer
     {
         public void Compose(IUmbracoBuilder builder)
         {

@@ -1,0 +1,9 @@
+<h2>our-if</h2>
+<p>
+    This is a tag helper attribute that can be applied to any DOM element 
+    in the razor template or partial. It will include its element and children 
+    on the page if the expression inside the our-if attribute evaluates to true.
+</p>
+
+<div our-if="(DateTime.UtcNow.Minute % 2) == 0">This will only render during <strong>even</strong> minutes.</div>
+<div our-if="(DateTime.UtcNow.Minute % 2) == 1">This will only render during <strong>odd</strong> minutes.</div>

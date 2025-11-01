@@ -1,0 +1,15 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
+
+
+<h2>our-fallback</h2>
+<p>
+    This tag helper element our-fallback uses the same fallback mode logic 
+    that is only available on the Value() method of the IPublishedContent interface 
+    that uses a string for the property name to lookup. 
+    In addition if the fallback value from a language or ancestors is not 
+    available we are still able to fallback to the content inside the tag.
+</p>
+
+
+<h3><our-fallback property="Header" mode="Fallback.ToLanguage" culture="da">I do have a DA culture variant of this property and this should be replaced</our-fallback></h3>
+<h3><our-fallback property="Header" mode="Fallback.ToLanguage" culture="da-DK">I do NOT have a da-DK culture variant of this property</our-fallback></h3>

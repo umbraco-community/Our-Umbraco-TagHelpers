@@ -1,0 +1,45 @@
+<h2>our-self-host</h2>
+<p>
+    This is a tag helper attribute that can be applied to any element using 
+    a src or href attribute in the razor template or partial. 
+    It will automatically download and self hosting of 
+    third party assets, like javascript, css or images. 
+    This was written by Soren Kottal for 24Days.in 
+    Umbraco Advent calendar 2022 article - https://24days.in/umbraco-cms/2022/static-assets-taghelper/
+</p>
+
+<h4>Simple Example</h4>
+<p>
+    This will download the linked file to your local filesystem, and swap out 
+    the src attribute with a reference to the now locally hosted file.
+</p>
+
+<script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" our-self-host></script>
+
+<h4>Folder location for downloaded files</h4>
+<p>
+    By default the files will be saved in /assets/, and keep the folder path of the url. 
+    The root folder can be configured in appsettings.json, by adding a value at 
+    Our.Umbraco.TagHelpers:OurSelfHost:RootFolder specifying 
+    the desired rootfolder. The default value is /assets/.
+</p>
+<p>
+    You can further divide the files into folders, by adding a folder attribute to the script tag, eg:
+</p>
+<script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" our-self-host folder="libraries"></script>
+
+<h4>Handling extensionless urls to files</h4>
+<p>
+    In case the url is extensionless, like https://unpkg.com/alpinejs, 
+    you can add an ext attribute, for specifying the extension of the file, eg:
+</p>
+<script src="https://unpkg.com/alpinejs" our-self-host ext="js"></script>
+<p>
+    This will save the file as /assets/alpinejs.js, enabling eg. MIME types for .js files.
+</p>
+
+<h4>Caching</h4>
+<p>
+    The file is saved once, and never updated unless you manually remove the file. 
+    The lookup for the local file is cached in the Runtime Cache.
+</p>

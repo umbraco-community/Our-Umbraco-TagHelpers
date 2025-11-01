@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using NUnit.Framework;
 using System.Threading.Tasks;
+using NUnit.Framework.Legacy;
 using Our.Umbraco.TagHelpers.Tests.Helpers;
 
 namespace Our.Umbraco.TagHelpers.Tests
@@ -27,7 +28,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var content = tagHelperOutput.Content.GetContent();
 
             // Assert
-            Assert.AreEqual(expected, content);
+            ClassicAssert.AreEqual(expected, content);
         }
     }
 }

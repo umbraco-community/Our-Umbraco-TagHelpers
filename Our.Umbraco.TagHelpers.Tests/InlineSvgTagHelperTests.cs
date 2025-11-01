@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Umbraco.Cms.Core.Configuration.Models;
+using NUnit.Framework.Legacy;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Routing;
@@ -61,7 +61,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
+            ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
+            ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
+            ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
         [Test]
@@ -105,7 +105,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
+            ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
         [Test]
@@ -121,10 +121,10 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsNull(_output?.TagName);
-            Assert.AreEqual(_output.Content.GetContent(), "test svg");
-            Assert.IsFalse(_output.Attributes.ContainsName("src"));
-            Assert.IsFalse(_output.Attributes.ContainsName("media-item"));
+            ClassicAssert.IsNull(_output?.TagName);
+            ClassicAssert.AreEqual(_output.Content.GetContent(), "test svg");
+            ClassicAssert.IsFalse(_output.Attributes.ContainsName("src"));
+            ClassicAssert.IsFalse(_output.Attributes.ContainsName("media-item"));
         }
 
         [Test]
@@ -139,7 +139,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
+            ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
         [Test]
@@ -155,7 +155,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
+            ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
         [Test]
@@ -166,7 +166,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             urlProvider.Setup(p => p.GetMediaUrl(umbContent, It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns("test.svg");
             var fileSystem = Mock.Of<IFileSystem>(fs => !fs.FileExists(It.IsAny<string>()));
             var tagHelper = new InlineSvgTagHelper(
-                new MediaFileManager(fileSystem, null, null, null, null, Mock.Of<IOptions<ContentSettings>>()),
+                new MediaFileManager(fileSystem, null, null, null, null),
                 null,
                 urlProvider.Object,
                 _settings, 
@@ -178,7 +178,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
+            ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
         [Test]
@@ -189,7 +189,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             urlProvider.Setup(p => p.GetMediaUrl(umbContent, It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns("test.svg");
             var fileSystem = Mock.Of<IFileSystem>(fs => fs.FileExists(It.IsAny<string>()) && fs.OpenFile(It.IsAny<string>()) == new MemoryStream(Encoding.UTF8.GetBytes("test svg")));
             var tagHelper = new InlineSvgTagHelper(
-                new MediaFileManager(fileSystem, null, null, null, null, Mock.Of<IOptions<ContentSettings>>()),
+                new MediaFileManager(fileSystem, null, null, null, null),
                 null,
                 urlProvider.Object,
                 _settings, 
@@ -201,10 +201,10 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.IsNull(_output?.TagName);
-            Assert.AreEqual("test svg", _output.Content.GetContent());
-            Assert.IsFalse(_output.Attributes.ContainsName("src"));
-            Assert.IsFalse(_output.Attributes.ContainsName("media-item"));
+            ClassicAssert.IsNull(_output?.TagName);
+            ClassicAssert.AreEqual("test svg", _output.Content.GetContent());
+            ClassicAssert.IsFalse(_output.Attributes.ContainsName("src"));
+            ClassicAssert.IsFalse(_output.Attributes.ContainsName("media-item"));
         }
 
         [Test]
@@ -222,7 +222,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             tagHelper.Process(_context, _output);
 
-            Assert.AreEqual("<a xlink:href=\"syntax:error:alert('test');\">Click here</a>end", _output.Content.GetContent());
+            ClassicAssert.AreEqual("<a xlink:href=\"syntax:error:alert('test');\">Click here</a>end", _output.Content.GetContent());
         }
     }
 }

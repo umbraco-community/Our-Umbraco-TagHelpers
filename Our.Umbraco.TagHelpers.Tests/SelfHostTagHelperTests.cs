@@ -5,6 +5,7 @@ using Our.Umbraco.TagHelpers.Models;
 using Our.Umbraco.TagHelpers.Services;
 using Our.Umbraco.TagHelpers.Tests.Helpers;
 using System.Threading.Tasks;
+using NUnit.Framework.Legacy;
 
 namespace Our.Umbraco.TagHelpers.Tests
 {
@@ -29,7 +30,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             await tagHelper.ProcessAsync(tagHelperContext, output);
 
             // Assert
-            Assert.AreEqual("/media/test.jpg", output.Attributes["src"].Value);
+            ClassicAssert.AreEqual("/media/test.jpg", output.Attributes["src"].Value);
         }
 
         [Test]
@@ -50,7 +51,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             await tagHelper.ProcessAsync(tagHelperContext, output);
 
             // Assert
-            Assert.AreEqual("/media/test.pdf", output.Attributes["href"].Value);
+            ClassicAssert.AreEqual("/media/test.pdf", output.Attributes["href"].Value);
         }
 
         [Test]
@@ -71,7 +72,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             await tagHelper.ProcessAsync(tagHelperContext, output);
 
             // Assert
-            Assert.IsFalse(output.Attributes.ContainsName("our-self-host"));
+            ClassicAssert.IsFalse(output.Attributes.ContainsName("our-self-host"));
         }
 
         [Test]
@@ -93,7 +94,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             await tagHelper.ProcessAsync(tagHelperContext, output);
 
             // Assert
-            Assert.IsFalse(output.Attributes.ContainsName("folder"));
+            ClassicAssert.IsFalse(output.Attributes.ContainsName("folder"));
         }
 
         [Test]
@@ -115,7 +116,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             await tagHelper.ProcessAsync(tagHelperContext, output);
 
             // Assert
-            Assert.IsFalse(output.Attributes.ContainsName("ext"));
+            ClassicAssert.IsFalse(output.Attributes.ContainsName("ext"));
         }
 
         [Test]
@@ -137,7 +138,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             await tagHelper.ProcessAsync(tagHelperContext, output);
 
             // Assert
-            Assert.IsTrue(output.Attributes.ContainsName("src") && output.Attributes["src"].Value.ToString().EndsWith(tagHelper.Extension));
+            ClassicAssert.IsTrue(output.Attributes.ContainsName("src") && output.Attributes["src"].Value.ToString().EndsWith(tagHelper.Extension));
         }
 
         [Test]
@@ -159,7 +160,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             await tagHelper.ProcessAsync(tagHelperContext, output);
 
             // Assert
-            Assert.IsTrue(output.Attributes.ContainsName("href") && output.Attributes["href"].Value.ToString().EndsWith(tagHelper.Extension));
+            ClassicAssert.IsTrue(output.Attributes.ContainsName("href") && output.Attributes["href"].Value.ToString().EndsWith(tagHelper.Extension));
         }
     }
 }
