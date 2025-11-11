@@ -1,0 +1,5 @@
+<Project>
+	<ItemGroup>
+		<UmbracoJsonSchemaFiles Include="$(MSBuildThisFileDirectory)..\appsettings-schema.our.umbraco.taghelpers.json" Weight="-80" />
+	</ItemGroup>
+</Project>
