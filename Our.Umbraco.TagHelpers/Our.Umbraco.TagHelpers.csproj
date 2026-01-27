@@ -30,6 +30,7 @@
 		<PackageTags>Umbraco;TagHelper;TagHelpers;UmbracoCMS;umbraco-marketplace</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Nullable>enable</Nullable>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -49,6 +50,7 @@
 
 	<ItemGroup>
 		<!-- Include files in package -->
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
     <None Include="..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\appsettings-schema.our.umbraco.taghelpers.json" Pack="true" PackagePath="\" />
     <None Include="TagHelperLogo.png" Pack="true" PackagePath="\" />
