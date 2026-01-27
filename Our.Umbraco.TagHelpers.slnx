@@ -1,8 +1,9 @@
 <Solution>
   <Folder Name="/Build/">
     <File Path=".github/workflows/codeql-analysis.yml" />
-    <File Path=".github/workflows/dotnet.yml" />
-    <File Path=".github/workflows/release-nuget.yml" />
+    <File Path="appsettings-schema.our.umbraco.taghelpers.json" />
+    <File Path="README.md" />
+    <File Path="umbraco-marketplace.json" />
   </Folder>
   <Project Path="Our.Umbraco.TagHelpers.Tests/Our.Umbraco.TagHelpers.Tests.csproj" />
   <Project Path="Our.Umbraco.TagHelpers.TestSite/Our.Umbraco.TagHelpers.TestSite.csproj" />
