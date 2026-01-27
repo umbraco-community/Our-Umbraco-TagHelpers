@@ -43,16 +43,16 @@
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
+  <ItemGroup>
+    <Content Include="buildTransitive\**" PackagePath="buildTransitive" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<!-- Include files in package -->
-		<None Include="TagHelperLogo.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-		<None Include="..\README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\appsettings-schema.our.umbraco.taghelpers.json" Pack="true" PackagePath="\" />
+    <None Include="TagHelperLogo.png" Pack="true" PackagePath="\" />
+
+  </ItemGroup>
 
 </Project>
