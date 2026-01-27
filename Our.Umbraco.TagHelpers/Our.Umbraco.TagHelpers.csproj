@@ -43,6 +43,10 @@
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
+  <ItemGroup>
+    <Content Include="buildTransitive\**" PackagePath="buildTransitive" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<!-- Include files in package -->
     <None Include="..\README.md" Pack="true" PackagePath="\" />
