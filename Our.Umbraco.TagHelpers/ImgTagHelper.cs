@@ -467,7 +467,7 @@ namespace Our.Umbraco.TagHelpers
             if (uri == null) return url;
 
             var baseUri = isRelativeUrl
-                ? uri.GetComponents(UriComponents.Path, UriFormat.UriEscaped)
+                ? uri.AbsolutePath
                 : uri.GetComponents(UriComponents.Scheme | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
 
             var query = QueryHelpers.ParseQuery(uri.Query);
