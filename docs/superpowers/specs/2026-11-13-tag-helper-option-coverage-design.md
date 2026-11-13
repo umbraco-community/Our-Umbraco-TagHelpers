@@ -29,25 +29,28 @@ The cross-version suite covers every tag helper on its main path. Several per-ta
 ## Constraints
 
 - Same four sites (one per Umbraco version) and the same `npm test` entry point. No extra sites.
-- The demo must keep working on a fresh install: content, users, members and groups that tests need are created by the tests, not committed as uSync data or as the local DB.
+- The demo must keep working on a fresh install: content comes from uSync, and users, members and groups from the TestSite migration. No database or password hashes are committed. Nothing is added to the shipped package.
 - Tests may run in parallel across spec files. Anything that publishes content or changes files on disk must not break another spec's assertions.
 - Work happens on `v2/feature/multi-version-support`, with granular commits (one per tag helper where practical) and no `Co-Authored-By` trailer. Nothing is pushed.
 
 ## Approach
 
-**Chosen:** the tests create the users, groups and members they need, and publish content, through Umbraco's Management API, once per version in the existing setup project (`specs/backoffice.setup.ts`). Each extra identity gets its own saved session (storage state), like the admin one today.
+**Chosen (Warren, 2026-11-13):** a package migration in the TestSite project (not in the shipped package) creates the demo people on first boot: the user group, users, member group and member. Passwords are set at runtime through Umbraco's services, so no hashes are committed. Credentials sit in `appsettings.Development.json` next to the existing unattended admin login. The setup project (`specs/backoffice.setup.ts`) logs each identity in and saves a session for it (storage state), like the admin one today. Publishing and preview, which happen *during* the cache tests, use Umbraco's Management API from the tests.
 
 **Considered:**
-- *Committing the users, groups and members to uSync.* uSync doesn't sync backoffice users, and committed member passwords are poor practice. Rejected.
-- *Driving the backoffice UI to create them.* Works, but the backoffice UI changes between 16 and 19 and is slow. Rejected in favour of the API, which is stable across these versions.
+- *Creating them from the tests through the Management API.* Works on 16–19 (probed), but the demo backoffice then has no users or members for someone trying the samples by hand. Replaced by the migration.
+- *uSync.* Free uSync has no user or member handlers. `uSync.PeopleEdition` does (disabled in the Default set until enabled), but its `license.txt` is the paid uSync.Complete agreement: a 60-day trial, then a licence for continued use. That doesn't fit an open-source repo and CI. Rejected.
+- *Driving the backoffice UI.* Slow, and the UI changes between 16 and 19. Rejected.
 
 ## Design decisions
 
-- **Identities**, created in setup per version:
-  - An Editor user in the built-in `editor` group, with a saved session.
-  - A user in a new user group that has no Content section access (for example, Media only), with a saved session.
-  - A `Staff` member group and a member in it, with a saved session (logged in through the demo's member login form).
-- **Publishing:** a helper republishes a named content node through the Management API, using the admin session. Specs that publish run serially with the other cache specs (one file, `test.describe.configure({ mode: 'serial' })`). Only the `our-cache` spec reads cache timestamps, so a publish doesn't disturb other specs.
+- **Demo people**, created by the TestSite migration on first boot (each skipped if it already exists):
+  - An Editor user in the built-in `editor` group.
+  - A user in a new "Demo No Content" user group (alias `demoNoContent`) with only the Media section.
+  - A `Staff` member group and a member in it, of the default `Member` type.
+  - Emails and one shared password come from `appsettings.Development.json` (`TestSite:DemoPeople`). Without that config the migration creates nothing, so nothing like it reaches other environments.
+- **Sessions:** setup logs in the two users through the backoffice login and the member through the demo's member login form, and saves a session for each.
+- **Publishing:** a test helper republishes a named content node through the Management API, using the admin session. Specs that publish run serially with the other cache specs (one file, `test.describe.configure({ mode: 'serial' })`). Only the `our-cache` spec reads cache timestamps, so a publish doesn't disturb other specs.
 - **Demo sample fixes found along the way:**
   - In the user sample, "Everyone except Admin or Editor" has `our-user-exclude="editor"`; it should be `admin,editor`.
   - The user and member samples describe `*` and `?` the wrong way round. In the code, `?` means anonymous and `*` means logged in.
@@ -57,7 +60,7 @@ The cross-version suite covers every tag helper on its main path. Several per-ta
 
 ## Left to the builder
 
-- Exact Management API endpoints and payloads, and how to authenticate them from the saved admin session (bearer token or cookie) on each of 16 to 19. Confirm with a quick probe on each version first.
+- Exact service calls in the migration. If an API differs between 16 and 19, use a per-version compile symbol set from `UmbracoVersion` in the TestSite project.
 - How to enter preview mode from a test. If it can't be driven reliably on all four versions, cover the debug skip and leave preview as a documented `test.fixme`.
 - Which page and property the `our-fallback` ancestors sample uses.
 - Sample wording and layout. Follow the existing table and section style.
