@@ -1,4 +1,4 @@
-import { test, expect, section } from '../fixtures';
+import { test, expect, section, type Page } from '../fixtures';
 
 const mediaFile = '/media/wqmnqu3q/ashim-d-silva-weyamle9fdm-unsplash.jpg';
 
@@ -59,4 +59,39 @@ test('every rendered image URL resolves', async ({ page, request }) => {
     const response = await request.get(new URL(url, page.url()).toString());
     expect(response.status(), url).toBe(200);
   }
+});
+
+const classAndStyleImg = (page: Page) => section(page, 'our-img').locator('img[src^="/samples/cute-unicorn.jpg?width=300"]');
+
+test('class is applied to the img', async ({ page }) => {
+  await page.goto('/en/');
+  const img = classAndStyleImg(page);
+
+  await expect(img).toHaveClass(/demo-img demo-img--rounded/);
+  await expect(img).toHaveAttribute('width', '300');
+  await expect(img).toHaveAttribute('height', '150');
+});
+
+// Known bug, same on Umbraco 16-19: `style` is bound to ImgTagHelper.ImgStyle, so Razor removes it from the
+// output, and the tag helper only writes it back when OurImg:ApplyAspectRatio is on. Remove fixme when fixed.
+test.fixme('style is applied to the img', async ({ page }) => {
+  await page.goto('/en/');
+  await expect(classAndStyleImg(page)).toHaveAttribute('style', /border: 2px solid green/);
+});
+
+test('large breakpoints render sources with the large media queries', async ({ page }) => {
+  await page.goto('/en/');
+  const picture = section(page, 'our-img').locator('picture').last();
+
+  const large = picture.locator('source[media="(min-width: 992px)"]');
+  await expect(large).toHaveAttribute('width', '500');
+  await expect(large).toHaveAttribute('height', '250');
+
+  const extraLarge = picture.locator('source[media="(min-width: 1200px)"]');
+  await expect(extraLarge).toHaveAttribute('width', '600');
+  await expect(extraLarge).toHaveAttribute('srcset', new RegExp(`^${mediaFile}\\?cc=`));
+
+  const extraExtraLarge = picture.locator('source[media="(min-width: 1400px)"]');
+  await expect(extraExtraLarge).toHaveAttribute('width', '800');
+  await expect(extraExtraLarge).toHaveAttribute('srcset', new RegExp(`^${mediaFile}\\?cc=`));
 });
