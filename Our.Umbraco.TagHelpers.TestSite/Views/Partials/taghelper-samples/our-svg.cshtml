@@ -28,6 +28,33 @@
     <our-svg media-item="logo" ensure-viewbox="true" />
 </div>
 
-<ul>
-    <li>TODO: With Cache</li>
-</ul>
+<h3>Options</h3>
+
+<p>A <code>class</code> is added to the inlined &lt;svg&gt;:</p>
+<div data-demo="class" style="max-width: 10vw">
+    <our-svg src="/samples/partying-face.svg" class="demo-svg demo-svg--large" />
+</div>
+
+<p>
+    This site sets <code>Our.Umbraco.TagHelpers:OurSVG:EnsureViewBox</code> to true in appsettings.json,
+    so a viewBox is added even without the <code>ensure-viewbox</code> attribute:
+</p>
+<div data-demo="appsettings" style="max-width: 10vw">
+    <our-svg src="/samples/partying-face.svg" />
+</div>
+
+<p><code>ignore-appsettings</code> uses only the attributes on the tag, so this one keeps its width and height and gets no viewBox:</p>
+<div data-demo="ignore-appsettings" style="max-width: 10vw">
+    <our-svg src="/samples/partying-face.svg" ignore-appsettings="true" />
+</div>
+
+<p>
+    <code>cache</code> keeps the file contents in Umbraco's runtime cache (for <code>cache-minutes</code>, default 180),
+    so changes to the file only show once the cache expires. The second copy of the same file is not cached:
+</p>
+<div data-demo="cached" style="display: inline-block">
+    <our-svg src="/samples/cache-demo.svg" cache="true" cache-minutes="5" />
+</div>
+<div data-demo="uncached" style="display: inline-block">
+    <our-svg src="/samples/cache-demo.svg" />
+</div>

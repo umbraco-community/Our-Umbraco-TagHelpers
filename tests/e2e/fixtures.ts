@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export { expect, type Page };
+export { expect, type Locator, type Page };
 
 const e2eDir = fileURLToPath(new URL('.', import.meta.url));
 
@@ -13,6 +13,11 @@ export type Identity = 'backoffice' | 'editor' | 'no-content-user' | 'staff-memb
 /** Saved session for one identity on one Umbraco major. */
 export function authFile(umbracoMajor: number, identity: Identity): string {
   return join(e2eDir, '.data', `v${umbracoMajor}`, `${identity}-auth.json`);
+}
+
+/** Folder the TestSite for one Umbraco major is published to and run from (see scripts/start-site.mjs). */
+export function siteRoot(umbracoMajor: number): string {
+  return join(e2eDir, '.data', `v${umbracoMajor}`, 'app');
 }
 
 /** Saved backoffice session for the unattended admin user. */
