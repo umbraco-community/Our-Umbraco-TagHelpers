@@ -34,7 +34,7 @@ namespace Our.Umbraco.TagHelpers.Composing
                 Extensions = []
             };
             
-            return Task.FromResult(manifest.AsEnumerableOfOne());
+            return Task.FromResult<IEnumerable<PackageManifest>>([manifest]);
         }
     }
 }
