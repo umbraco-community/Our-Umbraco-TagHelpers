@@ -1,11 +1,32 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export { expect, type Page };
 
-/** `test` with the Umbraco major of the current project (v16..v19) available as a fixture. */
-export const test = base.extend<{ umbracoMajor: number }>({
+const e2eDir = fileURLToPath(new URL('.', import.meta.url));
+
+/** Saved backoffice session for one Umbraco major, written by specs/backoffice.setup.ts. */
+export function backofficeAuthFile(umbracoMajor: number): string {
+  return join(e2eDir, '.data', `v${umbracoMajor}`, 'backoffice-auth.json');
+}
+
+type Fixtures = {
+  /** Umbraco major of the current project (v16..v19). */
+  umbracoMajor: number;
+  /** A page in its own browser context, logged into the backoffice as the unattended admin user. */
+  backofficePage: Page;
+};
+
+export const test = base.extend<Fixtures>({
   umbracoMajor: async ({}, use, testInfo) => {
     await use(Number(testInfo.project.metadata.umbracoMajor));
+  },
+  backofficePage: async ({ browser, umbracoMajor, baseURL }, use) => {
+    const context = await browser.newContext({ baseURL, storageState: backofficeAuthFile(umbracoMajor) });
+    const page = await context.newPage();
+    await use(page);
+    await context.close();
   },
 });
 

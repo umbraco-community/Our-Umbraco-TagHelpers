@@ -19,11 +19,22 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: versions.map((v) => ({
-    name: `v${v}`,
-    use: { baseURL: `http://localhost:50${v}` },
-    metadata: { umbracoMajor: v },
-  })),
+  // Per version: a setup project logs into the backoffice once and saves the session
+  // (the demo disallows concurrent logins of the same user), then the version's tests run.
+  projects: versions.flatMap((v) => [
+    {
+      name: `setup-v${v}`,
+      testMatch: /.*\.setup\.ts/,
+      use: { baseURL: `http://localhost:50${v}` },
+      metadata: { umbracoMajor: v },
+    },
+    {
+      name: `v${v}`,
+      dependencies: [`setup-v${v}`],
+      use: { baseURL: `http://localhost:50${v}` },
+      metadata: { umbracoMajor: v },
+    },
+  ]),
   webServer: versions.map((v) => ({
     command: `node scripts/start-site.mjs ${v}`,
     url: `http://localhost:50${v}/`,
