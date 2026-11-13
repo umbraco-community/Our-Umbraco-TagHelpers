@@ -632,6 +632,33 @@ This will save the file as `/assets/alpinejs.js`, enabling eg. MIME types for .j
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
 
+## Demo site & cross-version tests
+
+The package supports Umbraco 16, 17, 18 and 19 from a single NuGet package (`net9.0`, `net10.0` and `net11.0` builds).
+
+### Demo site
+`Our.Umbraco.TagHelpers.TestSite` is a demo site with a sample of every tag helper. It runs Umbraco 17 (LTS) by default and imports its content with uSync on first boot:
+
+```bash
+dotnet run --project Our.Umbraco.TagHelpers.TestSite
+```
+
+Pass `-p:UmbracoVersion=16|17|18|19` to build or run it against another supported Umbraco version, e.g. `dotnet run --project Our.Umbraco.TagHelpers.TestSite -p:UmbracoVersion=19`.
+
+### Cross-version tests
+`tests/e2e` contains [Playwright](https://playwright.dev) tests that publish the demo site for each Umbraco version, start it with a fresh database and check every tag helper sample renders as expected. They also run in GitHub Actions on every pull request.
+
+Prerequisites: Node.js LTS and the .NET runtimes for the versions you test (.NET 9 for Umbraco 16, .NET 10 for 17 and 18, .NET 11 for 19).
+
+```bash
+cd tests/e2e
+npm ci
+npx playwright install chromium
+npx playwright test                         # all versions
+UMBRACO_VERSIONS=17,19 npx playwright test  # selected versions
+npx playwright show-report                  # HTML report, with screenshots and traces of failures
+```
+
 ## Video 📺
 
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)
