@@ -48,7 +48,8 @@ jobs:
         working-directory: tests/e2e
         env:
           UMBRACO_VERSIONS: ${{ matrix.umbraco }}
-        run: npx playwright test
+        # npm test builds the library first, then runs Playwright
+        run: npm test
 
       - name: Upload Playwright report
         if: failure()

@@ -5,10 +5,9 @@
 // install and uSync first-boot import (no stale database, indexes, logs or downloaded assets).
 
 import { spawn, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, openSync, rmSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { setTimeout as sleep } from 'node:timers/promises';
+import { cpSync, existsSync, mkdirSync, openSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { configuration, libraryBuildProblem, repoRoot } from './library.mjs';
 
 const dotnetMajorFor = { 16: 9, 17: 10, 18: 10, 19: 11 };
 
@@ -19,8 +18,7 @@ if (!dotnetMajor) {
   process.exit(1);
 }
 
-const e2eDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const repoRoot = resolve(e2eDir, '..', '..');
+const e2eDir = join(repoRoot, 'tests', 'e2e');
 const siteProject = join(repoRoot, 'Our.Umbraco.TagHelpers.TestSite');
 const dataDir = join(e2eDir, '.data', `v${version}`);
 const appDir = join(dataDir, 'app');
@@ -33,39 +31,24 @@ if (runtimes.status !== 0 || !new RegExp(`^Microsoft\\.AspNetCore\\.App ${dotnet
   process.exit(1);
 }
 
+// The sites publish in parallel, so they must not build the shared library project themselves
+// (concurrent builds of one project write the same obj/bin files). `npm test` builds it once first.
+// Refuse to run against a missing or stale build rather than silently testing old code.
+const problem = libraryBuildProblem(`net${dotnetMajor}.0`);
+if (problem) {
+  console.error(`Cannot start Umbraco ${version}: ${problem}. Run the tests with \`npm test\` (or run \`npm run build:library\` first).`);
+  process.exit(1);
+}
+
 rmSync(dataDir, { recursive: true, force: true });
 mkdirSync(dataDir, { recursive: true });
 
-// All versions build the same library project; publish one at a time so they never
-// write to its obj/bin folders concurrently.
-const lockDir = join(e2eDir, '.data', '.publish.lock');
-async function withPublishLock(fn) {
-  for (;;) {
-    try {
-      mkdirSync(lockDir);
-      break;
-    } catch {
-      // A lock left behind by an interrupted run would otherwise block every future run
-      try {
-        if (Date.now() - statSync(lockDir).mtimeMs > 15 * 60_000) rmSync(lockDir, { recursive: true, force: true });
-      } catch {}
-      await sleep(500);
-    }
-  }
-  try {
-    return fn();
-  } finally {
-    rmSync(lockDir, { recursive: true, force: true });
-  }
-}
-
 console.log(`[v${version}] publishing TestSite for Umbraco ${version}...`);
-const publish = await withPublishLock(() =>
-  spawnSync(
-    'dotnet',
-    ['publish', siteProject, '-c', 'Release', `-p:UmbracoVersion=${version}`, '-o', appDir, '-nologo', '-v', 'q', '-clp:ErrorsOnly;NoSummary'],
-    { stdio: 'inherit' },
-  ),
+// --no-dependencies: restore and build only the TestSite, using the library build from above
+const publish = spawnSync(
+  'dotnet',
+  ['publish', siteProject, '--no-dependencies', '-c', configuration, `-p:UmbracoVersion=${version}`, '-o', appDir, '-nologo', '-v', 'q', '-clp:ErrorsOnly;NoSummary'],
+  { stdio: 'inherit' },
 );
 if (publish.status !== 0) {
   console.error(`[v${version}] dotnet publish failed`);

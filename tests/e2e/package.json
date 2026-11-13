@@ -4,6 +4,8 @@
   "description": "Cross-version Playwright tests for Our.Umbraco.TagHelpers (Umbraco 16-19)",
   "type": "module",
   "scripts": {
+    "build:library": "node scripts/build-library.mjs",
+    "pretest": "npm run build:library",
     "test": "playwright test",
     "typecheck": "tsc --noEmit",
     "report": "playwright show-report"
