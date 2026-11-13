@@ -3,8 +3,14 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Our.Umbraco.TagHelpers.Extensions;
 using Our.Umbraco.TagHelpers.Services;
 using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
+using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Web;
+using Umbraco.Extensions;
 
 namespace Our.Umbraco.TagHelpers
 {
@@ -17,12 +23,17 @@ namespace Our.Umbraco.TagHelpers
     public class EditLinkTagHelper : TagHelper
     {
         private readonly IBackofficeUserAccessor _backofficeUserAccessor;
-        private IUmbracoContextAccessor _umbracoContextAccessor;
+        private readonly IUmbracoContextAccessor _umbracoContextAccessor;
+        private readonly IUserService _userService;
 
-        public EditLinkTagHelper(IBackofficeUserAccessor backofficeUserAccessor, IUmbracoContextAccessor umbracoContextAccessor)
+        public EditLinkTagHelper(
+            IBackofficeUserAccessor backofficeUserAccessor,
+            IUmbracoContextAccessor umbracoContextAccessor,
+            IUserService userService)
         {
             _backofficeUserAccessor = backofficeUserAccessor;
             _umbracoContextAccessor = umbracoContextAccessor;
+            _userService = userService;
         }
 
         /// <summary>
@@ -38,7 +49,7 @@ namespace Our.Umbraco.TagHelpers
         [HtmlAttributeName("use-default-styles")]
         public bool UseDefaultStyles { get; set; } = false;
 
-        public override void Process(TagHelperContext context, TagHelperOutput output)
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             // Turn <our-edit-link> into an <a> tag
             output.TagName = "a";
@@ -48,7 +59,7 @@ namespace Our.Umbraco.TagHelpers
 
             // Check if the user is logged in to the backoffice
             // and they have access to the content section
-            if (_backofficeUserAccessor?.BackofficeUser != null && _backofficeUserAccessor.BackofficeUser.IsAllowedToSeeEditLink())
+            if (await IsAllowedToSeeEditLinkAsync(_backofficeUserAccessor?.BackofficeUser))
             {
                 // Try & get Umbraco Current Node Key (Only do this if ContentKey has NOT been set)
                 if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) && string.IsNullOrWhiteSpace(ContentKey))
@@ -92,6 +103,28 @@ namespace Our.Umbraco.TagHelpers
                 output.SuppressOutput();
                 return;
             }
+        }
+
+        /// <summary>
+        /// The user must be logged into the backoffice and have access to the content section.
+        /// Section access is read from the user record rather than a cookie claim, as the
+        /// allowed-applications claim type was removed from Umbraco in v19.
+        /// </summary>
+        private async Task<bool> IsAllowedToSeeEditLinkAsync(ClaimsIdentity? identity)
+        {
+            if (identity is null || !identity.IsLoggedIntoUmbraco())
+            {
+                return false;
+            }
+
+            var userKey = identity.GetUserKey();
+            if (userKey is null)
+            {
+                return false;
+            }
+
+            var user = await _userService.GetAsync(userKey.Value);
+            return user?.AllowedSections.Contains(Constants.Applications.Content) == true;
         }
 
         /// <summary>
