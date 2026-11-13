@@ -1,6 +1,6 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
 
-export { expect };
+export { expect, type Page };
 
 /** `test` with the Umbraco major of the current project (v16..v19) available as a fixture. */
 export const test = base.extend<{ umbracoMajor: number }>({
