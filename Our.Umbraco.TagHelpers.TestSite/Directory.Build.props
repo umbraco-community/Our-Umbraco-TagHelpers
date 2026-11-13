@@ -1,0 +1,14 @@
+<Project>
+  <!--
+    Applies to the TestSite only (the library and test projects live in sibling folders).
+    Each Umbraco version restores and builds into its own bin/obj folder, because 17 and 18
+    share net10.0 and would otherwise overwrite each other's restore output.
+  -->
+  <PropertyGroup>
+    <UmbracoVersion Condition="'$(UmbracoVersion)' == ''">17</UmbracoVersion>
+    <BaseIntermediateOutputPath>obj\u$(UmbracoVersion)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin\u$(UmbracoVersion)\</BaseOutputPath>
+    <!-- Keep other versions' (and older, pre-switch) build output out of the default item globs -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj\**;bin\**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
