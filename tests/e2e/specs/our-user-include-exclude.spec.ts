@@ -19,6 +19,24 @@ test('backoffice admin sees the admin and logged-in variants', async ({ backoffi
     'Only users in the ✅ Admin or ✅ Editor user group will see this.',
     'Only ✅ logged in users will see this.',
     'Everyone except ❌ Editor users can see this.',
+    'Everyone except ❌ Anonymous users will see this.',
+  ]);
+});
+
+test('editor sees the editor and logged-in variants', async ({ editorPage: page }) => {
+  await page.goto('/en/');
+  await expect(visibleLines(page)).toHaveText([
+    'Only users in the ✅ Admin or ✅ Editor user group will see this.',
+    'Only ✅ logged in users will see this.',
+    'Everyone except ❌ Anonymous users will see this.',
+  ]);
+});
+
+test('user outside admin and editor groups sees only the logged-in variants', async ({ noContentUserPage: page }) => {
+  await page.goto('/en/');
+  await expect(visibleLines(page)).toHaveText([
+    'Only ✅ logged in users will see this.',
+    'Everyone except ❌ Editor users can see this.',
     'Everyone except ❌ Admin or ❌ Editor users can see this.',
     'Everyone except ❌ Anonymous users will see this.',
   ]);
