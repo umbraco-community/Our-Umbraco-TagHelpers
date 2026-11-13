@@ -4,8 +4,9 @@ import { test, loginToBackoffice, loginMember, authFile, demoPeople, type Identi
 // Each login is saved as a session the specs reuse through fixtures (backofficePage, editorPage, ...).
 // The demo people are created by the TestSite on first boot (Migrations/AddDemoPeople.cs).
 
-// The first logins after boot wait for the backoffice to warm up (see loginToBackoffice)
-test.describe.configure({ timeout: 90_000 });
+// One login at a time: concurrent first logins on a fresh Umbraco 16 site race in OpenIddict
+// ("The specified 'client_id' is invalid"). The first logins also wait for the backoffice to warm up.
+test.describe.configure({ mode: 'serial', timeout: 120_000 });
 
 async function saveSession(page: Page, umbracoMajor: number, identity: Identity) {
   await page.context().storageState({ path: authFile(umbracoMajor, identity) });

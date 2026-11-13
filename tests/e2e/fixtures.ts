@@ -93,15 +93,16 @@ export async function loginToBackoffice(page: Page, credentials?: Credentials): 
   const email = credentials?.email ?? process.env.E2E_BACKOFFICE_EMAIL ?? 'warren@hackmakedo.com';
   const password = credentials?.password ?? process.env.E2E_BACKOFFICE_PASSWORD ?? 'password1234';
 
-  await page.goto('/umbraco');
   // The login page is a web component; CSS locators pierce its shadow DOM.
   const emailInput = page.locator('input[type="email"], input[name="username"]').first();
   const passwordInput = page.locator('input[type="password"]').first();
-  await emailInput.waitFor({ timeout: 60_000 });
 
-  // While the backoffice is still loading (several logins at once on a freshly booted site), the
-  // login form can re-render and drop what was typed, so the submit does nothing. Retry until it lands.
+  // On a freshly booted site the login form can re-render and drop what was typed (so the submit does
+  // nothing), and Umbraco 16 can answer the first authorize request with "client_id is invalid".
+  // Start over from /umbraco until the login lands.
   await expect(async () => {
+    await page.goto('/umbraco');
+    await emailInput.waitFor({ timeout: 30_000 });
     await emailInput.fill(email);
     await passwordInput.fill(password);
     await expect(emailInput).toHaveValue(email);
