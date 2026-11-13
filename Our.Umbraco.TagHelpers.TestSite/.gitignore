@@ -478,5 +478,8 @@ umbraco-package-schema.json
 # Log files
 /umbraco/Logs/
 
+# ModelsBuilder flag marking generated models as out of date with the database
+/umbraco/models/ood.flag
+
 # Media files
 #/wwwroot/media/
