@@ -158,6 +158,14 @@ namespace Our.Umbraco.TagHelpers.Tests
             ClassicAssert.IsTrue(_output.Content.IsEmptyOrWhiteSpace);
         }
 
+        // Umbraco 19 added a Lazy<ICoreScopeProvider> parameter to the MediaFileManager constructor
+        private static MediaFileManager CreateMediaFileManager(IFileSystem fileSystem) =>
+#if NET11_0_OR_GREATER
+            new MediaFileManager(fileSystem, null, null, null, null, null);
+#else
+            new MediaFileManager(fileSystem, null, null, null, null);
+#endif
+
         [Test]
         public void NoOutputIfMediaNotFound()
         {
@@ -166,7 +174,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             urlProvider.Setup(p => p.GetMediaUrl(umbContent, It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns("test.svg");
             var fileSystem = Mock.Of<IFileSystem>(fs => !fs.FileExists(It.IsAny<string>()));
             var tagHelper = new InlineSvgTagHelper(
-                new MediaFileManager(fileSystem, null, null, null, null),
+                CreateMediaFileManager(fileSystem),
                 null,
                 urlProvider.Object,
                 _settings, 
@@ -189,7 +197,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             urlProvider.Setup(p => p.GetMediaUrl(umbContent, It.IsAny<UrlMode>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>())).Returns("test.svg");
             var fileSystem = Mock.Of<IFileSystem>(fs => fs.FileExists(It.IsAny<string>()) && fs.OpenFile(It.IsAny<string>()) == new MemoryStream(Encoding.UTF8.GetBytes("test svg")));
             var tagHelper = new InlineSvgTagHelper(
-                new MediaFileManager(fileSystem, null, null, null, null),
+                CreateMediaFileManager(fileSystem),
                 null,
                 urlProvider.Object,
                 _settings, 
