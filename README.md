@@ -654,10 +654,12 @@ Prerequisites: Node.js LTS and the .NET runtimes for the versions you test (.NET
 cd tests/e2e
 npm ci
 npx playwright install chromium
-npx playwright test                         # all versions
-UMBRACO_VERSIONS=17,19 npx playwright test  # selected versions
-npx playwright show-report                  # HTML report, with screenshots and traces of failures
+npm test                         # builds the library, then tests all versions
+UMBRACO_VERSIONS=17,19 npm test  # selected versions
+npm run report                   # HTML report, with screenshots and traces of failures
 ```
+
+`npm test` builds the package once before the sites are published (they publish in parallel and must not build the same project at the same time). Running `npx playwright test` directly also works, but a site refuses to start if the package build is missing or older than its source — run `npm run build:library` first.
 
 ## Video 📺
 
