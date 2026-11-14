@@ -40,7 +40,10 @@ export default defineConfig({
     url: `http://localhost:50${v}/`,
     // Publish + unattended install + uSync import
     timeout: 600_000,
-    reuseExistingServer: !process.env.CI,
+    // Always start freshly published sites, so a site left running from an earlier run (serving old
+    // views and data) can't be tested by mistake; if a port is busy, Playwright reports it.
+    // Set E2E_REUSE_SITES=1 to reuse already-running sites while iterating on specs only.
+    reuseExistingServer: !process.env.CI && process.env.E2E_REUSE_SITES === '1',
     stdout: 'pipe' as const,
     stderr: 'pipe' as const,
   })),

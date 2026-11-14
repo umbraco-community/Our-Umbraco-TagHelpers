@@ -8,16 +8,27 @@ on:
 
 jobs:
   e2e:
-    name: Umbraco ${{ matrix.umbraco }}
-    runs-on: ubuntu-latest
+    name: Umbraco ${{ matrix.umbraco }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     # Umbraco 19 is a release candidate: report failures without blocking the PR.
     # Remove when the package moves to Umbraco 19.0.0 stable.
     continue-on-error: ${{ matrix.umbraco == 19 }}
+    # bash on every OS (Git Bash on Windows), so a failing command in a multi-line step fails the step
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         umbraco: [16, 17, 18, 19]
+        os: [ubuntu-latest]
+        # The test scripts must also work on Windows and macOS: run the LTS there too
+        include:
+          - umbraco: 17
+            os: windows-latest
+          - umbraco: 17
+            os: macos-latest
 
     steps:
       - name: Checkout repository
@@ -55,7 +66,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-v${{ matrix.umbraco }}
+          name: playwright-report-v${{ matrix.umbraco }}-${{ matrix.os }}
           path: |
             tests/e2e/playwright-report
             tests/e2e/.data/v${{ matrix.umbraco }}/site.log

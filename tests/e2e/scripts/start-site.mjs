@@ -40,7 +40,8 @@ if (problem) {
   process.exit(1);
 }
 
-rmSync(dataDir, { recursive: true, force: true });
+// Retries: on Windows a site that has only just stopped can still hold its database file open (EBUSY)
+rmSync(dataDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
 mkdirSync(dataDir, { recursive: true });
 
 console.log(`[v${version}] publishing TestSite for Umbraco ${version}...`);
