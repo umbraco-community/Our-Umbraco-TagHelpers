@@ -37,13 +37,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.3.0" />
 		<PackageReference Include="Stubble.Core" Version="1.10.8" />
-	  
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
+
+	<!-- ASP.NET Core comes from the shared framework (via Umbraco), and Source Link is built into the .NET SDK -->
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
 		<PackageReference Include="Umbraco.Cms.Core" Version="16.0.0" />
