@@ -649,10 +649,10 @@ dotnet run --project Our.Umbraco.TagHelpers.TestSite
   - an Editor user and a user who can only see the Media section (log in at `/umbraco`),
   - a member of the `Staff` member group (log in with the member login form on the home page).
 - Pass `-p:UmbracoVersion=16|17|18|19` to build or run it against another supported Umbraco version, e.g. `dotnet run --project Our.Umbraco.TagHelpers.TestSite -p:UmbracoVersion=19`.
-- Seeing "No published content"? Your local database was created before the uSync first-boot import was set up. Delete `Our.Umbraco.TagHelpers.TestSite/umbraco/Data/Umbraco.sqlite.db*` to get a fresh install with all the content, or import it from the uSync dashboard in the backoffice.
+- Seeing "No published content"? Your local database was created before the uSync first-boot import was set up. Delete `Our.Umbraco.TagHelpers.TestSite/umbraco/Data/Umbraco.sqlite.db*` to get a fresh install with all the content, or import it from the uSync dashboard in the backoffice. The same goes for demo content added later (such as the "Fallback Demo" page under Page A): uSync only imports it on a fresh install or from the dashboard. The demo users and member are created on any boot.
 
 ### Cross-version tests
-`tests/e2e` contains [Playwright](https://playwright.dev) tests that publish the demo site for each Umbraco version, start it with a fresh database and check every tag helper sample renders as expected. They also run in GitHub Actions on every pull request.
+`tests/e2e` contains [Playwright](https://playwright.dev) tests that publish the demo site for each Umbraco version, start it with a fresh database and check every tag helper sample renders as expected. They run in GitHub Actions on every pull request (all versions on Linux, plus Umbraco 17 on Windows and macOS), and locally on Windows, macOS and Linux.
 
 Prerequisites: Node.js LTS and the .NET runtimes for the versions you test (.NET 9 for Umbraco 16, .NET 10 for 17 and 18, .NET 11 for 19).
 
@@ -661,15 +661,28 @@ cd tests/e2e
 npm ci                           # first time only
 npx playwright install chromium  # first time only
 
-npm test                                # builds the library, then tests all versions
-UMBRACO_VERSIONS=17,19 npm test         # selected versions
-npm test -- specs/our-img.spec.ts       # a single spec
-npm run report                          # HTML report, with screenshots and traces of failures
+npm test                                         # builds the library, then tests all versions
+npm test -- specs/our-img.spec.ts                # a single spec
+npm test -- specs/our-form.spec.ts -g "umb-area" # tests whose name matches
+npm run report                                   # HTML report, with screenshots and traces of failures
 ```
 
-Each run publishes the sites into `tests/e2e/.data/` with throwaway databases, so it never touches the demo site's own database. To step through tests in Playwright's UI mode, run `npm run build:library` and then `UMBRACO_VERSIONS=17 npx playwright test --ui`.
+Choose the versions with the `UMBRACO_VERSIONS` environment variable:
+
+| Shell | Command |
+|---|---|
+| bash / zsh (macOS, Linux, Git Bash) | `UMBRACO_VERSIONS=17,19 npm test` |
+| PowerShell | `$env:UMBRACO_VERSIONS="17,19"; npm test` (clear it with `Remove-Item Env:UMBRACO_VERSIONS`) |
+| Command Prompt | `set UMBRACO_VERSIONS=17,19 && npm test` |
+
+Each run publishes the sites into `tests/e2e/.data/` with throwaway databases, so it never touches the demo site's own database. Every run starts freshly published sites on ports 5016–5019; if one of those ports is still in use (for example by a site from an interrupted run), Playwright stops with "is already used" — stop that process and run again. While iterating on specs only, set `E2E_REUSE_SITES=1` to reuse sites that are already running (they keep serving the views they were published with).
+
+To step through tests in Playwright's UI mode, run `npm run build:library` and then `npx playwright test --ui` (with `UMBRACO_VERSIONS` set to the version you want).
 
 `npm test` builds the package once before the sites are published (they publish in parallel and must not build the same project at the same time). Running `npx playwright test` directly also works, but a site refuses to start if the package build is missing or older than its source — run `npm run build:library` first.
+
+### Packing the NuGet package
+`build.ps1` packs the package into `build.out/`. It runs in Windows PowerShell or [PowerShell 7](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) (`pwsh ./build.ps1` on macOS and Linux).
 
 ## Video 📺
 
