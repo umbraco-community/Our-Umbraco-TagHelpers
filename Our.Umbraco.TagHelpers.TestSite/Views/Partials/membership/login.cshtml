@@ -82,7 +82,7 @@ else
     {
         <hr/>
         <h4>Or using external providers</h4>
-        if (externalSignInError?.AuthenticationType is null && externalSignInError?.Errors.Any() == true)
+        if (externalSignInError?.AuthenticationType is null && externalSignInError?.Errors?.Any() == true)
         {
             @Html.DisplayFor(x => externalSignInError.Errors);
         }
