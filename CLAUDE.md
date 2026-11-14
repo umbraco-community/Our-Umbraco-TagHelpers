@@ -7,7 +7,8 @@ Community NuGet package of ASP.NET Core Razor tag helpers for Umbraco. Version 2
 - `Our.Umbraco.TagHelpers/`: the package (tag helpers, services, configuration). This is the only thing that ships.
 - `Our.Umbraco.TagHelpers.Tests/`: NUnit unit tests, run on every target framework.
 - `Our.Umbraco.TagHelpers.TestSite/`: demo site with a sample of every tag helper (`Views/Partials/taghelper-samples/`). Runs Umbraco 17 by default; `-p:UmbracoVersion=16|17|18|19` switches version. Content comes from uSync (`uSync/site/`, imported on first boot). Demo users and members come from a TestSite package migration (`Migrations/AddDemoPeople.cs`, logins in `appsettings.Development.json`).
-- `tests/e2e/`: Playwright suite that publishes and boots the demo site for each Umbraco version and checks every sample.
+- `tests/e2e/`: Playwright suite that publishes and boots the demo site for each Umbraco version and checks every sample. It appears in the solution through `tests/e2e/Our.Umbraco.TagHelpers.E2E.csproj`, a `Microsoft.Build.NoTargets` project that builds nothing and picks up new files automatically.
+- `Our.Umbraco.TagHelpers.slnx`: `.slnx` can't include folders, so single files at the root (workflows, `build.ps1`, docs, this file) are listed one by one in the `/Build/` and `/Docs/` solution folders. Add new ones there.
 - `docs/supporting-a-new-umbraco-version.md`: checklist for adding, promoting or dropping Umbraco/.NET versions. Use the `umbraco-version-support` skill (`.claude/skills/`) to run it.
 - `docs/superpowers/`: design docs and implementation plans from earlier work.
 
