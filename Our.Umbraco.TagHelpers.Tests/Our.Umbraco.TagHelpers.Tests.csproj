@@ -6,6 +6,10 @@
     <IsPackable>false</IsPackable>
 
     <LangVersion>default</LangVersion>
+    <!-- Audit only the packages referenced here. Umbraco is referenced at the lowest version of each major
+         (so the package installs on every patch), which pulls in old transitive packages; sites resolve
+         and audit their own, newer Umbraco dependencies. -->
+    <NuGetAuditMode>direct</NuGetAuditMode>
   </PropertyGroup>
 
   <ItemGroup>
