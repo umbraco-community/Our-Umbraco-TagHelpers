@@ -41,6 +41,13 @@ namespace Our.Umbraco.TagHelpers
             // Attempt to get context
             if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext))
             {
+                if (umbracoContext.PublishedRequest is null)
+                {
+                    // Not a routed Umbraco page, so there is no current page to switch language for
+                    output.SuppressOutput();
+                    return;
+                }
+
                 // Current Culture of the page
                 var currentCulture = umbracoContext.PublishedRequest.Culture;
 
@@ -50,7 +57,7 @@ namespace Our.Umbraco.TagHelpers
                 // All domains in a site
                 // NOTE: A culture/language could have multiple domains assigned (So use the first we find)
                 var allDomains = umbracoContext.Domains.GetAll(false);
-                var allDomainsFiltered = allDomains?.GroupBy(d => d.Culture).Select(g => g.First()).ToList();
+                var allDomainsFiltered = allDomains?.Where(d => d.Culture is not null).GroupBy(d => d.Culture).Select(g => g.First()).ToList();
 
                 if (allDomainsFiltered?.Count() > 0)
                 {
@@ -61,7 +68,7 @@ namespace Our.Umbraco.TagHelpers
                     foreach (var domain in allDomainsFiltered)
                     {
                         // Will get the language such as English or Dansk without the (United States) country prefixed
-                        var culture = new CultureInfo(domain.Culture);
+                        var culture = new CultureInfo(domain.Culture!);
                         var languageName = culture.IsNeutralCulture ? culture.NativeName : culture.Parent.NativeName;
 
                         var lang = new LanguageSwitcherLang

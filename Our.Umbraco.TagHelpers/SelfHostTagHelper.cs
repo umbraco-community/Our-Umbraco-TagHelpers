@@ -26,7 +26,7 @@ namespace Our.Umbraco.TagHelpers
         public string? HrefAttribute { get; set; }
         [HtmlAttributeName("ext")]
         public string? Extension { get; set; }
-        public string Url => SrcAttribute.IfNullOrWhiteSpace(HrefAttribute);
+        public string Url => SrcAttribute.IfNullOrWhiteSpace(HrefAttribute) ?? string.Empty;
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {

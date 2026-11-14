@@ -56,8 +56,14 @@ namespace Our.Umbraco.TagHelpers
 
             output.TagName = ""; // Remove the outer <our-fallback>
 
+            // Without a property there is nothing to look up, so the content inside the tag is shown
+            if (ModelProperty is null)
+            {
+                return;
+            }
+
             // Get the Model property with fallback mode
-            var result = contentNode.Value(ModelProperty?.Name, fallback: Mode, culture: CultureCode);
+            var result = contentNode.Value(ModelProperty.Name, fallback: Mode, culture: CultureCode);
 
             // If we have a value that can be
             if (string.IsNullOrWhiteSpace($"{result}") == false)

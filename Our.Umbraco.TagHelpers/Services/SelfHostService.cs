@@ -35,7 +35,7 @@ namespace Our.Umbraco.TagHelpers.Services
 
         public async Task<SelfHostedFile> SelfHostFile(string url, string? subfolder = null, string? fileExtension = null)
         {
-            return await _runtimeCache.GetCacheItem($"Our.Umbraco.TagHelpers.Services.SelfHostService.SelfHostedFile({url}, {subfolder}, {fileExtension})", async () =>
+            async Task<SelfHostedFile> CreateSelfHostedFile()
             {
                 using (_logger.TraceDuration<ISelfHostService>($"Start generating SelfHostedFile: {url}", $"Finished generating SelfHostedFile: {url}"))
                 {
@@ -51,7 +51,10 @@ namespace Our.Umbraco.TagHelpers.Services
                     selfHostedFile.Url = await GetSelfHostedUrl(selfHostedFile);
                     return selfHostedFile;
                 }
-            });
+            }
+
+            var cacheKey = $"Our.Umbraco.TagHelpers.Services.SelfHostService.SelfHostedFile({url}, {subfolder}, {fileExtension})";
+            return await (_runtimeCache.GetCacheItem(cacheKey, CreateSelfHostedFile) ?? CreateSelfHostedFile());
         }
 
         public string GetFolderPath(Uri uri, string? subfolder = null)
@@ -87,7 +90,7 @@ namespace Our.Umbraco.TagHelpers.Services
         private async Task<string> GetSelfHostedUrl(SelfHostedFile file)
         {
             var filePath = $"{file.FolderPath}/{file.FileName}";
-            var localPath = _hostingEnvironment.MapPathWebRoot(file.FolderPath);
+            var localPath = _hostingEnvironment.MapPathWebRoot(file.FolderPath ?? string.Empty);
             var localFilePath = _hostingEnvironment.MapPathWebRoot(filePath);
 
             if (!File.Exists(localFilePath) && file.ExternalUrl is not null)
