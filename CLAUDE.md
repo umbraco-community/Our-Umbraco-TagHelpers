@@ -1,0 +1,37 @@
+# Our.Umbraco.TagHelpers
+
+Community NuGet package of ASP.NET Core Razor tag helpers for Umbraco. Version 2 is **one package for Umbraco 16, 17, 18 and 19**, multi-targeted `net9.0` (16), `net10.0` (17 LTS and 18) and `net11.0` (19, release candidate).
+
+## Layout
+
+- `Our.Umbraco.TagHelpers/`: the package (tag helpers, services, configuration). This is the only thing that ships.
+- `Our.Umbraco.TagHelpers.Tests/`: NUnit unit tests, run on every target framework.
+- `Our.Umbraco.TagHelpers.TestSite/`: demo site with a sample of every tag helper (`Views/Partials/taghelper-samples/`). Runs Umbraco 17 by default; `-p:UmbracoVersion=16|17|18|19` switches version. Content comes from uSync (`uSync/site/`, imported on first boot). Demo users and members come from a TestSite package migration (`Migrations/AddDemoPeople.cs`, logins in `appsettings.Development.json`).
+- `tests/e2e/`: Playwright suite that publishes and boots the demo site for each Umbraco version and checks every sample.
+- `docs/supporting-a-new-umbraco-version.md`: checklist for adding, promoting or dropping Umbraco/.NET versions. Use the `umbraco-version-support` skill (`.claude/skills/`) to run it.
+- `docs/superpowers/`: design docs and implementation plans from earlier work.
+
+## Commands
+
+All from the repository root unless noted. They work on Windows, macOS and Linux.
+
+```bash
+dotnet build Our.Umbraco.TagHelpers -c Release            # every target framework
+dotnet test Our.Umbraco.TagHelpers.Tests                  # unit tests, every target framework
+dotnet run --project Our.Umbraco.TagHelpers.TestSite      # demo site (https://localhost:44302)
+
+cd tests/e2e && npm test                                  # e2e, all versions (builds the library first)
+cd tests/e2e && npm test -- specs/our-img.spec.ts         # one spec
+```
+
+Choose e2e versions with `UMBRACO_VERSIONS=17,19`. The README shows the PowerShell and Command Prompt forms. Site logs are in `tests/e2e/.data/vN/site.log`.
+
+## Conventions
+
+- **Branches**: `v2/dev` is the long-lived branch for v2.x.x releases. Never merge it into `main`. Do work on a branch off `v2/dev` and PR it back into `v2/dev`.
+- **Commits**: small and granular, with no `Co-Authored-By: Claude` trailer. Don't push or open PRs unless asked.
+- **Cross-version**: any library change must build on every target framework and pass the unit and e2e suites on all four versions. Umbraco 17 and 18 share `net10.0`, so the 17-built DLL must also work on 18 at runtime (watch for members that move between interfaces).
+- **Cross-platform**: scripts and documented commands must work on Windows, macOS and Linux.
+- **Demo samples**: every sample sits in `<section data-sample="name">` in `Views/Home.cshtml` or `Views/Page.cshtml`, which the specs select by. A new tag helper option gets a sample and a spec. Test data the specs need goes in uSync (content) or the TestSite migration (people), never only in a local database.
+- **Known bugs** stay as `test.fixme` with a comment linking the GitHub issue (for example #97, `our-active-class` with culture domains).
+- **Docs**: before relying on Umbraco or library APIs, check current docs (the `ctx7` CLI if available); Umbraco APIs change between majors.
