@@ -2,7 +2,7 @@
 $projectFile = "./Our.Umbraco.TagHelpers/Our.Umbraco.TagHelpers.csproj"
 $configuration = "Release"
 $outputDirectory = "./build.out"
-$version = "2.0.0"
+$version = "2.1.0"
 
 # Delete all files in the output directory
 if (Test-Path $outputDirectory) {
