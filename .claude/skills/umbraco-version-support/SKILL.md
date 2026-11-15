@@ -25,7 +25,7 @@ Follow the checklist's sections in order, one commit per step:
 2. **Unit tests**: target framework, and any `#if` for changed constructors. `dotnet test Our.Umbraco.TagHelpers.Tests` must pass on every framework. Report the pass count per framework.
 3. **Demo site**: the `UmbracoVersion` block and the error text. `dotnet build Our.Umbraco.TagHelpers.TestSite -p:UmbracoVersion=N` must build.
 4. **E2E harness and CI**: `playwright.config.ts`, `scripts/start-site.mjs`, `.github/workflows/e2e.yml` (with `continue-on-error` while it's an RC), `.github/workflows/codeql-analysis.yml`.
-5. **Run the cross-version suite**: in `tests/e2e`, first `UMBRACO_VERSIONS=N npm test`, then `npm test` for every version. Fix failures using the checklist's "When something fails" guide:
+5. **Run the cross-version suite**: in `tests/e2e`, first `UMBRACO_VERSIONS=N npm test`, then `npm test` for every version, then `npm run test:package` (the same suite against the packed `.nupkg`). Fix failures using the checklist's "When something fails" guide:
    - Library fixes must keep every other version passing. A runtime `MissingMethodException` on a version that shares a target framework means building against the older version and avoiding the moved member.
    - Commit each fix separately, with a unit test when the fix is in the library.
    - A failure that's a genuine library bug outside the version work: mark the test `test.fixme` with a comment, draft a GitHub issue for the user, and ask before creating it.
