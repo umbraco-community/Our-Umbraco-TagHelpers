@@ -1,16 +1,26 @@
-# Define the project file and configuration
+# Packs Our.Umbraco.TagHelpers into ./build.out
+# The version comes from <Version> in Our.Umbraco.TagHelpers.csproj; pass -Version to override it,
+# e.g. pwsh ./build.ps1 -Version 2.1.0-rc1
+param(
+    [string]$Version
+)
+
 $projectFile = "./Our.Umbraco.TagHelpers/Our.Umbraco.TagHelpers.csproj"
 $configuration = "Release"
 $outputDirectory = "./build.out"
-$version = "2.1.0"
 
 # Delete all files in the output directory
 if (Test-Path $outputDirectory) {
-    Remove-Item "$outputDirectory/*"
+    Remove-Item "$outputDirectory/*" -Recurse -Force
+}
+
+$packArgs = @($projectFile, "--configuration", $configuration, "--output", $outputDirectory)
+if ($Version) {
+    $packArgs += "/p:Version=$Version"
 }
 
 # Pack the project into a NuGet package
-dotnet pack $projectFile --configuration $configuration --output $outputDirectory /p:Version=$version
+dotnet pack @packArgs
 
 # Check if the pack was successful
 if ($LASTEXITCODE -eq 0) {
