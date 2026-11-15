@@ -7,6 +7,7 @@
     "build:library": "node scripts/build-library.mjs",
     "pretest": "npm run build:library",
     "test": "playwright test",
+    "test:package": "node scripts/test-package.mjs",
     "typecheck": "tsc --noEmit",
     "report": "playwright show-report"
   },

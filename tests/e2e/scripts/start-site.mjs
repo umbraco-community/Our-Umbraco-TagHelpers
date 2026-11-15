@@ -5,9 +5,10 @@
 // install and uSync first-boot import (no stale database, indexes, logs or downloaded assets).
 
 import { spawn, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, openSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, openSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { configuration, libraryBuildProblem, repoRoot } from './library.mjs';
+import { packageFeed, packedVersion, usePackage } from './package.mjs';
 
 const dotnetMajorFor = { 16: 9, 17: 10, 18: 10, 19: 11 };
 
@@ -31,29 +32,62 @@ if (runtimes.status !== 0 || !new RegExp(`^Microsoft\\.AspNetCore\\.App ${dotnet
   process.exit(1);
 }
 
-// The sites publish in parallel, so they must not build the shared library project themselves
-// (concurrent builds of one project write the same obj/bin files). `npm test` builds it once first.
-// Refuse to run against a missing or stale build rather than silently testing old code.
-const problem = libraryBuildProblem(`net${dotnetMajor}.0`);
-if (problem) {
-  console.error(`Cannot start Umbraco ${version}: ${problem}. Run the tests with \`npm test\` (or run \`npm run build:library\` first).`);
-  process.exit(1);
+// Either the Our.Umbraco.TagHelpers project (npm test) or the packed .nupkg (npm run test:package)
+const packageVersion = usePackage() ? packedVersion() : null;
+const tagHelpersArgs = [];
+if (usePackage()) {
+  if (!packageVersion) {
+    console.error(`Cannot start Umbraco ${version}: no package in ${packageFeed}. Run the tests with \`npm run test:package\`.`);
+    process.exit(1);
+  }
+  tagHelpersArgs.push('-p:TagHelpersSource=Package', `-p:TagHelpersPackageVersion=${packageVersion}`, `-p:TagHelpersPackageSource=${packageFeed}`);
+} else {
+  // The sites publish in parallel, so they must not build the shared library project themselves
+  // (concurrent builds of one project write the same obj/bin files). `npm test` builds it once first.
+  // Refuse to run against a missing or stale build rather than silently testing old code.
+  const problem = libraryBuildProblem(`net${dotnetMajor}.0`);
+  if (problem) {
+    console.error(`Cannot start Umbraco ${version}: ${problem}. Run the tests with \`npm test\` (or run \`npm run build:library\` first).`);
+    process.exit(1);
+  }
 }
 
 // Retries: on Windows a site that has only just stopped can still hold its database file open (EBUSY)
 rmSync(dataDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
 mkdirSync(dataDir, { recursive: true });
 
-console.log(`[v${version}] publishing TestSite for Umbraco ${version}...`);
+console.log(`[v${version}] publishing TestSite for Umbraco ${version} with ${packageVersion ? `Our.Umbraco.TagHelpers ${packageVersion} (package)` : 'the Our.Umbraco.TagHelpers project'}...`);
 // --no-dependencies: restore and build only the TestSite, using the library build from above
 const publish = spawnSync(
   'dotnet',
-  ['publish', siteProject, '--no-dependencies', '-c', configuration, `-p:UmbracoVersion=${version}`, '-o', appDir, '-nologo', '-v', 'q', '-clp:ErrorsOnly;NoSummary'],
+  ['publish', siteProject, '--no-dependencies', '-c', configuration, `-p:UmbracoVersion=${version}`, ...tagHelpersArgs, '-o', appDir, '-nologo', '-v', 'q', '-clp:ErrorsOnly;NoSummary'],
   { stdio: 'inherit' },
 );
 if (publish.status !== 0) {
   console.error(`[v${version}] dotnet publish failed`);
   process.exit(publish.status ?? 1);
+}
+
+if (packageVersion) {
+  // Prove the site really runs the package: its deps.json must load the tag helpers from it...
+  const deps = JSON.parse(readFileSync(join(appDir, 'Our.Umbraco.TagHelpers.TestSite.deps.json'), 'utf8'));
+  const library = deps.libraries?.[`Our.Umbraco.TagHelpers/${packageVersion}`];
+  if (library?.type !== 'package') {
+    console.error(`[v${version}] the published site does not use the Our.Umbraco.TagHelpers ${packageVersion} package`);
+    process.exit(1);
+  }
+  // ...and the package's buildTransitive targets must register its appsettings JSON schema with Umbraco
+  const items = spawnSync(
+    'dotnet',
+    ['msbuild', siteProject, `-p:Configuration=${configuration}`, `-p:UmbracoVersion=${version}`, ...tagHelpersArgs, '-getItem:UmbracoJsonSchemaFiles', '-nologo'],
+    { encoding: 'utf8' },
+  );
+  const schemaFiles = items.status === 0 ? JSON.parse(items.stdout).Items.UmbracoJsonSchemaFiles.map((item) => item.Identity) : [];
+  if (!schemaFiles.some((file) => /appsettings-schema\.our\.umbraco\.taghelpers\.json$/.test(file))) {
+    console.error(`[v${version}] the package's appsettings schema was not registered (UmbracoJsonSchemaFiles: ${schemaFiles.join(', ') || `${items.stdout}${items.stderr}`.trim()})`);
+    process.exit(1);
+  }
+  console.log(`[v${version}] verified: tag helpers loaded from the package, appsettings schema registered`);
 }
 
 // Umbraco excludes wwwroot/media from publish (so deploys don't overwrite uploads);
