@@ -664,6 +664,7 @@ npx playwright install chromium  # first time only
 npm test                                         # builds the library, then tests all versions
 npm test -- specs/our-img.spec.ts                # a single spec
 npm test -- specs/our-form.spec.ts -g "umb-area" # tests whose name matches
+npm run test:package                             # the same tests against the packed NuGet package
 npm run report                                   # HTML report, with screenshots and traces of failures
 ```
 
@@ -681,8 +682,19 @@ To step through tests in Playwright's UI mode, run `npm run build:library` and t
 
 `npm test` builds the package once before the sites are published (they publish in parallel and must not build the same project at the same time). Running `npx playwright test` directly also works, but a site refuses to start if the package build is missing or older than its source — run `npm run build:library` first.
 
+`npm test` runs the sites against the `Our.Umbraco.TagHelpers` project. `npm run test:package` tests what would be published instead. It packs the library like `build.ps1`, then installs that `.nupkg` into every site and checks that each site loads the tag helpers from the package and picks up its appsettings schema, before running the same tests. It takes the same arguments and `UMBRACO_VERSIONS`. The package gets a unique prerelease version (such as `2.1.0-e2e.20261115093000`) because NuGet caches packages by version. Pull requests run both modes in GitHub Actions.
+
 ### Packing the NuGet package
-`build.ps1` packs the package into `build.out/`. It runs in Windows PowerShell or [PowerShell 7](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) (`pwsh ./build.ps1` on macOS and Linux).
+`build.ps1` packs the package into `build.out/`. It runs in Windows PowerShell or [PowerShell 7](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) (`pwsh ./build.ps1` on macOS and Linux). The version is the `<Version>` in `Our.Umbraco.TagHelpers/Our.Umbraco.TagHelpers.csproj`; pass `-Version` to override it, e.g. `pwsh ./build.ps1 -Version 2.1.0-rc1`.
+
+To try a packed build in the demo site, pack it with its own version, then run the site against it:
+
+```bash
+pwsh ./build.ps1 -Version 2.1.0-local.1
+dotnet run --project Our.Umbraco.TagHelpers.TestSite -p:TagHelpersSource=Package -p:TagHelpersPackageVersion=2.1.0-local.1
+```
+
+Use a new version for each new build of the package, because NuGet caches packages by version.
 
 ## Video 📺
 

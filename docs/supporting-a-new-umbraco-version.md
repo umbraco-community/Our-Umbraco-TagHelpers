@@ -57,7 +57,10 @@ Then the cross-version suite (see the README for setting `UMBRACO_VERSIONS` in P
 cd tests/e2e
 UMBRACO_VERSIONS=N npm test     # the new version first
 npm test                        # then every version
+npm run test:package            # then every version against the packed .nupkg
 ```
+
+`npm run test:package` catches what only shows up in a real install: the wrong `lib/` folder, a dependency that doesn't restore on one version, or the package's `buildTransitive` schema registration.
 
 When something fails:
 - **A compile error in the library**: an API changed. Prefer a change that compiles on every version. Use `#if NETx_0_OR_GREATER` only when the API genuinely differs per target framework.
@@ -73,6 +76,7 @@ Every site's log is at `tests/e2e/.data/vN/site.log`, and `npm run report` shows
 - Bump the references to the stable version: the library `ItemGroup`, the TestSite `PropertyGroup` and the uSync version.
 - Remove `continue-on-error` for `N` in `.github/workflows/e2e.yml`.
 - Don't release a stable package while it still references a prerelease Umbraco. `dotnet pack` warns about this (`NU5104`).
+- Before releasing, run `npm run test:package` on every version, then bump `<Version>` in `Our.Umbraco.TagHelpers/Our.Umbraco.TagHelpers.csproj` and pack with `build.ps1`.
 
 ## 5. Dropping an old version
 
