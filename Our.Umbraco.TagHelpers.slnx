@@ -8,6 +8,7 @@
     <File Path="umbraco-marketplace.json" />
   </Folder>
   <Folder Name="/Docs/">
+    <File Path=".claude/skills/release-package/SKILL.md" />
     <File Path=".claude/skills/umbraco-version-support/SKILL.md" />
     <File Path="CLAUDE.md" />
     <File Path="docs/supporting-a-new-umbraco-version.md" />

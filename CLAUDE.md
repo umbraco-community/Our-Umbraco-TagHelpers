@@ -10,6 +10,7 @@ Community NuGet package of ASP.NET Core Razor tag helpers for Umbraco. Version 2
 - `tests/e2e/`: Playwright suite that publishes and boots the demo site for each Umbraco version and checks every sample. It appears in the solution through `tests/e2e/Our.Umbraco.TagHelpers.E2E.csproj`, a `Microsoft.Build.NoTargets` project that builds nothing and picks up new files automatically.
 - `Our.Umbraco.TagHelpers.slnx`: `.slnx` can't include folders, so single files at the root (workflows, `build.ps1`, docs, this file) are listed one by one in the `/Build/` and `/Docs/` solution folders. Add new ones there.
 - `docs/supporting-a-new-umbraco-version.md`: checklist for adding, promoting or dropping Umbraco/.NET versions. Use the `umbraco-version-support` skill (`.claude/skills/`) to run it.
+- Releases: the `release-package` skill prepares one (breaking-change and prerelease-dependency checks, tests, version, pack, release notes). The user tags, creates the GitHub release and pushes to NuGet.
 - `docs/superpowers/`: design docs and implementation plans from earlier work.
 
 ## Commands

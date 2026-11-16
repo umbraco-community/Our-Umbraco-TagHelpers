@@ -76,7 +76,7 @@ Every site's log is at `tests/e2e/.data/vN/site.log`, and `npm run report` shows
 - Bump the references to the stable version: the library `ItemGroup`, the TestSite `PropertyGroup` and the uSync version.
 - Remove `continue-on-error` for `N` in `.github/workflows/e2e.yml`.
 - Don't release a stable package while it still references a prerelease Umbraco. `dotnet pack` warns about this (`NU5104`).
-- Before releasing, run `npm run test:package` on every version, then bump `<Version>` in `Our.Umbraco.TagHelpers/Our.Umbraco.TagHelpers.csproj` and pack with `build.ps1`.
+- To release, follow `.claude/skills/release-package/SKILL.md` (the `release-package` skill): it checks for breaking changes and prerelease dependencies, runs every test, sets `<Version>`, packs and drafts the release notes.
 
 ## 5. Dropping an old version
 
