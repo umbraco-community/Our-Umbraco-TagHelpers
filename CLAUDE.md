@@ -25,6 +25,7 @@ dotnet run --project Our.Umbraco.TagHelpers.TestSite      # demo site (https://l
 cd tests/e2e && npm test                                  # e2e, all versions (builds the library first)
 cd tests/e2e && npm test -- specs/our-img.spec.ts         # one spec
 cd tests/e2e && npm run test:package                      # e2e against the packed .nupkg (what gets published)
+cd tests/e2e && E2E_PACKAGE_DIR=<folder> npm run test:package   # e2e against an already packed .nupkg
 pwsh ./build.ps1                                          # pack into build.out/ (version from the library .csproj)
 ```
 
