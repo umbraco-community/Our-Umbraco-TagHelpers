@@ -35,7 +35,7 @@ Install that .NET SDK and runtime locally. `dotnet --list-sdks` and `dotnet --li
 | `Our.Umbraco.TagHelpers.TestSite/Our.Umbraco.TagHelpers.TestSite.csproj` | Add a `PropertyGroup Condition="'$(UmbracoVersion)' == 'N'"` with `TargetFramework`, `UmbracoCmsVersion` (latest patch) and `USyncVersion`. Update the `ValidateUmbracoVersion` error text and the comment at the top. |
 | `tests/e2e/playwright.config.ts` | Add `N` to `supported`. The site runs on port `50N`. |
 | `tests/e2e/scripts/start-site.mjs` | Add `N: <dotnet major>` to `dotnetMajorFor`. |
-| `.github/workflows/e2e.yml` | Add `N` to the matrix, add the .NET version to `setup-dotnet`. While `N` is an RC, set `continue-on-error: ${{ matrix.umbraco == N }}` (report, don't block). |
+| `.github/workflows/e2e.yml` | Add `N` to the matrix, add the .NET version to both `setup-dotnet` steps (the `pack` job and the `e2e` job). While `N` is an RC, set `continue-on-error: ${{ matrix.umbraco == N }}` (report, don't block). |
 | `.github/workflows/codeql-analysis.yml` | Add the .NET version to `setup-dotnet` (CodeQL builds every target framework). |
 | `README.md` | The supported-versions sentence, the target framework list, the `-p:UmbracoVersion=` list, and the runtime prerequisites. |
 
