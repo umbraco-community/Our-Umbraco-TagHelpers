@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#nullable enable
+using System.IO;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 {
     public class ImgTagHelperTests
     {
-        private TagHelperContext _tagHelperContext;
+        private TagHelperContext _tagHelperContext = null!;
 
         // What the tag helper asked Umbraco's image URL generator for
         private ImageUrlGenerationOptions? _requested;
@@ -118,8 +119,8 @@ namespace Our.Umbraco.TagHelpers.Tests
 
             var imageUrlGenerator = new Mock<IImageUrlGenerator>();
             imageUrlGenerator
-                .Setup(g => g.GetImageUrl(It.IsAny<ImageUrlGenerationOptions?>()))
-                .Callback<ImageUrlGenerationOptions?>(options => _requested = options)
+                .Setup(g => g.GetImageUrl(It.IsAny<ImageUrlGenerationOptions>()))
+                .Callback<ImageUrlGenerationOptions>(options => _requested = options)
                 .Returns(generatedUrl);
 
             var tagHelper = new ImgTagHelper(globalSettings, imageUrlGenerator.Object)
