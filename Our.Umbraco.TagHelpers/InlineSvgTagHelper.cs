@@ -74,7 +74,15 @@ namespace Our.Umbraco.TagHelpers
         /// NOTE: Use the appsettings configuration to apply this globally (e.g. "Our.Umbraco.TagHelpers": { "OurSVG": { "Cache": true } } ).
         /// </summary>
         [HtmlAttributeName("cache")]
-        public bool? Cache { get; set; }
+        public bool Cache
+        {
+            get => _cache ?? false;
+            set => _cache = value;
+        }
+
+        // Razor only sets Cache when the tag has a cache attribute, so null means "not set": use appsettings.
+        // Kept private so Cache stays a bool, as in earlier versions.
+        private bool? _cache;
 
         /// <summary>
         /// An integer to set the cache minutes. Default: 180 minutes.
@@ -106,7 +114,7 @@ namespace Our.Umbraco.TagHelpers
             string? cleanedFileContents = null;
 
             // The tag's own cache attribute wins; otherwise use appsettings (#57)
-            if (Cache ?? (_globalSettings.OurSVG.Cache && !IgnoreAppSettings))
+            if (_cache ?? (_globalSettings.OurSVG.Cache && !IgnoreAppSettings))
             {
                 var cacheName = string.Empty;
                 var cacheMins = CacheMinutes > 0 ? CacheMinutes : _globalSettings.OurSVG.CacheMinutes;

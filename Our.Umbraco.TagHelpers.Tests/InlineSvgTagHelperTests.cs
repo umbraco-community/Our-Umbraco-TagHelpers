@@ -281,9 +281,13 @@ namespace Our.Umbraco.TagHelpers.Tests
                 var tagHelper = new InlineSvgTagHelper(null!, hostEnv, null!, Options.Create(settings), appCaches, Mock.Of<ILogger<InlineSvgTagHelper>>())
                 {
                     FileSource = "/test.svg",
-                    Cache = cacheAttribute,
                     IgnoreAppSettings = ignoreAppSettings,
                 };
+                // Like Razor, only set Cache when the tag has a cache attribute
+                if (cacheAttribute is bool cache)
+                {
+                    tagHelper.Cache = cache;
+                }
                 var output = new TagHelperOutput("our-svg", new TagHelperAttributeList(), (_, _) =>
                     Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
                 tagHelper.Process(_context, output);
