@@ -8,7 +8,7 @@ on:
 
 jobs:
   e2e:
-    name: Umbraco ${{ matrix.umbraco }} (${{ matrix.os }})
+    name: Umbraco ${{ matrix.umbraco }} (${{ matrix.os }}, ${{ matrix.source }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     # Umbraco 19 is a release candidate: report failures without blocking the PR.
@@ -23,12 +23,17 @@ jobs:
       matrix:
         umbraco: [16, 17, 18, 19]
         os: [ubuntu-latest]
+        # project: the sites reference the Our.Umbraco.TagHelpers project (npm test)
+        # package: the sites install the packed .nupkg, i.e. what would be published (npm run test:package)
+        source: [project, package]
         # The test scripts must also work on Windows and macOS: run the LTS there too
         include:
           - umbraco: 17
             os: windows-latest
+            source: project
           - umbraco: 17
             os: macos-latest
+            source: project
 
     steps:
       - name: Checkout repository
@@ -59,14 +64,14 @@ jobs:
         working-directory: tests/e2e
         env:
           UMBRACO_VERSIONS: ${{ matrix.umbraco }}
-        # npm test builds the library first, then runs Playwright
-        run: npm test
+        # npm test builds the library first; npm run test:package packs it and installs the package instead
+        run: ${{ matrix.source == 'package' && 'npm run test:package' || 'npm test' }}
 
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-v${{ matrix.umbraco }}-${{ matrix.os }}
+          name: playwright-report-v${{ matrix.umbraco }}-${{ matrix.os }}-${{ matrix.source }}
           path: |
             tests/e2e/playwright-report
             tests/e2e/.data/v${{ matrix.umbraco }}/site.log

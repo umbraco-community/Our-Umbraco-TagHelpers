@@ -42,8 +42,9 @@ export default defineConfig({
     timeout: 600_000,
     // Always start freshly published sites, so a site left running from an earlier run (serving old
     // views and data) can't be tested by mistake; if a port is busy, Playwright reports it.
-    // Set E2E_REUSE_SITES=1 to reuse already-running sites while iterating on specs only.
-    reuseExistingServer: !process.env.CI && process.env.E2E_REUSE_SITES === '1',
+    // Set E2E_REUSE_SITES=1 to reuse already-running sites while iterating on specs only
+    // (never with npm run test:package: a running site may not be the one built from the package).
+    reuseExistingServer: !process.env.CI && process.env.E2E_REUSE_SITES === '1' && process.env.E2E_TAGHELPERS_SOURCE !== 'package',
     stdout: 'pipe' as const,
     stderr: 'pipe' as const,
   })),

@@ -4,6 +4,8 @@
 		<!-- Each Umbraco major is tied to a single .NET version, so the TFM selects the Umbraco build:
 		     net9.0 = Umbraco 16, net10.0 = Umbraco 17 + 18, net11.0 = Umbraco 19 -->
 		<TargetFrameworks>net9.0;net10.0;net11.0</TargetFrameworks>
+		<!-- The package version: build.ps1, the e2e package tests and CI all pack from this -->
+		<Version>2.1.0-rc1</Version>
 		<LangVersion>default</LangVersion>
 		<!-- Audit only the packages referenced here. Umbraco is referenced at the lowest version of each major
 		     (so the package installs on every patch), which pulls in old transitive packages; sites resolve

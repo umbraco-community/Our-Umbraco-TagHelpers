@@ -10,6 +10,7 @@ Community NuGet package of ASP.NET Core Razor tag helpers for Umbraco. Version 2
 - `tests/e2e/`: Playwright suite that publishes and boots the demo site for each Umbraco version and checks every sample. It appears in the solution through `tests/e2e/Our.Umbraco.TagHelpers.E2E.csproj`, a `Microsoft.Build.NoTargets` project that builds nothing and picks up new files automatically.
 - `Our.Umbraco.TagHelpers.slnx`: `.slnx` can't include folders, so single files at the root (workflows, `build.ps1`, docs, this file) are listed one by one in the `/Build/` and `/Docs/` solution folders. Add new ones there.
 - `docs/supporting-a-new-umbraco-version.md`: checklist for adding, promoting or dropping Umbraco/.NET versions. Use the `umbraco-version-support` skill (`.claude/skills/`) to run it.
+- Releases: the `release-package` skill prepares one (breaking-change and prerelease-dependency checks, tests, version, pack, release notes). The user tags, creates the GitHub release and pushes to NuGet.
 - `docs/superpowers/`: design docs and implementation plans from earlier work.
 
 ## Commands
@@ -23,6 +24,8 @@ dotnet run --project Our.Umbraco.TagHelpers.TestSite      # demo site (https://l
 
 cd tests/e2e && npm test                                  # e2e, all versions (builds the library first)
 cd tests/e2e && npm test -- specs/our-img.spec.ts         # one spec
+cd tests/e2e && npm run test:package                      # e2e against the packed .nupkg (what gets published)
+pwsh ./build.ps1                                          # pack into build.out/ (version from the library .csproj)
 ```
 
 Choose e2e versions with `UMBRACO_VERSIONS=17,19`. The README shows the PowerShell and Command Prompt forms. Site logs are in `tests/e2e/.data/vN/site.log`.

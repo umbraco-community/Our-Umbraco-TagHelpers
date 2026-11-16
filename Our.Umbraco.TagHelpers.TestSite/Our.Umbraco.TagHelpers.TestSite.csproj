@@ -49,9 +49,35 @@
     <RuntimeHostConfigurationOption Include="System.Globalization.AppLocalIcu" Value="72.1.0.3" Condition="$(RuntimeIdentifier.StartsWith('linux')) or $(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and !$([MSBuild]::IsOSPlatform('osx')))" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--
+    Where the tag helpers come from:
+    - Project (default): the Our.Umbraco.TagHelpers project in this repository.
+    - Package: an Our.Umbraco.TagHelpers .nupkg, to test exactly what would be published.
+      Pack it (pwsh ./build.ps1 -Version 2.1.0-local.1), then build or run this project with
+      -p:TagHelpersSource=Package -p:TagHelpersPackageVersion=2.1.0-local.1 (see README.md).
+      TagHelpersPackageSource is the folder to restore it from (default: build.out, where build.ps1 packs).
+      NuGet caches packages by version, so give each new build of the package its own version.
+  -->
+  <PropertyGroup>
+    <TagHelpersSource Condition="'$(TagHelpersSource)' == ''">Project</TagHelpersSource>
+    <TagHelpersPackageSource Condition="'$(TagHelpersPackageSource)' == ''">$(MSBuildThisFileDirectory)..\build.out</TagHelpersPackageSource>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TagHelpersSource)' == 'Project'">
     <ProjectReference Include="..\Our.Umbraco.TagHelpers\Our.Umbraco.TagHelpers.csproj" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TagHelpersSource)' == 'Package'">
+    <RestoreAdditionalProjectSources>$(TagHelpersPackageSource)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TagHelpersSource)' == 'Package' and '$(TagHelpersPackageVersion)' != ''">
+    <PackageReference Include="Our.Umbraco.TagHelpers" Version="[$(TagHelpersPackageVersion)]" />
+  </ItemGroup>
+
+  <Target Name="ValidateTagHelpersSource" BeforeTargets="Restore;_CheckForInvalidConfigurationAndPlatform">
+    <Error Condition="'$(TagHelpersSource)' != 'Project' and '$(TagHelpersSource)' != 'Package'" Text="Unsupported TagHelpersSource '$(TagHelpersSource)'. Use Project or Package." />
+    <Error Condition="'$(TagHelpersSource)' == 'Package' and '$(TagHelpersPackageVersion)' == ''" Text="TagHelpersSource=Package needs the package version, e.g. -p:TagHelpersPackageVersion=2.1.0" />
+  </Target>
 
   <PropertyGroup>
     <!-- Razor files are needed for the backoffice to work correctly -->
