@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.7.134">
+  <!--
+    Not a .NET project: it builds nothing. It only makes the Playwright suite in this folder show up in the
+    solution, with new specs and scripts included automatically. Run the tests with npm (see README.md).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Generated and installed files: thousands of them, never edited -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);node_modules/**;.data/**;playwright-report/**;test-results/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
