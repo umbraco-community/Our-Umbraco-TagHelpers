@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.DataProtection;
@@ -16,7 +16,10 @@ namespace Our.Umbraco.TagHelpers.Tests
         [TestCase("ContactForm", "ContactForm")]
         [TestCase("ContactFormController", "ContactForm")]
         [TestCase("contactformcontroller", "contactform")]
-        [TestCase("Controller", "Controller", Description = "a controller literally named Controller has nothing to strip")]
+        // ControllerController is routed as "Controller": with the suffix it's stripped once, and without it
+        // the name is only the suffix itself, which must not be stripped to an empty name
+        [TestCase("ControllerController", "Controller", Description = "ControllerController with its suffix")]
+        [TestCase("Controller", "Controller", Description = "ControllerController, written without its suffix")]
         public void ControllerName_IsRoutedWithoutTheControllerSuffix(string ourController, string expectedRouteName)
         {
             var dataProtectionProvider = new EphemeralDataProtectionProvider();
