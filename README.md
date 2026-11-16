@@ -357,9 +357,9 @@ If you want the edit link to open in a new tab, just add the `target="_blank"` a
 ## `our-active-class`
 
 This is a tag helper attribute that can be applied to `<a>` element in the razor template or partial. It will use the value inside the attribute and append it to the class attribute of the `<a>`.
-If the link inside the href attribute can be found by its route as a content node, if so then it will check with the current page being rendered if its the same node or an ancestor.
+It compares the link with the URLs of the page being rendered and its ancestors, so the class is added when the link points to the current page or any page above it. A navigation item stays active while one of its child or grandchild pages is being rendered; links to other pages, or to children of the current page, don't get the class.
 
-This allows for the navigation item to still have the class added to it when a child or grandchildren page is the currently page being rendered.
+This works with and without culture domains (for example `/en/` and `/da/`), and ignores case, a trailing slash, the query string and the fragment.
 
 ### Simple Example
 
