@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#nullable enable
+using System.IO;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 {
     public class ImgTagHelperTests
     {
-        private TagHelperContext _tagHelperContext;
+        private TagHelperContext _tagHelperContext = null!;
 
         // What the tag helper asked Umbraco's image URL generator for
         private ImageUrlGenerationOptions? _requested;
@@ -112,14 +113,75 @@ namespace Our.Umbraco.TagHelpers.Tests
             ClassicAssert.AreEqual(50, _requested.Height);
         }
 
-        private ImgTagHelper CreateTagHelper(string requestPath, string generatedUrl = "/generated.png")
+        // https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/107
+        // Razor removes the bound style attribute from the output, so the tag helper has to write it back
+        [Test]
+        public async Task Style_IsKept_WithTheDefaultSettings()
         {
-            var globalSettings = Options.Create(new OurUmbracoTagHelpersConfiguration());
+            var tagHelper = CreateTagHelper("/");
+            tagHelper.FileSource = "/images/logo.png";
+            tagHelper.ImgWidth = 300;
+            tagHelper.ImgHeight = 150;
+            tagHelper.ImgStyle = "border: 2px solid green";
+
+            var output = TestContextHelpers.GetTagHelperOutput("our-img");
+            await tagHelper.ProcessAsync(_tagHelperContext, output);
+
+            ClassicAssert.AreEqual("border: 2px solid green", output.Attributes["style"]?.Value.ToString());
+        }
+
+        [Test]
+        public async Task Style_IsKept_ForAFileWithoutAWidthAndHeight()
+        {
+            var tagHelper = CreateTagHelper("/");
+            tagHelper.FileSource = "/images/logo.png";
+            tagHelper.ImgStyle = "border: 2px solid green";
+
+            var output = TestContextHelpers.GetTagHelperOutput("our-img");
+            await tagHelper.ProcessAsync(_tagHelperContext, output);
+
+            ClassicAssert.AreEqual("border: 2px solid green", output.Attributes["style"]?.Value.ToString());
+        }
+
+        [Test]
+        public async Task Style_IsCombinedWithTheAspectRatio_WhenApplyAspectRatioIsOn()
+        {
+            var settings = new OurUmbracoTagHelpersConfiguration();
+            settings.OurImg.ApplyAspectRatio = true;
+            var tagHelper = CreateTagHelper("/", settings: settings);
+            tagHelper.FileSource = "/images/logo.png";
+            tagHelper.ImgWidth = 300;
+            tagHelper.ImgHeight = 150;
+            tagHelper.ImgStyle = "border: 2px solid green;";
+
+            var output = TestContextHelpers.GetTagHelperOutput("our-img");
+            await tagHelper.ProcessAsync(_tagHelperContext, output);
+
+            ClassicAssert.AreEqual("border: 2px solid green;aspect-ratio: 300 / 150;width: 100%; height: auto;", output.Attributes["style"]?.Value.ToString());
+        }
+
+        [Test]
+        public async Task NoStyle_WhenNoneIsSetAndApplyAspectRatioIsOff()
+        {
+            var tagHelper = CreateTagHelper("/");
+            tagHelper.FileSource = "/images/logo.png";
+            tagHelper.ImgWidth = 300;
+            tagHelper.ImgHeight = 150;
+
+            var output = TestContextHelpers.GetTagHelperOutput("our-img");
+            await tagHelper.ProcessAsync(_tagHelperContext, output);
+
+            ClassicAssert.IsFalse(output.Attributes.ContainsName("style"));
+        }
+
+        private ImgTagHelper CreateTagHelper(string requestPath, string generatedUrl = "/generated.png", OurUmbracoTagHelpersConfiguration? settings = null)
+        {
+            var globalSettings = Options.Create(settings ?? new OurUmbracoTagHelpersConfiguration());
 
             var imageUrlGenerator = new Mock<IImageUrlGenerator>();
             imageUrlGenerator
-                .Setup(g => g.GetImageUrl(It.IsAny<ImageUrlGenerationOptions?>()))
-                .Callback<ImageUrlGenerationOptions?>(options => _requested = options)
+                .Setup(g => g.GetImageUrl(It.IsAny<ImageUrlGenerationOptions>()))
+                .Callback<ImageUrlGenerationOptions>(options => _requested = options)
                 .Returns(generatedUrl);
 
             var tagHelper = new ImgTagHelper(globalSettings, imageUrlGenerator.Object)

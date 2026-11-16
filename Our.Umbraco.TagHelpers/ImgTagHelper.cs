@@ -237,6 +237,11 @@ namespace Our.Umbraco.TagHelpers
                 {
                     output.Attributes.Add("src", FileSource);
 
+                    if (!string.IsNullOrEmpty(ImgStyle))
+                    {
+                        output.Attributes.SetAttribute("style", ImgStyle);
+                    }
+
                     if (cssClasses.Count > 0)
                     {
                         output.Attributes.Add("class", string.Join(" ", cssClasses));
@@ -276,6 +281,11 @@ namespace Our.Umbraco.TagHelpers
                 output.Attributes.Add("style", style);
                 output.Attributes.RemoveAll("width");
                 output.Attributes.RemoveAll("height");
+            }
+            else if (!string.IsNullOrEmpty(ImgStyle))
+            {
+                // style is bound to ImgStyle, so Razor removed it from the output: write it back (#107)
+                output.Attributes.SetAttribute("style", ImgStyle);
             }
             #endregion
 

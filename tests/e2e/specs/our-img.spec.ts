@@ -72,9 +72,9 @@ test('class is applied to the img', async ({ page }) => {
   await expect(img).toHaveAttribute('height', '150');
 });
 
-// Known bug, same on Umbraco 16-19: `style` is bound to ImgTagHelper.ImgStyle, so Razor removes it from the
-// output, and the tag helper only writes it back when OurImg:ApplyAspectRatio is on. Remove fixme when fixed.
-test.fixme('style is applied to the img', async ({ page }) => {
+// `style` is bound to ImgTagHelper.ImgStyle, so Razor removes it and the tag helper must write it back:
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/107
+test('style is applied to the img', async ({ page }) => {
   await page.goto('/en/');
   await expect(classAndStyleImg(page)).toHaveAttribute('style', /border: 2px solid green/);
 });
