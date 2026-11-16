@@ -30,12 +30,10 @@ namespace Our.Umbraco.TagHelpers
     public class ImgTagHelper : TagHelper
     {
         private OurUmbracoTagHelpersConfiguration _globalSettings;
-        private IMediaService _mediaService;
 
-        public ImgTagHelper(IOptions<OurUmbracoTagHelpersConfiguration> globalSettings, IMediaService mediaService)
+        public ImgTagHelper(IOptions<OurUmbracoTagHelpersConfiguration> globalSettings)
         {
             _globalSettings = globalSettings.Value;
-            _mediaService = mediaService;
         }
 
         /// <summary>
@@ -151,9 +149,12 @@ namespace Our.Umbraco.TagHelpers
             if (MediaItem is not null)
             {
                 #region Opting to use a media-item as the source image
-                var media = _mediaService.GetById(MediaItem.Id); // Get the media object from the media library service
-                var originalWidth = media.GetValue<double>("umbracoWidth"); // Determine the width from the originally uploaded image
-                var originalHeight = media.GetValue<double>("umbracoHeight"); // Determine the height from the originally uploaded image
+                // Read the original dimensions from the published media item rather than loading it from the
+                // database via IMediaService. Accessing it as IPublishedContent keeps this binary-compatible
+                // between Umbraco 17 and 18, which moved IPublishedContent members (e.g. Id) to IPublishedElement.
+                IPublishedContent mediaContent = MediaItem;
+                var originalWidth = mediaContent.Value<double>("umbracoWidth"); // Determine the width from the originally uploaded image
+                var originalHeight = mediaContent.Value<double>("umbracoHeight"); // Determine the height from the originally uploaded image
                 width = ImgWidth > 0 ? ImgWidth : originalWidth; // If the element wasn't provided with a width property, use the width from the media object instead
 
                 if (!string.IsNullOrEmpty(ImgCropAlias))
@@ -437,7 +438,9 @@ namespace Our.Umbraco.TagHelpers
                 }
                 else
                 {
-                    return image.Name;
+                    // Use the Name() extension rather than the property: the property moved from
+                    // IPublishedContent to IPublishedElement in Umbraco 18, breaking a DLL compiled against 17
+                    return image.Name();
                 }
             }
             catch (Exception)

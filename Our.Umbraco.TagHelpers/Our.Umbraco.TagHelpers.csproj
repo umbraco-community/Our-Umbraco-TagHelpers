@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0;</TargetFrameworks>
+		<!-- Each Umbraco major is tied to a single .NET version, so the TFM selects the Umbraco build:
+		     net9.0 = Umbraco 16, net10.0 = Umbraco 17 + 18, net11.0 = Umbraco 19 -->
+		<TargetFrameworks>net9.0;net10.0;net11.0</TargetFrameworks>
+		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -38,10 +41,23 @@
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.3.0" />
 		<PackageReference Include="Stubble.Core" Version="1.10.8" />
-		<PackageReference Include="Umbraco.Cms.Core" Version="16.0.0" />
-		<PackageReference Include="Umbraco.Cms.Web.Common" Version="16.0.0" />
 	  
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="16.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="16.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="17.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="17.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="19.0.0-rc1" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="19.0.0-rc1" />
 	</ItemGroup>
 
   <ItemGroup>

@@ -192,6 +192,12 @@ namespace Our.Umbraco.TagHelpers
                 fileContents = reader.ReadToEnd();
             }
 
+            // Nothing to render (no media item or src, or an empty file) - bail out before parsing
+            if (string.IsNullOrWhiteSpace(fileContents))
+            {
+                return null;
+            }
+
             // Sanitize SVG (Is there anything in Umbraco to reuse)
             // https://stackoverflow.com/questions/65247336/is-there-anyway-to-sanitize-svg-file-in-c-any-libraries-anything/65375485#65375485
             var cleanedFileContents = Regex.Replace(fileContents,
@@ -209,7 +215,17 @@ namespace Our.Umbraco.TagHelpers
                 HtmlDocument doc = new HtmlDocument();
                 try {
                     doc.LoadHtml(cleanedFileContents);
+                    // SelectNodes returns null rather than an empty collection when nothing matches
                     var svgs = doc.DocumentNode.SelectNodes("//svg");
+                    if (svgs is null)
+                    {
+                        if (_logger.IsEnabled(LogLevel.Warning))
+                        {
+                            _logger.LogWarning("Invalid svg markup: no <svg> element found");
+                        }
+                        return string.Empty;
+                    }
+
                     foreach (var svgNode in svgs)
                     {
                         if (!string.IsNullOrEmpty(CssClass))

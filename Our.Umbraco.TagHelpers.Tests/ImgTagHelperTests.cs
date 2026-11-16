@@ -5,12 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Options;
-using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Tests.Helpers;
-using Umbraco.Cms.Core.Services;
 
 namespace Our.Umbraco.TagHelpers.Tests
 {
@@ -76,9 +74,8 @@ namespace Our.Umbraco.TagHelpers.Tests
         private static ImgTagHelper CreateTagHelper(string requestPath)
         {
             var globalSettings = Options.Create(new OurUmbracoTagHelpersConfiguration());
-            var mediaServiceMock = new Mock<IMediaService>();
 
-            var tagHelper = new ImgTagHelper(globalSettings, mediaServiceMock.Object)
+            var tagHelper = new ImgTagHelper(globalSettings)
             {
                 ViewContext = CreateViewContext(requestPath)
             };
