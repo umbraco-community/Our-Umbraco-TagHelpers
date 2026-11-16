@@ -93,22 +93,22 @@ namespace Our.Umbraco.TagHelpers
         public int ImgHeightExtraExtraLarge { get; set; }
 
         [HtmlAttributeName("cropalias")]
-        public string ImgCropAlias { get; set; }
+        public string? ImgCropAlias { get; set; }
 
         [HtmlAttributeName("cropalias--s")]
-        public string ImgCropAliasSmall { get; set; }
+        public string? ImgCropAliasSmall { get; set; }
 
         [HtmlAttributeName("cropalias--m")]
-        public string ImgCropAliasMedium { get; set; }
+        public string? ImgCropAliasMedium { get; set; }
 
         [HtmlAttributeName("cropalias--l")]
-        public string ImgCropAliasLarge { get; set; }
+        public string? ImgCropAliasLarge { get; set; }
 
         [HtmlAttributeName("cropalias--xl")]
-        public string ImgCropAliasExtraLarge { get; set; }
+        public string? ImgCropAliasExtraLarge { get; set; }
 
         [HtmlAttributeName("cropalias--xxl")]
-        public string ImgCropAliasExtraExtraLarge { get; set; }
+        public string? ImgCropAliasExtraExtraLarge { get; set; }
 
         [HtmlAttributeName("style")]
         public string? ImgStyle { get; set; }
@@ -122,7 +122,7 @@ namespace Our.Umbraco.TagHelpers
         protected HttpRequest Request => ViewContext.HttpContext.Request;
 
         [ViewContext]
-        public ViewContext ViewContext { get; set; }
+        public ViewContext ViewContext { get; set; } = null!; // set by Razor before Process runs
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
@@ -412,8 +412,7 @@ namespace Our.Umbraco.TagHelpers
                 else
                 {
                     var baseUri = new Uri(Request.GetDisplayUrl());
-                    Uri uri;
-                    if (!Uri.TryCreate(url, UriKind.Absolute, out uri))
+                    if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
                         uri = new Uri(baseUri, url);
 
                     return Path.GetFileNameWithoutExtension(uri.LocalPath);
@@ -437,13 +436,13 @@ namespace Our.Umbraco.TagHelpers
 
                 if (image.HasProperty(alias) && image.HasValue(alias))
                 {
-                    return image.Value<string>(alias);
+                    return image.Value<string>(alias) ?? string.Empty;
                 }
                 else
                 {
                     // Use the Name() extension rather than the property: the property moved from
                     // IPublishedContent to IPublishedElement in Umbraco 18, breaking a DLL compiled against 17
-                    return image.Name();
+                    return image.Name() ?? string.Empty;
                 }
             }
             catch (Exception)
@@ -534,10 +533,11 @@ namespace Our.Umbraco.TagHelpers
 
         private (string Url, int Width, int Height) GetImageUrlAndDimensions(MediaWithCrops media, int width, string? cropAlias = null)
         {
-            var imgSrc = media.GetCropUrl(width: width, cropAlias: cropAlias);
+            var imgSrc = media.GetCropUrl(width: width, cropAlias: cropAlias) ?? string.Empty;
 
             // H5YR! to mistyn8 for the following suggestion of extracting the height from the auto generated URL rather than using LocalCrops
-            var q = HttpUtility.ParseQueryString(imgSrc.Split("?")[1] ?? string.Empty);
+            var queryStart = imgSrc.IndexOf('?');
+            var q = HttpUtility.ParseQueryString(queryStart >= 0 ? imgSrc[(queryStart + 1)..] : string.Empty);
             var height = int.TryParse(q["height"], out var cropHeight) ? cropHeight : 0;
 
             return (imgSrc, width, height);

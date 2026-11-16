@@ -6,11 +6,13 @@
     <IsPackable>false</IsPackable>
 
     <LangVersion>default</LangVersion>
+    <!-- Audit only the packages referenced here. Umbraco is referenced at the lowest version of each major
+         (so the package installs on every patch), which pulls in old transitive packages; sites resolve
+         and audit their own, newer Umbraco dependencies. -->
+    <NuGetAuditMode>direct</NuGetAuditMode>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="NUnit" Version="4.4.0" />

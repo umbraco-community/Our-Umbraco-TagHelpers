@@ -25,7 +25,7 @@ namespace Our.Umbraco.TagHelpers.Utils
         internal static decimal GetDecimal(object input, decimal defaultValue = 0)
         {
             decimal value = decimal.MinValue;
-            decimal.TryParse(input != null ? input.ToString().Replace("£", "") : "", out value);
+            decimal.TryParse(input?.ToString()?.Replace("£", "") ?? "", out value);
 
             if (value > decimal.MinValue)
             {
@@ -59,7 +59,7 @@ namespace Our.Umbraco.TagHelpers.Utils
             {
                 return true;
             }
-            string str = Convert.ToString(value);
+            string? str = Convert.ToString(value);
             if (double.TryParse(str, out num))
             {
                 return true;

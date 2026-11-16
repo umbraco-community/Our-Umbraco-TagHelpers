@@ -61,6 +61,13 @@ namespace Our.Umbraco.TagHelpers
 
             var ctx = _umbracoContextAccessor.GetRequiredUmbracoContext();
 
+            // Only a routed Umbraco page has a current page to compare the link with
+            var publishedRequest = ctx.PublishedRequest;
+            if (publishedRequest?.PublishedContent is null)
+            {
+                return;
+            }
+
             // If we have active link prop set use that othewise try to find the href attribute on an <a> and its value
             var href = string.IsNullOrEmpty(ActiveLink) ? output.Attributes["href"]?.Value.ToString() : ActiveLink;
             if (string.IsNullOrEmpty(href))
@@ -77,11 +84,11 @@ namespace Our.Umbraco.TagHelpers
             
             // Try & parse href as URI, as it could be relative or absolute
             // or contain a querystring we only want the path part
-            if (Uri.TryCreate(href, UriKind.Absolute, out Uri? link) || Uri.TryCreate(ctx.PublishedRequest.Uri, href, out link))
+            if (Uri.TryCreate(href, UriKind.Absolute, out Uri? link) || Uri.TryCreate(publishedRequest.Uri, href, out link))
             {
                 // Get the node based of the value in the HREF
                 // GetByRoute on IPublishedContentCache is obsolete now - need to use DocumentUrlService instead
-                var culture = ctx.PublishedRequest.Culture;
+                var culture = publishedRequest.Culture;
                 var documentKeyFromUrl = _documentUrlService.GetDocumentKeyByRoute(link.AbsolutePath, culture, Constants.System.Root, false);
                 var nodeOfLink = documentKeyFromUrl is not null ? ctx.Content.GetById(documentKeyFromUrl.Value) : null;
                 
@@ -91,7 +98,7 @@ namespace Our.Umbraco.TagHelpers
                 }
 
                 // Get the current node of the page that is rendering
-                var currentPageRendering = ctx.PublishedRequest.PublishedContent;
+                var currentPageRendering = publishedRequest.PublishedContent;
 
                 // Check if thelink we are rendering is current page or an ancestor
                 if (nodeOfLink.IsAncestorOrSelf(currentPageRendering))
