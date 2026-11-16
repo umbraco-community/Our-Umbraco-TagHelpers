@@ -68,11 +68,13 @@ namespace Our.Umbraco.TagHelpers
         public bool EnsureViewBox { get; set; }
 
         /// <summary>
-        /// A boolean to cache the SVG contents rather than performing the operation on each page load.
-        /// NOTE: Use the appsettings configuration to apply this globally (e.g. "Our.Umbraco.TagHelpers": { "InlineSvgTagHelper": { "Cache": true } } ).
+        /// Whether to cache the SVG contents rather than reading the file on each page load.
+        /// When it isn't set, the appsettings value is used (unless 'ignore-appsettings' is set), so cache="false"
+        /// turns caching off for this tag even when it's on globally.
+        /// NOTE: Use the appsettings configuration to apply this globally (e.g. "Our.Umbraco.TagHelpers": { "OurSVG": { "Cache": true } } ).
         /// </summary>
         [HtmlAttributeName("cache")]
-        public bool Cache { get; set; }
+        public bool? Cache { get; set; }
 
         /// <summary>
         /// An integer to set the cache minutes. Default: 180 minutes.
@@ -103,7 +105,8 @@ namespace Our.Umbraco.TagHelpers
 
             string? cleanedFileContents = null;
 
-            if(Cache || (_globalSettings.OurSVG.Cache && !IgnoreAppSettings))
+            // The tag's own cache attribute wins; otherwise use appsettings (#57)
+            if (Cache ?? (_globalSettings.OurSVG.Cache && !IgnoreAppSettings))
             {
                 var cacheName = string.Empty;
                 var cacheMins = CacheMinutes > 0 ? CacheMinutes : _globalSettings.OurSVG.CacheMinutes;

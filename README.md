@@ -202,7 +202,7 @@ Additional properties have been added to cache the output and also to ensure the
 
 - `class` - Allows for a CSS class upon the SVG element. This is a `string` value.
 - `ensure-viewbox` - Enables the feature to "fix" the output SVG which always ensures the SVG utilises a viewbox rather than width & height. This is a `boolean` value.
-- `cache` - Enables the feature to cache the output at runtime level. This is a `boolean` value.
+- `cache` - Enables the feature to cache the output at runtime level. This is a `boolean` value. When it's set, it overrides the global `Cache` setting for that element, so `cache="false"` turns caching off even when it's on globally; when it isn't set, the global setting applies.
 - `cache-minutes` - Defines the amount of time (in minutes) to cache the output. To be used in conjunction with the `cache` property. This is an `integer` value.
 - `ignore-appsettings` - When enabled, the all settings appropiate to this tag helper which are defined within `appsettings.json` are completely ignored. For example, if global caching is enabled we can simply disable caching of individual elements (unless the `cache` property is `true`). This is a `boolean` value.
 

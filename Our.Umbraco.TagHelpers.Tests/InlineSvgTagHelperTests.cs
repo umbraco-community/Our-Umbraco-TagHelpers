@@ -261,6 +261,49 @@ namespace Our.Umbraco.TagHelpers.Tests
             ClassicAssert.AreEqual("<svg width=\"10\" height=\"10\"></svg>", withoutViewBox);
         }
 
+        // https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/57
+        // Each test renders the file, changes it, and renders again: the second render shows whether it was cached
+        [TestCase(true, null, false, true, Description = "appsettings Cache is used when the tag doesn't set cache")]
+        [TestCase(true, false, false, false, Description = "cache=\"false\" overrides appsettings Cache")]
+        [TestCase(false, true, false, true, Description = "cache=\"true\" caches without appsettings Cache")]
+        [TestCase(true, null, true, false, Description = "ignore-appsettings skips appsettings Cache")]
+        [TestCase(true, true, true, true, Description = "cache=\"true\" still caches with ignore-appsettings")]
+        public void Cache_AttributeAndAppSettings(bool appSettingsCache, bool? cacheAttribute, bool ignoreAppSettings, bool expectCached)
+        {
+            var settings = new OurUmbracoTagHelpersConfiguration();
+            settings.OurSVG.Cache = appSettingsCache;
+            var svg = "<svg>first</svg>";
+            var hostEnv = CreateHostEnvironment(() => svg);
+            var appCaches = CreateAppCaches();
+
+            string Render()
+            {
+                var tagHelper = new InlineSvgTagHelper(null!, hostEnv, null!, Options.Create(settings), appCaches, Mock.Of<ILogger<InlineSvgTagHelper>>())
+                {
+                    FileSource = "/test.svg",
+                    Cache = cacheAttribute,
+                    IgnoreAppSettings = ignoreAppSettings,
+                };
+                var output = new TagHelperOutput("our-svg", new TagHelperAttributeList(), (_, _) =>
+                    Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
+                tagHelper.Process(_context, output);
+                return output.Content.GetContent();
+            }
+
+            ClassicAssert.AreEqual("<svg>first</svg>", Render());
+            svg = "<svg>changed</svg>";
+            ClassicAssert.AreEqual(expectCached ? "<svg>first</svg>" : "<svg>changed</svg>", Render());
+        }
+
+        private static IWebHostEnvironment CreateHostEnvironment(Func<string> svg)
+        {
+            var fileProvider = new Mock<IFileProvider>();
+            fileProvider
+                .Setup(p => p.GetFileInfo(It.IsAny<string>()))
+                .Returns(() => Mock.Of<IFileInfo>(f => f.Exists && f.CreateReadStream() == new MemoryStream(Encoding.UTF8.GetBytes(svg()))));
+            return Mock.Of<IWebHostEnvironment>(e => e.WebRootFileProvider == fileProvider.Object);
+        }
+
         private static IWebHostEnvironment CreateHostEnvironment(string svg)
         {
             var fileProvider = new Mock<IFileProvider>();
