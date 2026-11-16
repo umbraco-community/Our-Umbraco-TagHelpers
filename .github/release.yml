@@ -15,6 +15,10 @@ changelog:
       labels:
         - Semver-Minor
         - enhancement
+    # A PR goes in the first category whose labels it has, so a breaking bug fix stays under Breaking Changes
+    - title: Bug Fixes 🐛
+      labels:
+        - bug
     - title: Other Changes
       labels:
         - "*"
