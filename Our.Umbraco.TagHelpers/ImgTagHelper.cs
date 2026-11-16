@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
+using Umbraco.Cms.Core.Media;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Services;
@@ -30,10 +31,12 @@ namespace Our.Umbraco.TagHelpers
     public class ImgTagHelper : TagHelper
     {
         private OurUmbracoTagHelpersConfiguration _globalSettings;
+        private readonly IImageUrlGenerator _imageUrlGenerator;
 
-        public ImgTagHelper(IOptions<OurUmbracoTagHelpersConfiguration> globalSettings)
+        public ImgTagHelper(IOptions<OurUmbracoTagHelpersConfiguration> globalSettings, IImageUrlGenerator imageUrlGenerator)
         {
             _globalSettings = globalSettings.Value;
+            _imageUrlGenerator = imageUrlGenerator;
         }
 
         /// <summary>
@@ -216,7 +219,7 @@ namespace Our.Umbraco.TagHelpers
                 width = ImgWidth;
                 height = ImgHeight;
 
-                imgSrc = AddQueryToUrl(FileSource, "width", width.ToString()) + "&height=" + height.ToString();
+                imgSrc = GetFileImageUrl((int)width, (int)height);
 
                 #region Autogenerate alt text if unspecfied
                 if (string.IsNullOrWhiteSpace(ImgAlt))
@@ -385,7 +388,7 @@ namespace Our.Umbraco.TagHelpers
                     if (!string.IsNullOrEmpty(FileSource) && ImgWidth > 0 && ImgHeight > 0)
                     {
                         sourceHeight = size.ImageHeight > 0 ? size.ImageHeight : (ImgHeight / ImgWidth) * size.ImageWidth;
-                        var sourceUrl = AddQueryToUrl(FileSource, "width", size.ImageWidth.ToString()) + "&height=" + size.ImageHeight;
+                        var sourceUrl = GetFileImageUrl(size.ImageWidth, size.ImageHeight);
                         sb.AppendLine($"<source {(jsLazyLoad ? "data-" : "")}srcset=\"{sourceUrl}\" media=\"({(_globalSettings.OurImg.MobileFirst ? $"min-width: {minWidth}" : $"max-width: {minWidth - 1}")}px)\" width=\"{size.ImageWidth}\"{(sourceHeight > 0 ? $" height=\"{sourceHeight}\"" : "")} />");
 
                     }
@@ -451,9 +454,29 @@ namespace Our.Umbraco.TagHelpers
             return "";
         }
 
-        private string AddQueryToUrl(string url, string key, string value)
+        /// <summary>
+        /// Builds a resized URL for <see cref="FileSource"/> with Umbraco's image URL generator, as media crop URLs are,
+        /// so it's signed with an HMAC when the site requires one (Umbraco:CMS:Imaging:HMACSecretKey, which
+        /// Umbraco 17+ generates on install). ImageSharp answers 400 to an unsigned resize request on those sites.
+        /// </summary>
+        private string GetFileImageUrl(int width, int height)
         {
-            Uri uri = null!;
+            var (path, query) = SplitFileUrl(FileSource!);
+            return _imageUrlGenerator.GetImageUrl(new ImageUrlGenerationOptions(path)
+            {
+                Width = width,
+                Height = height,
+                FurtherOptions = query,
+            }) ?? path;
+        }
+
+        /// <summary>
+        /// Splits a file URL into its path and its query without width and height. A root-relative path
+        /// keeps its leading '/', and a page-relative one is resolved against the current request.
+        /// </summary>
+        private (string Path, string? Query) SplitFileUrl(string url)
+        {
+            Uri uri;
             bool isRelativeUrl = false;
 
             if (url.Contains("://"))
@@ -462,28 +485,23 @@ namespace Our.Umbraco.TagHelpers
             }
             else
             {
+                // Resolve against the current page, never with Uri.TryCreate(url, UriKind.Absolute): on macOS and
+                // Linux that reads "/images/a.jpg?x=1" as a file path (file:///images/a.jpg%3Fx=1), losing the query
                 isRelativeUrl = true;
-                if (!Uri.TryCreate(url, UriKind.Absolute, out uri!))
-                    uri = new Uri(new Uri(Request.GetDisplayUrl()), url);
+                uri = new Uri(new Uri(Request.GetDisplayUrl()), url);
             }
 
-            if (uri == null) return url;
-
-            var baseUri = isRelativeUrl
+            var path = isRelativeUrl
                 ? uri.AbsolutePath
                 : uri.GetComponents(UriComponents.Scheme | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
 
-            var query = QueryHelpers.ParseQuery(uri.Query);
+            var items = QueryHelpers.ParseQuery(uri.Query)
+                .Where(x => x.Key != "width" && x.Key != "height")
+                .SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value ?? string.Empty))
+                .ToList();
 
-            var items = query.SelectMany(x => x.Value, (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
-
-            items.RemoveAll(x => x.Key == key);
-
-            var qb = new QueryBuilder(items);
-
-            qb.Add(key, value);
-
-            return baseUri + qb.ToQueryString();
+            var query = new QueryBuilder(items).ToQueryString().Value?.TrimStart('?');
+            return (path, string.IsNullOrEmpty(query) ? null : query);
         }
 
         private List<OurImageSize> GetImageSizes(bool isMedia = true)
