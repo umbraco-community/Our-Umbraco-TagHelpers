@@ -632,6 +632,42 @@ This will save the file as `/assets/alpinejs.js`, enabling eg. MIME types for .j
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
 
+## Demo site & cross-version tests
+
+The package supports Umbraco 16, 17, 18 and 19 from a single NuGet package (`net9.0`, `net10.0` and `net11.0` builds).
+
+### Demo site
+`Our.Umbraco.TagHelpers.TestSite` is a demo site with a sample of every tag helper. It runs Umbraco 17 (LTS) by default, so it needs the .NET 10 SDK, and imports its content with uSync on first boot:
+
+```bash
+dotnet run --project Our.Umbraco.TagHelpers.TestSite
+```
+
+- Open https://localhost:44302 (if the browser rejects the certificate, run `dotnet dev-certs https --trust` once).
+- The backoffice is at `/umbraco`; the login is the unattended install user in `appsettings.Development.json`.
+- Pass `-p:UmbracoVersion=16|17|18|19` to build or run it against another supported Umbraco version, e.g. `dotnet run --project Our.Umbraco.TagHelpers.TestSite -p:UmbracoVersion=19`.
+- Seeing "No published content"? Your local database was created before the uSync first-boot import was set up. Delete `Our.Umbraco.TagHelpers.TestSite/umbraco/Data/Umbraco.sqlite.db*` to get a fresh install with all the content, or import it from the uSync dashboard in the backoffice.
+
+### Cross-version tests
+`tests/e2e` contains [Playwright](https://playwright.dev) tests that publish the demo site for each Umbraco version, start it with a fresh database and check every tag helper sample renders as expected. They also run in GitHub Actions on every pull request.
+
+Prerequisites: Node.js LTS and the .NET runtimes for the versions you test (.NET 9 for Umbraco 16, .NET 10 for 17 and 18, .NET 11 for 19).
+
+```bash
+cd tests/e2e
+npm ci                           # first time only
+npx playwright install chromium  # first time only
+
+npm test                                # builds the library, then tests all versions
+UMBRACO_VERSIONS=17,19 npm test         # selected versions
+npm test -- specs/our-img.spec.ts       # a single spec
+npm run report                          # HTML report, with screenshots and traces of failures
+```
+
+Each run publishes the sites into `tests/e2e/.data/` with throwaway databases, so it never touches the demo site's own database. To step through tests in Playwright's UI mode, run `npm run build:library` and then `UMBRACO_VERSIONS=17 npx playwright test --ui`.
+
+`npm test` builds the package once before the sites are published (they publish in parallel and must not build the same project at the same time). Running `npx playwright test` directly also works, but a site refuses to start if the package build is missing or older than its source — run `npm run build:library` first.
+
 ## Video 📺
 
 [![How to create ASP.NET TagHelpers for Umbraco](https://user-images.githubusercontent.com/1389894/138666925-15475216-239f-439d-b989-c67995e5df71.png)](https://www.youtube.com/watch?v=3fkDs0NwIE8)

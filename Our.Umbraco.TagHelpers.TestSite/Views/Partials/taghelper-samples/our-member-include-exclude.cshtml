@@ -27,3 +27,8 @@
 <partial name="membership/login" />
 
 <partial name="membership/login-status" />
+
+@if (!(Context.User.GetMemberIdentity()?.IsAuthenticated ?? false))
+{
+    <partial name="membership/register" />
+}

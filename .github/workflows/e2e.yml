@@ -1,0 +1,62 @@
+name: Cross-version tests
+
+# Boots the demo site on each supported Umbraco version and runs the Playwright
+# specs in tests/e2e against it (see tests/e2e/playwright.config.ts).
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: Umbraco ${{ matrix.umbraco }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Umbraco 19 is a release candidate: report failures without blocking the PR.
+    # Remove when the package moves to Umbraco 19.0.0 stable.
+    continue-on-error: ${{ matrix.umbraco == 19 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        umbraco: [16, 17, 18, 19]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+            11.0.x
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install test dependencies
+        working-directory: tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        working-directory: tests/e2e
+        env:
+          UMBRACO_VERSIONS: ${{ matrix.umbraco }}
+        # npm test builds the library first, then runs Playwright
+        run: npm test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-v${{ matrix.umbraco }}
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/.data/v${{ matrix.umbraco }}/site.log
+          retention-days: 14

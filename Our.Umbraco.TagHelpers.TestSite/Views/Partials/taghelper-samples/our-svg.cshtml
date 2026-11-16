@@ -1,4 +1,15 @@
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
+@using Umbraco.Cms.Core.Models
+@{
+    // Umbraco 19 returns a list from MediaPicker3 even when it is limited to one item
+    // (single pickers moved to Umbraco.MediaPicker.Single), so resolve the logo either way.
+    MediaWithCrops? logo = Model.Value("logo") switch
+    {
+        MediaWithCrops single => single,
+        IEnumerable<MediaWithCrops> many => many.FirstOrDefault(),
+        _ => null
+    };
+}
 
 <h2>our-svg</h2>
 <p>
@@ -14,7 +25,7 @@
 </div>
 
 <div style="border:2px solid green; max-width: 25vw">
-    <our-svg media-item="Model.Logo" ensure-viewbox="true" />
+    <our-svg media-item="logo" ensure-viewbox="true" />
 </div>
 
 <ul>

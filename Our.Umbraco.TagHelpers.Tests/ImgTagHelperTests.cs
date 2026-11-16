@@ -1,20 +1,26 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Options;
+using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Tests.Helpers;
+using Umbraco.Cms.Core.Media;
+using Umbraco.Cms.Core.Models;
 
 namespace Our.Umbraco.TagHelpers.Tests
 {
     public class ImgTagHelperTests
     {
         private TagHelperContext _tagHelperContext;
+
+        // What the tag helper asked Umbraco's image URL generator for
+        private ImageUrlGenerationOptions? _requested;
 
         [SetUp]
         public void SetUp()
@@ -37,8 +43,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var output = TestContextHelpers.GetTagHelperOutput("our-img");
             await tagHelper.ProcessAsync(_tagHelperContext, output);
 
-            var renderedSrc = output.Attributes["src"].Value.ToString();
-            StringAssert.StartsWith(src + "?width=100&height=50", renderedSrc);
+            ClassicAssert.AreEqual(src, _requested!.ImageUrl);
         }
 
         [Test]
@@ -52,8 +57,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             var output = TestContextHelpers.GetTagHelperOutput("our-img");
             await tagHelper.ProcessAsync(_tagHelperContext, output);
 
-            var renderedSrc = output.Attributes["src"].Value.ToString();
-            StringAssert.StartsWith("/some/child/images/logo.png?width=100&height=50", renderedSrc);
+            ClassicAssert.AreEqual("/some/child/images/logo.png", _requested!.ImageUrl);
         }
 
         [Test]
@@ -67,15 +71,58 @@ namespace Our.Umbraco.TagHelpers.Tests
             var output = TestContextHelpers.GetTagHelperOutput("our-img");
             await tagHelper.ProcessAsync(_tagHelperContext, output);
 
-            var renderedSrc = output.Attributes["src"].Value.ToString();
-            StringAssert.StartsWith("https://cdn.example.com/images/logo.png?width=100&height=50", renderedSrc);
+            ClassicAssert.AreEqual("https://cdn.example.com/images/logo.png", _requested!.ImageUrl);
         }
 
-        private static ImgTagHelper CreateTagHelper(string requestPath)
+        // Umbraco 17+ sites sign image requests with an HMAC (Umbraco:CMS:Imaging:HMACSecretKey, generated
+        // on install) and ImageSharp answers 400 to an unsigned URL, so file URLs must come from Umbraco's generator.
+        [Test]
+        public async Task FileSource_Url_ComesFromUmbracosImageUrlGenerator()
+        {
+            const string signedUrl = "/images/logo.png?width=100&height=50&hmac=signed";
+            var tagHelper = CreateTagHelper("/some/child/page", generatedUrl: signedUrl);
+            tagHelper.FileSource = "/images/logo.png";
+            tagHelper.ImgWidth = 100;
+            tagHelper.ImgHeight = 50;
+
+            var output = TestContextHelpers.GetTagHelperOutput("our-img");
+            await tagHelper.ProcessAsync(_tagHelperContext, output);
+
+            ClassicAssert.AreEqual(signedUrl, output.Attributes["src"].Value.ToString());
+            ClassicAssert.AreEqual("/images/logo.png", _requested!.ImageUrl);
+            ClassicAssert.AreEqual(100, _requested.Width);
+            ClassicAssert.AreEqual(50, _requested.Height);
+            ClassicAssert.IsNull(_requested.FurtherOptions);
+        }
+
+        [Test]
+        public async Task FileSource_Url_KeepsItsOwnQueryButNotItsWidthAndHeight()
+        {
+            var tagHelper = CreateTagHelper("/");
+            tagHelper.FileSource = "/images/logo.png?format=webp&width=1&height=2";
+            tagHelper.ImgWidth = 100;
+            tagHelper.ImgHeight = 50;
+
+            var output = TestContextHelpers.GetTagHelperOutput("our-img");
+            await tagHelper.ProcessAsync(_tagHelperContext, output);
+
+            ClassicAssert.AreEqual("/images/logo.png", _requested!.ImageUrl);
+            ClassicAssert.AreEqual("format=webp", _requested.FurtherOptions);
+            ClassicAssert.AreEqual(100, _requested.Width);
+            ClassicAssert.AreEqual(50, _requested.Height);
+        }
+
+        private ImgTagHelper CreateTagHelper(string requestPath, string generatedUrl = "/generated.png")
         {
             var globalSettings = Options.Create(new OurUmbracoTagHelpersConfiguration());
 
-            var tagHelper = new ImgTagHelper(globalSettings)
+            var imageUrlGenerator = new Mock<IImageUrlGenerator>();
+            imageUrlGenerator
+                .Setup(g => g.GetImageUrl(It.IsAny<ImageUrlGenerationOptions?>()))
+                .Callback<ImageUrlGenerationOptions?>(options => _requested = options)
+                .Returns(generatedUrl);
+
+            var tagHelper = new ImgTagHelper(globalSettings, imageUrlGenerator.Object)
             {
                 ViewContext = CreateViewContext(requestPath)
             };
