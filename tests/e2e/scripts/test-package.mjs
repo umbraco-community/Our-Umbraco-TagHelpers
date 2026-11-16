@@ -13,7 +13,7 @@
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { configuration, libraryProject } from './library.mjs';
 import { packageFeed, packageVersionFile } from './package.mjs';
 
@@ -30,14 +30,18 @@ let version;
 const packageDir = process.env.E2E_PACKAGE_DIR;
 if (packageDir) {
   // Test an already packed package
+  // In the folder itself or one level down (a downloaded CI artifact may sit in a folder of its own)
   const packageFile = /^Our\.Umbraco\.TagHelpers\.(\d+\.\d+\.\d+.*)\.nupkg$/;
-  const packages = readdirSync(packageDir).filter((file) => packageFile.test(file));
+  const packages = readdirSync(packageDir, { recursive: true })
+    .map(String)
+    .filter((file) => file.split(/[\\/]/).length <= 2 && packageFile.test(basename(file)));
   if (packages.length !== 1) {
     console.error(`E2E_PACKAGE_DIR (${packageDir}) must hold exactly one Our.Umbraco.TagHelpers.<version>.nupkg (found: ${packages.join(', ') || 'none'})`);
     process.exit(1);
   }
-  version = packages[0].match(packageFile)[1];
-  copyFileSync(join(packageDir, packages[0]), join(packageFeed, packages[0]));
+  const fileName = basename(packages[0]);
+  version = fileName.match(packageFile)[1];
+  copyFileSync(join(packageDir, packages[0]), join(packageFeed, fileName));
   console.log(`Testing the packed Our.Umbraco.TagHelpers ${version} from ${packageDir}`);
 } else {
   const baseVersion = spawnSync('dotnet', ['msbuild', libraryProject, '-getProperty:Version', '-nologo'], { encoding: 'utf8' }).stdout.trim();

@@ -1,6 +1,6 @@
 name: Cross-version tests
 
-# Packs the NuGet package once and attaches it to the run, then boots the demo site on each
+# Packs the NuGet package once and attaches the .nupkg and .snupkg to the run, then boots the demo site on each
 # supported Umbraco version and runs the Playwright specs in tests/e2e against it
 # (see tests/e2e/playwright.config.ts), both with the project and with that package.
 on:
@@ -41,13 +41,19 @@ jobs:
       - name: Pack
         run: pwsh ./build.ps1 -Version ${{ steps.version.outputs.version }}
 
-      - name: Attach the package to the run
+      # Unzipped (archive: false), so each downloads as the file itself; the artifact is named after the file
+      - name: Attach the .nupkg to the run
         uses: actions/upload-artifact@v7
         with:
-          name: nuget-package-${{ steps.version.outputs.version }}
-          path: |
-            build.out/*.nupkg
-            build.out/*.snupkg
+          path: build.out/Our.Umbraco.TagHelpers.${{ steps.version.outputs.version }}.nupkg
+          archive: false
+          if-no-files-found: error
+
+      - name: Attach the .snupkg (symbols) to the run
+        uses: actions/upload-artifact@v7
+        with:
+          path: build.out/Our.Umbraco.TagHelpers.${{ steps.version.outputs.version }}.snupkg
+          archive: false
           if-no-files-found: error
 
   e2e:
@@ -109,7 +115,7 @@ jobs:
         if: matrix.source == 'package'
         uses: actions/download-artifact@v8
         with:
-          pattern: nuget-package-*
+          pattern: Our.Umbraco.TagHelpers.*.nupkg
           path: ${{ runner.temp }}/nuget-package
           merge-multiple: true
 
