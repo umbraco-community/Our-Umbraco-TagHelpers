@@ -78,7 +78,7 @@ This is a tag helper attribute that can be applied to any DOM element in the raz
 
 ## BeginUmbracoForm Replacement
 
-This is to make it easier to create a HTML `<form>` that uses an Umbraco SurfaceController and would be an alternative of using the `@Html.BeginUmbracoForm` approach. This taghelper runs against the `<form>` element along with these attributes `our-controller`and `our-action` to help generate a hidden input field of `ufprt` containing the encoded path that this form needs to route to.
+This is to make it easier to create a HTML `<form>` that uses an Umbraco SurfaceController and would be an alternative of using the `@Html.BeginUmbracoForm` approach. This taghelper runs against the `<form>` element along with these attributes `our-controller`and `our-action` to help generate a hidden input field of `ufprt` containing the encoded path that this form needs to route to. `our-controller` takes the controller's name with or without its `Controller` suffix (`ContactForm` or `ContactFormController`).
 
 https://our.umbraco.com/Documentation/Fundamentals/Code/Creating-Forms/
 
