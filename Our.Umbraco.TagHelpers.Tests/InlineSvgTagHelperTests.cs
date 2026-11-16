@@ -263,11 +263,20 @@ namespace Our.Umbraco.TagHelpers.Tests
 
         // https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/57
         // Each test renders the file, changes it, and renders again: the second render shows whether it was cached
-        [TestCase(true, null, false, true, Description = "appsettings Cache is used when the tag doesn't set cache")]
-        [TestCase(true, false, false, false, Description = "cache=\"false\" overrides appsettings Cache")]
-        [TestCase(false, true, false, true, Description = "cache=\"true\" caches without appsettings Cache")]
-        [TestCase(true, null, true, false, Description = "ignore-appsettings skips appsettings Cache")]
-        [TestCase(true, true, true, true, Description = "cache=\"true\" still caches with ignore-appsettings")]
+        // All 12 combinations, in the same order as the README's "When is an SVG cached?" table:
+        // (appsettings Cache, cache attribute or null when not set, ignore-appsettings, expected cached)
+        [TestCase(false, null, false, false)]
+        [TestCase(true, null, false, true)]
+        [TestCase(false, null, true, false)]
+        [TestCase(true, null, true, false)]
+        [TestCase(false, true, false, true)]
+        [TestCase(true, true, false, true)]
+        [TestCase(false, true, true, true)]
+        [TestCase(true, true, true, true)]
+        [TestCase(false, false, false, false)]
+        [TestCase(true, false, false, false)]
+        [TestCase(false, false, true, false)]
+        [TestCase(true, false, true, false)]
         public void Cache_AttributeAndAppSettings(bool appSettingsCache, bool? cacheAttribute, bool ignoreAppSettings, bool expectCached)
         {
             var settings = new OurUmbracoTagHelpersConfiguration();

@@ -208,16 +208,22 @@ Additional properties have been added to cache the output and also to ensure the
 
 ### When is an SVG cached?
 
-An attribute on the tag always wins. Without a `cache` attribute, the global `Cache` setting applies, unless the tag has `ignore-appsettings="true"`.
+`cache` on the tag always decides when it's there. When it isn't, the global `Cache` setting decides, unless the tag has `ignore-appsettings="true"`, in which case the SVG isn't cached.
 
-| The tag | Global `Cache` | Cached? |
-|---|---|---|
-| `<our-svg src="…" />` | `false` (the default) | no |
-| `<our-svg src="…" />` | `true` | yes |
-| `<our-svg src="…" cache="true" />` | either | yes |
-| `<our-svg src="…" cache="false" />` | either | no |
-| `<our-svg src="…" ignore-appsettings="true" />` | either | no |
-| `<our-svg src="…" cache="true" ignore-appsettings="true" />` | either | yes |
+| `cache` on the tag | `ignore-appsettings` on the tag | Global `Cache` in appsettings | Cached? |
+|---|---|---|---|
+| not set | not set | `false` | no |
+| not set | not set | `true` | **yes** |
+| not set | `ignore-appsettings="true"` | `false` | no |
+| not set | `ignore-appsettings="true"` | `true` | no |
+| `cache="true"` | not set | `false` | **yes** |
+| `cache="true"` | not set | `true` | **yes** |
+| `cache="true"` | `ignore-appsettings="true"` | `false` | **yes** |
+| `cache="true"` | `ignore-appsettings="true"` | `true` | **yes** |
+| `cache="false"` | not set | `false` | no |
+| `cache="false"` | not set | `true` | no |
+| `cache="false"` | `ignore-appsettings="true"` | `false` | no |
+| `cache="false"` | `ignore-appsettings="true"` | `true` | no |
 
 Only the file's contents are cached, so `class` and `ensure-viewbox` still apply to each tag separately, even when several tags share one cached file.
 
