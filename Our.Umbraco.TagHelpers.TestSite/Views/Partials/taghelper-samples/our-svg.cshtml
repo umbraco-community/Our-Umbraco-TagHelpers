@@ -58,3 +58,13 @@
 <div data-demo="uncached" style="display: inline-block">
     <our-svg src="/samples/cache-demo.svg" />
 </div>
+<p>
+    Cached copies of the same file share one cache entry, but each keeps its own <code>class</code>:
+    only the file contents are cached, not the rendered tag.
+</p>
+<div data-demo="cached-class-a" style="display: inline-block; max-width: 5vw">
+    <our-svg src="/samples/partying-face.svg" cache="true" class="demo-svg-a" />
+</div>
+<div data-demo="cached-class-b" style="display: inline-block; max-width: 5vw">
+    <our-svg src="/samples/partying-face.svg" cache="true" class="demo-svg-b" />
+</div>
