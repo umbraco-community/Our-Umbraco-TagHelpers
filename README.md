@@ -202,9 +202,24 @@ Additional properties have been added to cache the output and also to ensure the
 
 - `class` - Allows for a CSS class upon the SVG element. This is a `string` value.
 - `ensure-viewbox` - Enables the feature to "fix" the output SVG which always ensures the SVG utilises a viewbox rather than width & height. This is a `boolean` value.
-- `cache` - Enables the feature to cache the output at runtime level. This is a `boolean` value. When it's set, it overrides the global `Cache` setting for that element, so `cache="false"` turns caching off even when it's on globally; when it isn't set, the global setting applies.
-- `cache-minutes` - Defines the amount of time (in minutes) to cache the output. To be used in conjunction with the `cache` property. This is an `integer` value.
-- `ignore-appsettings` - When enabled, the all settings appropiate to this tag helper which are defined within `appsettings.json` are completely ignored. For example, if global caching is enabled we can simply disable caching of individual elements (unless the `cache` property is `true`). This is a `boolean` value.
+- `cache` - Caches the SVG file's contents in Umbraco's runtime cache, so the file isn't read on every page load. This is a `boolean` value. When it's on the tag, it wins over the global `Cache` setting, so `cache="false"` turns caching off for that element even when it's on globally. See [When is an SVG cached?](#when-is-an-svg-cached) below.
+- `cache-minutes` - How long (in minutes) a cached SVG is kept. When it isn't set, the global `CacheMinutes` is used (180 by default). This is an `integer` value.
+- `ignore-appsettings` - Ignores the global `EnsureViewBox` and `Cache` settings for this element, so only the attributes on the tag apply. This is a `boolean` value.
+
+### When is an SVG cached?
+
+An attribute on the tag always wins. Without a `cache` attribute, the global `Cache` setting applies, unless the tag has `ignore-appsettings="true"`.
+
+| The tag | Global `Cache` | Cached? |
+|---|---|---|
+| `<our-svg src="…" />` | `false` (the default) | no |
+| `<our-svg src="…" />` | `true` | yes |
+| `<our-svg src="…" cache="true" />` | either | yes |
+| `<our-svg src="…" cache="false" />` | either | no |
+| `<our-svg src="…" ignore-appsettings="true" />` | either | no |
+| `<our-svg src="…" cache="true" ignore-appsettings="true" />` | either | yes |
+
+Only the file's contents are cached, so `class` and `ensure-viewbox` still apply to each tag separately, even when several tags share one cached file.
 
 ### Global settings via appsettings.json
 
