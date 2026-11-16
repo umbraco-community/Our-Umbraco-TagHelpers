@@ -6,8 +6,8 @@
     There are two special User Groups you can use:
 </p>
 <ul>
-    <li> * - All anonymous users</li>
-    <li>? - All authenticated users</li>
+    <li>? - All anonymous users</li>
+    <li>* - All authenticated users</li>
     <li>Use the alias of the User Group</li>
 </ul>
 
@@ -20,6 +20,6 @@
 
 <h4>Exclude</h4>
 <div our-user-exclude="editor">Everyone except <strong>❌ Editor</strong> users can see this.</div>
-<div our-user-exclude="editor">Everyone except <strong>❌ Admin</strong> or <strong>❌ Editor</strong> users can see this.</div>
+<div our-user-exclude="admin,editor">Everyone except <strong>❌ Admin</strong> or <strong>❌ Editor</strong> users can see this.</div>
 <div our-user-exclude="?">Everyone except <strong>❌ Anonymous</strong> users will see this.</div>
 <div our-user-exclude="*">Everyone except <strong>❌ logged in</strong> users will see this.</div>

@@ -24,6 +24,16 @@ test('shown to a backoffice user with access to content', async ({ backofficePag
   await expect(styled.locator('xpath=..')).toHaveAttribute('style', /position:fixed/);
 });
 
+test('shown to an editor', async ({ editorPage: page }) => {
+  await page.goto('/en/');
+  await expect(section(page, 'our-edit-link').locator('a')).toHaveCount(4);
+});
+
+test('hidden for a backoffice user without access to content', async ({ noContentUserPage: page }) => {
+  await page.goto('/en/');
+  await expect(section(page, 'our-edit-link').locator('a')).toHaveCount(0);
+});
+
 // Cookies on localhost ignore the port, so make sure a login never leaks into another test
 test('a fresh visitor is anonymous even after the backoffice login', async ({ page }) => {
   await page.goto('/en/');

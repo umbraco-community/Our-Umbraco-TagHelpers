@@ -9,3 +9,41 @@ test('adds the encoded ufprt route field for the surface controller', async ({ p
   await expect(ufprt).toHaveCount(1);
   expect(await ufprt.getAttribute('value')).toMatch(/\S{20,}/);
 });
+
+test('invalid input shows the validation messages', async ({ page }) => {
+  await page.goto('/en/');
+  const sample = section(page, 'our-form');
+
+  await sample.locator('form#testContactForm input[type="submit"]').click();
+
+  await expect(sample.locator('span.field-validation-error')).toHaveCount(3);
+  for (const message of await sample.locator('span.field-validation-error').all()) {
+    await expect(message).not.toBeEmpty();
+  }
+  await expect(sample.locator('.form-success')).toHaveCount(0);
+});
+
+test('valid input reaches the surface controller and redirects back', async ({ page }) => {
+  await page.goto('/en/');
+  const sample = section(page, 'our-form');
+  const form = sample.locator('form#testContactForm');
+
+  await form.locator('input[name="Name"]').fill('E2E Tester');
+  await form.locator('input[name="Email"]').fill('e2e@example.com');
+  await form.locator('textarea[name="Message"]').fill('Hello from Playwright');
+  await form.locator('input[type="submit"]').click();
+
+  await expect(page).toHaveURL(/\/en\/$/);
+  await expect(sample.locator('.form-success')).toHaveText('Thanks E2E Tester, your message was sent.');
+});
+
+test('umb-area routes to the surface controller in that area', async ({ page }) => {
+  await page.goto('/en/');
+  const sample = section(page, 'our-form');
+  const form = sample.locator('form#testAreaForm');
+
+  await form.locator('input[name="name"]').fill('E2E Area');
+  await form.locator('button[type="submit"]').click();
+
+  await expect(sample.locator('.area-form-success')).toHaveText('Area form received E2E Area');
+});

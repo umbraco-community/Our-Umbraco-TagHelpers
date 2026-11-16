@@ -32,6 +32,7 @@ public class ContactFormController : SurfaceController
         }
         
         // Send out an email or save to a DB table or CRM system etc...
+        TempData["ContactFormSubmitted"] = model.Name;
         return RedirectToCurrentUmbracoPage();
     }
 }

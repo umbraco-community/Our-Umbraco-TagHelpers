@@ -1,0 +1,15 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Web.Common.PublishedModels.Page>
+
+<h2>our-fallback on a page</h2>
+
+<p>
+    <code>Fallback.ToAncestors</code> uses the value from the nearest ancestor when this page has none.
+    Open the <a href="/en/page-a/fallback-demo/">Fallback Demo</a> page, which has an empty header, to see Page A's header here.
+</p>
+<h3 data-demo="ancestors"><our-fallback property="Header" mode="Fallback.ToAncestors">No header here or on any ancestor</our-fallback></h3>
+
+<p>
+    When no value is found (here <code>Fallback.ToDefaultValue</code>, with no default value),
+    the content inside the tag is shown instead.
+</p>
+<h3 data-demo="content"><our-fallback property="Header" mode="Fallback.ToDefaultValue">This page has no header, so the tag content is shown</our-fallback></h3>

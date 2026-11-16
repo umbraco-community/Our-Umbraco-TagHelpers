@@ -19,3 +19,15 @@ test('serves the downloaded file', async ({ page, request }) => {
   expect(response.status()).toBe(200);
   expect((await response.body()).length).toBeGreaterThan(1_000);
 });
+
+test('rewrites href to a locally hosted copy and serves it', async ({ page, request }) => {
+  await page.goto('/en/');
+  const link = section(page, 'our-self-host').locator('link[rel="stylesheet"]');
+
+  await expect(link).toHaveAttribute('href', '/assets/normalize.css@8.0.1/normalize.css');
+  await expect(link).toHaveAttribute('data-original-href', 'https://unpkg.com/normalize.css@8.0.1/normalize.css');
+
+  const response = await request.get('/assets/normalize.css@8.0.1/normalize.css');
+  expect(response.status()).toBe(200);
+  expect(await response.text()).toContain('normalize.css');
+});

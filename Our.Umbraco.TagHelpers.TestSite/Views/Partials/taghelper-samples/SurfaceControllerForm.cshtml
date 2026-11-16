@@ -10,6 +10,11 @@
     the encoded path that this form needs to route to.
 </p>
 
+@if (TempData["ContactFormSubmitted"] is string submittedName)
+{
+    <p class="form-success">Thanks @submittedName, your message was sent.</p>
+}
+
 <form our-controller="ContactForm" our-action="Submit" method="post" id="testContactForm" class="form">
     <div asp-validation-summary="All"></div>
 
@@ -30,4 +35,21 @@
     </div>
     <br/>
     <input type="submit" name="Submit" value="Submit" />
+</form>
+
+<h3>Surface controllers in an area (umb-area)</h3>
+<p>
+    Surface controllers marked with <code>[PluginController("...")]</code>, as packages usually do, live in an MVC area.
+    Add <code>umb-area</code> with the area name so the ufprt field routes the form to that controller.
+</p>
+
+@if (TempData["AreaFormSubmitted"] is string areaName)
+{
+    <p class="area-form-success">Area form received @areaName</p>
+}
+
+<form our-controller="AreaContactForm" our-action="Submit" umb-area="TagHelpersDemo" method="post" id="testAreaForm" class="form">
+    <p>Name:</p>
+    <input name="name" />
+    <button type="submit">Send to the area controller</button>
 </form>

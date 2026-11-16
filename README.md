@@ -645,6 +645,9 @@ dotnet run --project Our.Umbraco.TagHelpers.TestSite
 
 - Open https://localhost:44302 (if the browser rejects the certificate, run `dotnet dev-certs https --trust` once).
 - The backoffice is at `/umbraco`; the login is the unattended install user in `appsettings.Development.json`.
+- To try the user and member samples as someone other than the admin, the site creates demo people on first boot (a TestSite migration, not part of the package), using the logins under `TestSite:DemoPeople` in `appsettings.Development.json`:
+  - an Editor user and a user who can only see the Media section (log in at `/umbraco`),
+  - a member of the `Staff` member group (log in with the member login form on the home page).
 - Pass `-p:UmbracoVersion=16|17|18|19` to build or run it against another supported Umbraco version, e.g. `dotnet run --project Our.Umbraco.TagHelpers.TestSite -p:UmbracoVersion=19`.
 - Seeing "No published content"? Your local database was created before the uSync first-boot import was set up. Delete `Our.Umbraco.TagHelpers.TestSite/umbraco/Data/Umbraco.sqlite.db*` to get a fresh install with all the content, or import it from the uSync dashboard in the backoffice.
 

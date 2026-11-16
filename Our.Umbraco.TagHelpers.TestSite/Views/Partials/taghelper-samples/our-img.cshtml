@@ -129,6 +129,47 @@
                          width--xxl="480" height--xxl="240" />
             </td>
         </tr>
+        <!-- Class and style -->
+        <tr>
+            <td>
+                <h4>Class and Style</h4>
+                CSS classes and inline styles are passed on to the &lt;img&gt;
+            </td>
+            <td>
+                <span class="code-label">Input:</span>
+<pre class="code-block">
+&lt;our-img src="/samples/cute-unicorn.jpg"
+          width="300" height="150"
+          class="demo-img demo-img--rounded"
+          style="border: 2px solid green" /&gt;
+</pre>
+            </td>
+            <td>
+                <our-img src="/samples/cute-unicorn.jpg" width="300" height="150" class="demo-img demo-img--rounded" style="border: 2px solid green" />
+            </td>
+        </tr>
+
+        <!-- Large breakpoints with crops -->
+        <tr>
+            <td>
+                <h4>Large Breakpoints with Crops</h4>
+                Sources for the large (992px), extra large (1200px) and extra extra large (1400px) breakpoints,
+                with a fixed height and with crops
+            </td>
+            <td>
+                <span class="code-label">Input:</span>
+<pre class="code-block">
+&lt;our-img media-item="Model.Image"
+          width="200" height="200"
+          width--l="500" height--l="250"
+          width--xl="600" cropalias--xl="desktop"
+          width--xxl="800" cropalias--xxl="desktop" /&gt;
+</pre>
+            </td>
+            <td>
+                <our-img media-item="Model.Image" width="200" height="200" width--l="500" height--l="250" width--xl="600" cropalias--xl="desktop" width--xxl="800" cropalias--xxl="desktop" />
+            </td>
+        </tr>
     </tbody>
 </table>
 
