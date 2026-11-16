@@ -73,6 +73,10 @@ const site = spawn('dotnet', ['Our.Umbraco.TagHelpers.TestSite.dll'], {
     ASPNETCORE_ENVIRONMENT: 'Development',
     ASPNETCORE_URLS: `http://localhost:${port}`,
     Umbraco__CMS__Global__UseHttps: 'false',
+    // Umbraco 17+ generates an imaging HMAC key on install but only uses it after a restart, so every
+    // test site gets one from the first boot: image URLs must then be signed, as on a real site.
+    // A fixed key, only ever used by these local test sites.
+    Umbraco__CMS__Imaging__HMACSecretKey: 'PVUrY5IXvtiuu3bYjmpHXmG4tWGAghESQJEXMeC+rk4D+iy9G1MgbTyzykPEQfkg5HJw5bpqQ68D49JGD+iCoQ==',
   },
 });
 

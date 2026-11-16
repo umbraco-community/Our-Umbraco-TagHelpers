@@ -32,7 +32,9 @@ test('media image renders responsive crop sources', async ({ page }) => {
   await expect(picture.locator('source').first()).toHaveAttribute('srcset', new RegExp(`^${mediaFile}\\?cc=`));
 });
 
-test('file images keep root-relative paths', async ({ page }) => {
+// The test sites sign image requests (an HMAC key, as Umbraco 17+ generates on install), so the
+// resize URLs must carry Umbraco's hmac or ImageSharp answers 400
+test('file images keep root-relative paths and are signed', async ({ page }) => {
   await page.goto('/en/');
   const sample = section(page, 'our-img');
   const urls = [
@@ -41,7 +43,7 @@ test('file images keep root-relative paths', async ({ page }) => {
   ];
 
   expect(urls.length).toBeGreaterThanOrEqual(3);
-  for (const url of urls) expect(url).toMatch(/^\/samples\/cute-unicorn\.jpg\?width=\d+&height=\d+$/);
+  for (const url of urls) expect(url).toMatch(/^\/samples\/cute-unicorn\.jpg\?width=\d+&height=\d+&hmac=[0-9a-f]+$/);
 });
 
 test('every rendered image URL resolves', async ({ page, request }) => {
