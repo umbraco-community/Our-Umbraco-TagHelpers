@@ -66,3 +66,12 @@ test('cache serves the cached svg after the file changes', async ({ page, umbrac
     writeFileSync(file, original);
   }
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/58
+test('cached copies of the same svg keep their own class', async ({ page }) => {
+  await page.goto('/en/');
+
+  // Both read the same cache entry; the class must come from each tag, not from the cache
+  await expect(demo(page, 'cached-class-a')).toHaveClass('demo-svg-a');
+  await expect(demo(page, 'cached-class-b')).toHaveClass('demo-svg-b');
+});

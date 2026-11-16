@@ -133,6 +133,14 @@ namespace Our.Umbraco.TagHelpers
                 return;
             }
 
+            // After the cache, so tags sharing a cached file each get their own class and viewBox
+            cleanedFileContents = ApplyTagAttributes(cleanedFileContents);
+            if (string.IsNullOrEmpty(cleanedFileContents))
+            {
+                output.SuppressOutput();
+                return;
+            }
+
             // Remove the src attribute or media-item from the <svg>
             output.Attributes.RemoveAll("src");
             output.Attributes.RemoveAll("media-item");
@@ -210,6 +218,15 @@ namespace Our.Umbraco.TagHelpers
                 @"syntax:error:",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+            return cleanedFileContents;
+        }
+
+        /// <summary>
+        /// Applies this tag's class and viewBox to the sanitized SVG. This runs for every tag, after the cache:
+        /// the cache holds one file's contents, shared by every tag that uses the file.
+        /// </summary>
+        private string ApplyTagAttributes(string cleanedFileContents)
+        {
             if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
             {
                 HtmlDocument doc = new HtmlDocument();

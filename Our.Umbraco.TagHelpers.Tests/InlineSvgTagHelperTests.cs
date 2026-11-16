@@ -12,6 +12,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework.Legacy;
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Routing;
@@ -231,6 +232,60 @@ namespace Our.Umbraco.TagHelpers.Tests
             tagHelper.Process(_context, _output);
 
             ClassicAssert.AreEqual("<a xlink:href=\"syntax:error:alert('test');\">Click here</a>end", _output.Content.GetContent());
+        }
+
+        // https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/58
+        [Test]
+        public void CachedSvgKeepsEachTagsOwnClass()
+        {
+            var hostEnv = CreateHostEnvironment("<svg width=\"10\" height=\"10\"></svg>");
+            var appCaches = CreateAppCaches();
+
+            var first = RenderCachedSvg(hostEnv, appCaches, svg => svg.CssClass = "first");
+            var second = RenderCachedSvg(hostEnv, appCaches, svg => svg.CssClass = "second");
+
+            ClassicAssert.AreEqual("<svg width=\"10\" height=\"10\" class=\"first\"></svg>", first);
+            ClassicAssert.AreEqual("<svg width=\"10\" height=\"10\" class=\"second\"></svg>", second);
+        }
+
+        [Test]
+        public void CachedSvgKeepsEachTagsOwnViewBoxSetting()
+        {
+            var hostEnv = CreateHostEnvironment("<svg width=\"10\" height=\"10\"></svg>");
+            var appCaches = CreateAppCaches();
+
+            var withViewBox = RenderCachedSvg(hostEnv, appCaches, svg => svg.EnsureViewBox = true);
+            var withoutViewBox = RenderCachedSvg(hostEnv, appCaches, svg => { });
+
+            ClassicAssert.AreEqual("<svg viewbox=\"0 0 10 10\"></svg>", withViewBox);
+            ClassicAssert.AreEqual("<svg width=\"10\" height=\"10\"></svg>", withoutViewBox);
+        }
+
+        private static IWebHostEnvironment CreateHostEnvironment(string svg)
+        {
+            var fileProvider = new Mock<IFileProvider>();
+            fileProvider
+                .Setup(p => p.GetFileInfo(It.IsAny<string>()))
+                .Returns(() => Mock.Of<IFileInfo>(f => f.Exists && f.CreateReadStream() == new MemoryStream(Encoding.UTF8.GetBytes(svg))));
+            return Mock.Of<IWebHostEnvironment>(e => e.WebRootFileProvider == fileProvider.Object);
+        }
+
+        private static AppCaches CreateAppCaches() =>
+            new(new ObjectCacheAppCache(), NoAppCache.Instance, new IsolatedCaches(_ => NoAppCache.Instance));
+
+        private string RenderCachedSvg(IWebHostEnvironment hostEnv, AppCaches appCaches, Action<InlineSvgTagHelper> configure)
+        {
+            var tagHelper = new InlineSvgTagHelper(null!, hostEnv, null!, _settings, appCaches, Mock.Of<ILogger<InlineSvgTagHelper>>())
+            {
+                FileSource = "/test.svg",
+                Cache = true
+            };
+            configure(tagHelper);
+
+            var output = new TagHelperOutput("our-svg", new TagHelperAttributeList(), (_, _) =>
+                Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
+            tagHelper.Process(_context, output);
+            return output.Content.GetContent();
         }
     }
 }
