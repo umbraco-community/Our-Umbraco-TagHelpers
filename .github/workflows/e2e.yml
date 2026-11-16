@@ -1,13 +1,57 @@
 name: Cross-version tests
 
-# Boots the demo site on each supported Umbraco version and runs the Playwright
-# specs in tests/e2e against it (see tests/e2e/playwright.config.ts).
+# Packs the NuGet package once and attaches it to the run, then boots the demo site on each
+# supported Umbraco version and runs the Playwright specs in tests/e2e against it
+# (see tests/e2e/playwright.config.ts), both with the project and with that package.
 on:
   pull_request:
+  push:
+    branches: [ v2/dev ]
   workflow_dispatch:
 
 jobs:
+  pack:
+    name: Pack NuGet package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+            11.0.x
+
+      # <Version> without its prerelease part, plus -ci.<run number>: e.g. 2.1.0-ci.42 for 2.1.0-rc1.
+      # NuGet sorts it below 2.1.0-rc1 and 2.1.0, so a CI package never looks newer than a release,
+      # and every run's package has its own version.
+      - name: Work out the CI package version
+        id: version
+        run: |
+          base=$(dotnet msbuild Our.Umbraco.TagHelpers/Our.Umbraco.TagHelpers.csproj -getProperty:Version -nologo)
+          echo "version=${base%%-*}-ci.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Pack
+        run: pwsh ./build.ps1 -Version ${{ steps.version.outputs.version }}
+
+      - name: Attach the package to the run
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-package-${{ steps.version.outputs.version }}
+          path: |
+            build.out/*.nupkg
+            build.out/*.snupkg
+          if-no-files-found: error
+
   e2e:
+    needs: pack
     name: Umbraco ${{ matrix.umbraco }} (${{ matrix.os }}, ${{ matrix.source }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -60,11 +104,21 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      # The package jobs test the exact package the pack job attached to this run
+      - name: Download the packed package
+        if: matrix.source == 'package'
+        uses: actions/download-artifact@v8
+        with:
+          pattern: nuget-package-*
+          path: ${{ runner.temp }}/nuget-package
+          merge-multiple: true
+
       - name: Run Playwright tests
         working-directory: tests/e2e
         env:
           UMBRACO_VERSIONS: ${{ matrix.umbraco }}
-        # npm test builds the library first; npm run test:package packs it and installs the package instead
+          E2E_PACKAGE_DIR: ${{ matrix.source == 'package' && format('{0}/nuget-package', runner.temp) || '' }}
+        # npm test builds the library first; npm run test:package installs the attached package instead
         run: ${{ matrix.source == 'package' && 'npm run test:package' || 'npm test' }}
 
       - name: Upload Playwright report
