@@ -1,4 +1,4 @@
-@using Our.Umbraco.TagHelpers.TestSite.Models
+﻿@using Our.Umbraco.TagHelpers.TestSite.Models
 @model ContactFormViewModel
 
 <h2>Replacement for BeginUmbracoForm</h2>
@@ -35,6 +35,23 @@
     </div>
     <br/>
     <input type="submit" name="Submit" value="Submit" />
+</form>
+
+<h3>With the Controller suffix</h3>
+<p>
+    <code>our-controller</code> takes the controller's name with or without its <code>Controller</code> suffix,
+    so <code>our-controller="ContactFormController"</code> posts to the same controller as the form above.
+</p>
+
+<form our-controller="ContactFormController" our-action="Submit" method="post" id="testSuffixForm" class="form">
+    <p>Name:</p>
+    <input name="Name" />
+    <p>Email:</p>
+    <input name="Email" />
+    <p>Message:</p>
+    <textarea name="Message"></textarea>
+    <br/>
+    <input type="submit" value="Submit" />
 </form>
 
 <h3>Surface controllers in an area (umb-area)</h3>

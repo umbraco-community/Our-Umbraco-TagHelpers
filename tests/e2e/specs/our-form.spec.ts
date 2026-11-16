@@ -47,3 +47,18 @@ test('umb-area routes to the surface controller in that area', async ({ page }) 
 
   await expect(sample.locator('.area-form-success')).toHaveText('Area form received E2E Area');
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/93
+test('our-controller with the Controller suffix reaches the surface controller', async ({ page }) => {
+  await page.goto('/en/');
+  const sample = section(page, 'our-form');
+  const form = sample.locator('form#testSuffixForm');
+
+  await form.locator('input[name="Name"]').fill('E2E Suffix');
+  await form.locator('input[name="Email"]').fill('suffix@example.com');
+  await form.locator('textarea[name="Message"]').fill('Posted with ContactFormController');
+  await form.locator('input[type="submit"]').click();
+
+  await expect(page).toHaveURL(/\/en\/$/);
+  await expect(sample.locator('.form-success')).toHaveText('Thanks E2E Suffix, your message was sent.');
+});
