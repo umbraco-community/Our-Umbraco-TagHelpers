@@ -25,7 +25,8 @@ namespace Our.Umbraco.TagHelpers
         public string? ControllerAction { get; set; }
 
         /// <summary>
-        /// The name of the Umbraco controller minus the 'Controller' suffix.
+        /// The name of the Umbraco surface controller, with or without its 'Controller' suffix
+        /// (ContactForm or ContactFormController).
         /// </summary>
         [HtmlAttributeName("our-controller")]
         public string? ControllerName { get; set; }
@@ -85,7 +86,7 @@ namespace Our.Umbraco.TagHelpers
                 return;
 
             var encryptedString = EncryptionHelper.CreateEncryptedRouteString(_dataProtectionProvider,
-                ControllerName,
+                WithoutControllerSuffix(ControllerName),
                 ControllerAction,
                 Area,
                 RouteValues);
@@ -107,6 +108,19 @@ namespace Our.Umbraco.TagHelpers
 
             // Note: We do not need to add the HTMLAntiforgeryToken
             // As the existing Microsoft Form taghelper will add it before the end of the form
+        }
+
+        /// <summary>
+        /// Umbraco routes surface controllers by their name without the 'Controller' suffix, as
+        /// BeginUmbracoForm&lt;ContactFormController&gt; passes it. With the suffix, the form posted but Umbraco
+        /// couldn't find the route (#93).
+        /// </summary>
+        private static string WithoutControllerSuffix(string controllerName)
+        {
+            const string suffix = "Controller";
+            return controllerName.Length > suffix.Length && controllerName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
+                ? controllerName[..^suffix.Length]
+                : controllerName;
         }
     }
 }
