@@ -665,6 +665,28 @@ This will save the file as `/assets/alpinejs.js`, enabling eg. MIME types for .j
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
 
+### Limits on what's downloaded
+`our-self-host` is meant for URLs written in your views, such as the CDN links above, not for values that editors or visitors enter. To keep downloads in check:
+- Only `http` and `https` URLs are downloaded, and the file must end up inside the root folder (a `folder` attribute such as `../..` isn't allowed).
+- If a download fails, takes too long or is too large, the tag keeps the original URL instead of breaking the page, and a warning is logged.
+
+These can be set in appsettings.json under `Our.Umbraco.TagHelpers:OurSelfHost` (the values shown are the defaults):
+
+    {
+      "Our.Umbraco.TagHelpers": {
+        "OurSelfHost": {
+          "RootFolder": "/assets",
+          "AllowedHosts": [],
+          "MaxFileSizeKilobytes": 10240,
+          "DownloadTimeoutSeconds": 30
+        }
+      }
+    }
+
+- `AllowedHosts` - the hosts files may be downloaded from, for example `["unpkg.com", "cdn.jsdelivr.net"]`. When it's empty, any host is allowed; a URL on another host keeps pointing at the original.
+- `MaxFileSizeKilobytes` - the largest file that's downloaded (10 MB by default).
+- `DownloadTimeoutSeconds` - how long to wait for a download.
+
 ## Demo site & cross-version tests
 
 The package supports Umbraco 16, 17, 18 and 19 from a single NuGet package (`net9.0`, `net10.0` and `net11.0` builds).
