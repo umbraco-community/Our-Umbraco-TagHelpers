@@ -9,7 +9,7 @@ namespace Our.Umbraco.TagHelpers.Composing
     {
         public void Compose(IUmbracoBuilder builder)
         {
-            builder.AddNotificationHandler<MediaSavedNotification, InlineSvgTagHelperNotifications>();
+            builder.AddNotificationHandler<MediaCacheRefresherNotification, InlineSvgTagHelperNotifications>();
         }
     }
 }

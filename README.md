@@ -277,7 +277,7 @@ Applying any of the below configurations within your `appsettings.json` file wil
       }
     }
 
-> **Note:** SVG caches are cleared on application restart, or by resaving the media in the media library.
+> **Note:** cached SVGs from the media library (`media-item`) are cleared when media is saved or changed, on every server of a load-balanced site. SVGs from `wwwroot` (`src`) stay cached until `cache-minutes` expires or the site restarts.
 
 ## `<our-fallback>`
 
