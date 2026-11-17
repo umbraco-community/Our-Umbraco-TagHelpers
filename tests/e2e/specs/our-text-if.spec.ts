@@ -16,7 +16,7 @@ test('fills the element with the text of the page culture', async ({ page }) => 
 test('leaves the element out when there is no text', async ({ page }) => {
   await page.goto('/en/');
   await expect(demo(page, 'empty')).toHaveCount(0);
-  await expect(section(page, 'our-text-if')).not.toContainText("This heading isn't rendered");
+  await expect(section(page, 'our-text-if').locator('h3')).toHaveCount(1); // only the "with-text" heading
 });
 
 test('shows markup in the text as text', async ({ page }) => {

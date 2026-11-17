@@ -10,14 +10,16 @@ namespace Our.Umbraco.TagHelpers
     /// and nothing at all when the heading is empty.
     /// </summary>
     /// <remarks>
+    /// Use it on an empty element. Anything inside the element is never shown: it's replaced by the text, or left out
+    /// with the element. For content to show when the value is empty, use &lt;our-fallback&gt; instead.
     /// Text is HTML-encoded, as @Model.Heading is in Razor; values that are already HTML (IHtmlEncodedString such as
-    /// rich text, or IHtmlContent) are output as HTML. The text replaces any content inside the element.
+    /// rich text, or IHtmlContent) are output as HTML.
     /// </remarks>
     [HtmlTargetElement("*", Attributes = "our-text-if")]
     public class TextIfTagHelper : TagHelper
     {
         /// <summary>
-        /// The text to show. When it's null, empty or whitespace, the element isn't rendered.
+        /// The text to show. When it's null, empty or whitespace, the element (and anything inside it) isn't rendered.
         /// </summary>
         [HtmlAttributeName("our-text-if")]
         public object? Text { get; set; }

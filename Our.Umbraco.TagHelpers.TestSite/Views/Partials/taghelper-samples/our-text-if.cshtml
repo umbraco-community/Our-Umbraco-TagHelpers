@@ -11,7 +11,7 @@
 <h3 data-demo="with-text" our-text-if="@Model.Header" />
 
 <p>A property with no value, so the heading below isn't rendered:</p>
-<h3 data-demo="empty" our-text-if='@Model.Value<string>("noSuchProperty")'>This heading isn't rendered</h3>
+<h3 data-demo="empty" our-text-if='@Model.Value<string>("noSuchProperty")' />
 
 <p>Text is HTML-encoded, so markup in it is shown as text:</p>
 <p data-demo="markup" our-text-if='@("<em>Shown as text, not emphasised</em>")' />
