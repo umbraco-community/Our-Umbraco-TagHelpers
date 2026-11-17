@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Umbraco.Cms.Core.Strings;
+using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Umbraco.Cms.Core.Models.PublishedContent;
@@ -68,7 +70,21 @@ namespace Our.Umbraco.TagHelpers
             // If we have a value that can be
             if (string.IsNullOrWhiteSpace($"{result}") == false)
             {
-                output.Content.SetHtmlContent($"{result}");
+                // As @Model.Value(...) in Razor: values that are already HTML are output as HTML, anything else
+                // (e.g. a Textstring) is HTML-encoded so markup in it is shown as text. (Rich Text and Markdown
+                // properties don't get here: their model type is complex, so they're suppressed above.)
+                switch (result)
+                {
+                    case IHtmlEncodedString html:
+                        output.Content.SetHtmlContent(html.ToHtmlString());
+                        break;
+                    case IHtmlContent html:
+                        output.Content.SetHtmlContent(html);
+                        break;
+                    default:
+                        output.Content.SetContent($"{result}");
+                        break;
+                }
                 return;
             }
         }
