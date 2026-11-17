@@ -665,10 +665,12 @@ This will save the file as `/assets/alpinejs.js`, enabling eg. MIME types for .j
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
 
+If a file couldn't be saved (see below), the tag uses the original URL and tries the download again after 5 minutes, so a short outage at the CDN doesn't leave the site linking to it until the site restarts. Once the file is saved, it's used from then on.
+
 ### Limits on what's downloaded
 `our-self-host` is meant for URLs written in your views, such as the CDN links above, not for values that editors or visitors enter. To keep downloads in check:
 - Only `http` and `https` URLs are downloaded, and the file must end up inside the root folder (a `folder` attribute such as `../..` isn't allowed).
-- If a download fails, takes too long or is too large, the tag keeps the original URL instead of breaking the page, and a warning is logged.
+- If a download fails, takes too long or is too large, the tag keeps the original URL instead of breaking the page, and a warning is logged. The download is tried again after 5 minutes.
 
 These can be set in appsettings.json under `Our.Umbraco.TagHelpers:OurSelfHost` (the values shown are the defaults):
 
