@@ -50,6 +50,16 @@ namespace Our.Umbraco.TagHelpers.Tests
         }
 
         [Test]
+        public void NoText_LeavesTheContentInsideTheElementOutToo()
+        {
+            // our-text-if is for empty elements: content inside is never shown, not even as a fallback
+            var output = Render(null, childContent: "Default", tagMode: TagMode.StartTagAndEndTag);
+            ClassicAssert.IsNull(output.TagName);
+            ClassicAssert.IsTrue(output.IsContentModified, "Razor would otherwise render the original content inside the element");
+            ClassicAssert.IsTrue(output.Content.IsEmptyOrWhiteSpace);
+        }
+
+        [Test]
         public void Markup_InText_IsShownAsText()
         {
             ClassicAssert.AreEqual("&lt;em&gt;Not emphasised&lt;/em&gt;", Render("<em>Not emphasised</em>").Content.GetContent());
