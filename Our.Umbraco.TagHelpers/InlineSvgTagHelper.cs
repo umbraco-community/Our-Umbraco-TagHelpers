@@ -117,6 +117,23 @@ namespace Our.Umbraco.TagHelpers
         // Like _cache: null means the tag has no scope-styles attribute, so appsettings is used
         private bool? _scopeStyles;
 
+        /// <summary>
+        /// Gives every id in the SVG a prefix of its own for this tag, and updates the references to them (url(#...),
+        /// href="#...", aria-labelledby and #id selectors in &lt;style&gt;), so the same SVG twice on a page, or two SVGs
+        /// using the same ids, don't share gradients, clip paths or filters.
+        /// When it isn't set, the appsettings value is used (unless 'ignore-appsettings' is set).
+        /// NOTE: Use the appsettings configuration to apply this globally (e.g. "Our.Umbraco.TagHelpers": { "OurSVG": { "UniqueIds": true } } ).
+        /// </summary>
+        [HtmlAttributeName("unique-ids")]
+        public bool UniqueIds
+        {
+            get => _uniqueIds ?? false;
+            set => _uniqueIds = value;
+        }
+
+        // Like _cache: null means the tag has no unique-ids attribute, so appsettings is used
+        private bool? _uniqueIds;
+
         [HtmlAttributeName("ignore-appsettings")]
         public bool IgnoreAppSettings { get; set; }
 
@@ -180,6 +197,13 @@ namespace Our.Umbraco.TagHelpers
             {
                 var scopeClass = SvgStyleScope.ScopeClass(MediaItem is not null ? MediaItem.Key.ToString() : FileSource ?? string.Empty);
                 cleanedFileContents = ScopeStyleBlocks(cleanedFileContents, scopeClass);
+            }
+
+            // After the cache, so each tag gets its own ids even when they share a cached file (#115). Random rather than
+            // a page counter, so an SVG inside <our-cache> can't get the same ids as one rendered on a later request.
+            if (_uniqueIds ?? (_globalSettings.OurSVG.UniqueIds && !IgnoreAppSettings))
+            {
+                cleanedFileContents = MakeIdsUnique(cleanedFileContents, "s" + Guid.NewGuid().ToString("N")[..8] + "-");
             }
 
             // Remove the src attribute or media-item from the <svg>
@@ -249,6 +273,80 @@ namespace Our.Umbraco.TagHelpers
             foreach (var style in styles)
             {
                 style.InnerHtml = SvgStyleScope.ScopeCss(style.InnerHtml, scopeClass);
+            }
+
+            return doc.DocumentNode.OuterHtml;
+        }
+
+        // ARIA attributes whose value is a list of ids
+        private static readonly HashSet<string> AriaIdReferences = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "aria-labelledby", "aria-describedby", "aria-controls", "aria-owns", "aria-flowto",
+            "aria-activedescendant", "aria-details", "aria-errormessage",
+        };
+
+        // url(#id), url('#id'), url("#id") and url(&quot;#id&quot;)
+        private static readonly Regex UrlIdReference = new("(?<before>url\\(\\s*(?:['\"]|&quot;)?)#(?<id>[^)'\"&\\s]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        // #id in CSS selectors
+        private static readonly Regex CssIdSelector = new("#(?<id>-?[_a-zA-Z][\\w-]*)", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Prefixes every id in the SVG, and the references to those ids: url(#...) in any attribute and in &lt;style&gt;,
+        /// href and xlink:href values of "#id", ARIA id references and #id selectors in &lt;style&gt;. Only ids the SVG
+        /// defines are changed, so colours such as "#fff" and references to other ids stay as they are.
+        /// </summary>
+        internal static string MakeIdsUnique(string svg, string prefix)
+        {
+            if (svg.IndexOf("id=", StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return svg;
+            }
+
+            var doc = new HtmlDocument();
+            doc.LoadHtml(svg);
+            var elements = doc.DocumentNode.Descendants().Where(node => node.NodeType == HtmlNodeType.Element).ToList();
+            var ids = new HashSet<string>(
+                elements.Select(node => node.GetAttributeValue("id", string.Empty)).Where(id => id.Length > 0),
+                StringComparer.Ordinal);
+            if (ids.Count == 0)
+            {
+                return svg;
+            }
+
+            string RenameUrls(string text) => UrlIdReference.Replace(text, match =>
+                ids.Contains(match.Groups["id"].Value) ? match.Groups["before"].Value + "#" + prefix + match.Groups["id"].Value : match.Value);
+
+            foreach (var element in elements)
+            {
+                foreach (var attribute in element.Attributes)
+                {
+                    var value = attribute.Value ?? string.Empty;
+                    if (attribute.Name.Equals("id", StringComparison.OrdinalIgnoreCase))
+                    {
+                        attribute.Value = prefix + value;
+                    }
+                    else if ((attribute.Name.Equals("href", StringComparison.OrdinalIgnoreCase) || attribute.Name.Equals("xlink:href", StringComparison.OrdinalIgnoreCase))
+                        && value.StartsWith('#') && ids.Contains(value[1..]))
+                    {
+                        attribute.Value = "#" + prefix + value[1..];
+                    }
+                    else if (AriaIdReferences.Contains(attribute.Name))
+                    {
+                        attribute.Value = string.Join(" ", value.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(id => ids.Contains(id) ? prefix + id : id));
+                    }
+                    else if (value.Contains("url(", StringComparison.OrdinalIgnoreCase))
+                    {
+                        attribute.Value = RenameUrls(value);
+                    }
+                }
+
+                if (element.Name.Equals("style", StringComparison.OrdinalIgnoreCase))
+                {
+                    // url(#id) first; the renamed ids are no longer in the set, so the selector pass leaves them alone
+                    var css = RenameUrls(element.InnerHtml);
+                    element.InnerHtml = CssIdSelector.Replace(css, match => ids.Contains(match.Groups["id"].Value) ? "#" + prefix + match.Groups["id"].Value : match.Value);
+                }
             }
 
             return doc.DocumentNode.OuterHtml;
