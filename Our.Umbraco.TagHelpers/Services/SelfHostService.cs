@@ -1,13 +1,18 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Models;
-using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Logging;
 using Umbraco.Extensions;
 
@@ -19,6 +24,25 @@ namespace Our.Umbraco.TagHelpers.Services
         private readonly IAppPolicyCache _runtimeCache;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly OurUmbracoTagHelpersConfiguration _globalSettings;
+
+        // One HttpClient for every download, as Microsoft recommends: a new one per download can exhaust sockets, and
+        // PooledConnectionLifetime replaces connections every few minutes so DNS changes (e.g. a CDN moving) are picked
+        // up. The timeout is per download (DownloadTimeoutSeconds), so the client's own timeout is off.
+        // Redirects are followed by GetFollowingAllowedRedirects, so each new URL is checked like the first one.
+        private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            AllowAutoRedirect = false,
+        })
+        {
+            Timeout = Timeout.InfiniteTimeSpan,
+        };
+
+        // As many redirects as a CDN needs (e.g. unpkg.com/alpinejs to the versioned file), not a loop
+        private const int MaxRedirects = 5;
+
+        // Logging without changing the public constructor (IProfilingLogger can't log warnings)
+        private static ILogger? Logger => StaticServiceProvider.Instance?.GetService<ILogger<SelfHostService>>();
 
         public SelfHostService(
             IProfilingLogger logger,
@@ -33,9 +57,21 @@ namespace Our.Umbraco.TagHelpers.Services
             _globalSettings = globalSettings.Value;
         }
 
+        // A file that couldn't be self hosted (the download failed, timed out or was too large) keeps its original URL
+        // for this long, then the download is tried again. Self-hosted files stay cached.
+        internal static readonly TimeSpan RetryFailedDownloadAfter = TimeSpan.FromMinutes(5);
+
+        private static readonly object RetryLock = new();
+
+        // The clock for retrying failed downloads; tests replace it to move time forward
+        internal TimeProvider TimeProvider { get; set; } = TimeProvider.System;
+
+        // What's cached for a URL: the file, and when to try again if it wasn't self hosted
+        private sealed record CachedFile(SelfHostedFile File, DateTimeOffset? RetryAfter);
+
         public async Task<SelfHostedFile> SelfHostFile(string url, string? subfolder = null, string? fileExtension = null)
         {
-            async Task<SelfHostedFile> CreateSelfHostedFile()
+            async Task<CachedFile> CreateCachedFile()
             {
                 using (_logger.TraceDuration<ISelfHostService>($"Start generating SelfHostedFile: {url}", $"Finished generating SelfHostedFile: {url}"))
                 {
@@ -49,12 +85,39 @@ namespace Our.Umbraco.TagHelpers.Services
                     };
 
                     selfHostedFile.Url = await GetSelfHostedUrl(selfHostedFile);
-                    return selfHostedFile;
+
+                    // Still the original URL: try again later, rather than not until the site restarts
+                    var retryAfter = selfHostedFile.Url == url ? TimeProvider.GetUtcNow() + RetryFailedDownloadAfter : (DateTimeOffset?)null;
+                    return new CachedFile(selfHostedFile, retryAfter);
                 }
             }
 
+            // Only http(s) URLs on an allowed host are downloaded; anything else keeps pointing at the original
+            if (!IsAllowedUrl(url))
+            {
+                return new SelfHostedFile { ExternalUrl = url, Url = url };
+            }
+
             var cacheKey = $"Our.Umbraco.TagHelpers.Services.SelfHostService.SelfHostedFile({url}, {subfolder}, {fileExtension})";
-            return await (_runtimeCache.GetCacheItem(cacheKey, CreateSelfHostedFile) ?? CreateSelfHostedFile());
+            var cached = _runtimeCache.GetCacheItem(cacheKey, CreateCachedFile);
+            var entry = await (cached ?? CreateCachedFile());
+
+            if (cached is not null && entry.RetryAfter is { } retryAfter && TimeProvider.GetUtcNow() >= retryAfter)
+            {
+                // Only the first request to find the old entry removes it; requests at the same time then share the
+                // one new download, as on the first render
+                lock (RetryLock)
+                {
+                    if (ReferenceEquals(_runtimeCache.Get(cacheKey), cached))
+                    {
+                        _runtimeCache.Clear(cacheKey);
+                    }
+                }
+
+                entry = await (_runtimeCache.GetCacheItem(cacheKey, CreateCachedFile) ?? CreateCachedFile());
+            }
+
+            return entry.File;
         }
 
         public string GetFolderPath(Uri uri, string? subfolder = null)
@@ -87,11 +150,19 @@ namespace Our.Umbraco.TagHelpers.Services
 
             return string.Empty;
         }
+
         private async Task<string> GetSelfHostedUrl(SelfHostedFile file)
         {
             var filePath = $"{file.FolderPath}/{file.FileName}";
             var localPath = _hostingEnvironment.MapPathWebRoot(file.FolderPath ?? string.Empty);
             var localFilePath = _hostingEnvironment.MapPathWebRoot(filePath);
+
+            // The file must stay inside the root folder (a folder="../.." attribute must not write elsewhere)
+            if (!IsInsideRootFolder(localFilePath))
+            {
+                Logger?.LogWarning("Not self hosting {Url}: {Path} is outside the {RootFolder} folder", file.ExternalUrl, filePath, _globalSettings.OurSelfHost.RootFolder);
+                return file.ExternalUrl ?? filePath;
+            }
 
             if (!File.Exists(localFilePath) && file.ExternalUrl is not null)
             {
@@ -114,21 +185,119 @@ namespace Our.Umbraco.TagHelpers.Services
             return filePath;
         }
 
-        private static async Task<byte[]?> GetUrlContent(string url)
+        private bool IsAllowedUrl(string url)
         {
-            using (var client = new HttpClient())
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
-                using (var result = await client.GetAsync(url))
+                return false;
+            }
+
+            var allowedHosts = _globalSettings.OurSelfHost.AllowedHosts;
+            if (allowedHosts is { Length: > 0 } && !allowedHosts.Any(host => string.Equals(host, uri.Host, StringComparison.OrdinalIgnoreCase)))
+            {
+                Logger?.LogWarning("Not self hosting {Url}: {Host} isn't in OurSelfHost:AllowedHosts", url, uri.Host);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool IsInsideRootFolder(string localFilePath)
+        {
+            var root = Path.GetFullPath(_hostingEnvironment.MapPathWebRoot(_globalSettings.OurSelfHost.RootFolder))
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            return Path.GetFullPath(localFilePath).StartsWith(root, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// GETs the URL, following up to <see cref="MaxRedirects"/> redirects. Each redirect's URL must pass the same checks
+        /// as the first one (http/https and <c>AllowedHosts</c>) and mustn't go from https to http; otherwise it isn't
+        /// requested at all and null is returned, so the tag keeps the original URL.
+        /// </summary>
+        private async Task<HttpResponseMessage?> GetFollowingAllowedRedirects(Uri url, CancellationToken cancellationToken)
+        {
+            var current = url;
+            for (var redirects = 0; ; redirects++)
+            {
+                var response = await HttpClient.GetAsync(current, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                if (!IsRedirect(response.StatusCode))
                 {
-                    if (result is not null && result.IsSuccessStatusCode)
+                    return response;
+                }
+
+                var location = response.Headers.Location;
+                response.Dispose();
+                if (location is null || redirects == MaxRedirects)
+                {
+                    Logger?.LogWarning("Not self hosting {Url}: it redirects more than {MaxRedirects} times, or without a location", url, MaxRedirects);
+                    return null;
+                }
+
+                var next = location.IsAbsoluteUri ? location : new Uri(current, location);
+                if ((current.Scheme == Uri.UriSchemeHttps && next.Scheme != Uri.UriSchemeHttps) || !IsAllowedUrl(next.AbsoluteUri))
+                {
+                    Logger?.LogWarning("Not self hosting {Url}: it redirects to {RedirectUrl}, which isn't allowed", url, next);
+                    return null;
+                }
+
+                current = next;
+            }
+        }
+
+        private static bool IsRedirect(HttpStatusCode statusCode) => statusCode is
+            HttpStatusCode.MovedPermanently or HttpStatusCode.Found or HttpStatusCode.SeeOther or
+            HttpStatusCode.TemporaryRedirect or HttpStatusCode.PermanentRedirect;
+
+        /// <summary>
+        /// Downloads the file, or returns null when the download fails, takes longer than DownloadTimeoutSeconds
+        /// or is larger than MaxFileSizeKilobytes. The tag then keeps the original URL instead of breaking the page.
+        /// </summary>
+        private async Task<byte[]?> GetUrlContent(string url)
+        {
+            var settings = _globalSettings.OurSelfHost;
+            var maxBytes = (long)settings.MaxFileSizeKilobytes * 1024;
+            try
+            {
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(settings.DownloadTimeoutSeconds));
+                using var response = await GetFollowingAllowedRedirects(new Uri(url), timeout.Token);
+                if (response is null)
+                {
+                    return null;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Logger?.LogWarning("Not self hosting {Url}: the download returned {StatusCode}", url, (int)response.StatusCode);
+                    return null;
+                }
+
+                if (response.Content.Headers.ContentLength > maxBytes)
+                {
+                    Logger?.LogWarning("Not self hosting {Url}: it's larger than OurSelfHost:MaxFileSizeKilobytes ({MaxKilobytes} KB)", url, settings.MaxFileSizeKilobytes);
+                    return null;
+                }
+
+                // Stop reading as soon as it's over the limit, in case the size wasn't sent (or was wrong)
+                await using var stream = await response.Content.ReadAsStreamAsync(timeout.Token);
+                using var content = new MemoryStream();
+                var buffer = new byte[81920];
+                int read;
+                while ((read = await stream.ReadAsync(buffer, timeout.Token)) > 0)
+                {
+                    content.Write(buffer, 0, read);
+                    if (content.Length > maxBytes)
                     {
-                        return await result.Content.ReadAsByteArrayAsync();
-                    }
-                    else
-                    {
+                        Logger?.LogWarning("Not self hosting {Url}: it's larger than OurSelfHost:MaxFileSizeKilobytes ({MaxKilobytes} KB)", url, settings.MaxFileSizeKilobytes);
                         return null;
                     }
                 }
+
+                return content.ToArray();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or IOException)
+            {
+                Logger?.LogWarning(ex, "Not self hosting {Url}: the download failed or took longer than OurSelfHost:DownloadTimeoutSeconds ({Seconds} s)", url, settings.DownloadTimeoutSeconds);
+                return null;
             }
         }
     }

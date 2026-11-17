@@ -690,6 +690,31 @@ This will save the file as `/assets/alpinejs.js`, enabling eg. MIME types for .j
 ### Caching
 The file is saved once, and never updated unless you manually remove the file. The lookup for the local file is cached in the Runtime Cache.
 
+If a file couldn't be saved (see below), the tag uses the original URL and tries the download again after 5 minutes, so a short outage at the CDN doesn't leave the site linking to it until the site restarts. Once the file is saved, it's used from then on.
+
+### Limits on what's downloaded
+`our-self-host` is meant for URLs written in your views, such as the CDN links above, not for values that editors or visitors enter. To keep downloads in check:
+- Only `http` and `https` URLs are downloaded, and the file must end up inside the root folder (a `folder` attribute such as `../..` isn't allowed).
+- Redirects are followed (up to 5) only to URLs that pass the same checks, including `AllowedHosts`, and never from `https` to `http`.
+- If a download fails, takes too long or is too large, the tag keeps the original URL instead of breaking the page, and a warning is logged. The download is tried again after 5 minutes.
+
+These can be set in appsettings.json under `Our.Umbraco.TagHelpers:OurSelfHost` (the values shown are the defaults):
+
+    {
+      "Our.Umbraco.TagHelpers": {
+        "OurSelfHost": {
+          "RootFolder": "/assets",
+          "AllowedHosts": [],
+          "MaxFileSizeKilobytes": 1024,
+          "DownloadTimeoutSeconds": 30
+        }
+      }
+    }
+
+- `AllowedHosts` - the hosts files may be downloaded from, for example `["unpkg.com", "cdn.jsdelivr.net"]`. When it's empty, any host is allowed; a URL on another host keeps pointing at the original.
+- `MaxFileSizeKilobytes` - the largest file that's downloaded, in kilobytes (1024, 1 MB, by default). That's plenty for scripts, stylesheets, fonts and web-ready images; raise it if you self host bigger files such as large photos.
+- `DownloadTimeoutSeconds` - how long to wait for a download.
+
 ## Demo site & cross-version tests
 
 The package supports Umbraco 16, 17, 18 and 19 from a single NuGet package (`net9.0`, `net10.0` and `net11.0` builds).
