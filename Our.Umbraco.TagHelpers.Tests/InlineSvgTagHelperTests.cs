@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,7 @@ using Our.Umbraco.TagHelpers.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework.Legacy;
@@ -346,13 +348,76 @@ namespace Our.Umbraco.TagHelpers.Tests
             ClassicAssert.AreEqual(svg, RenderSvg(svg));
         }
 
-        private string RenderSvg(string svg)
+        // https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/116
+        // Attributes on <our-svg> that aren't the tag helper's own are copied onto the root <svg>
+        [Test]
+        public void OtherAttributes_AreCopiedOntoTheSvg()
+        {
+            var svg = RootSvg(RenderSvg("<svg viewBox=\"0 0 1 1\"><circle r=\"1\"/></svg>", new TagHelperAttributeList
+            {
+                { "aria-hidden", "true" },
+                { "id", "logo" },
+                { "data-track", "header-logo" },
+            }));
+
+            ClassicAssert.AreEqual("true", svg.GetAttributeValue("aria-hidden", null));
+            ClassicAssert.AreEqual("logo", svg.GetAttributeValue("id", null));
+            ClassicAssert.AreEqual("header-logo", svg.GetAttributeValue("data-track", null));
+            ClassicAssert.AreEqual("0 0 1 1", svg.GetAttributeValue("viewBox", null));
+        }
+
+        [Test]
+        public void OtherAttributes_OverrideTheFilesOwnValues()
+        {
+            var svg = RootSvg(RenderSvg("<svg width=\"10\" height=\"10\"></svg>", new TagHelperAttributeList { { "width", "20" } }));
+
+            ClassicAssert.AreEqual("20", svg.GetAttributeValue("width", null));
+            ClassicAssert.AreEqual("10", svg.GetAttributeValue("height", null));
+            ClassicAssert.AreEqual(1, svg.Attributes.Count(a => a.Name == "width"));
+        }
+
+        [Test]
+        public void OtherAttributes_AreHtmlEncoded()
+        {
+            var html = RenderSvg("<svg></svg>", new TagHelperAttributeList { { "aria-label", "Logo \"><script>alert(1)</script> & co" } });
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(html);
+
+            ClassicAssert.IsNull(doc.DocumentNode.SelectSingleNode("//script"));
+            ClassicAssert.AreEqual("Logo \"><script>alert(1)</script> & co", HtmlAgilityPack.HtmlEntity.DeEntitize(RootSvg(html).GetAttributeValue("aria-label", null)));
+        }
+
+        [Test]
+        public void OtherAttributes_FromRazorExpressions_AreKeptEncoded()
+        {
+            // An attribute written with a Razor expression arrives as already-encoded HTML content
+            var svg = RootSvg(RenderSvg("<svg></svg>", new TagHelperAttributeList { { "aria-label", new HtmlString("Logo &amp; tagline") } }));
+
+            ClassicAssert.AreEqual("Logo & tagline", HtmlAgilityPack.HtmlEntity.DeEntitize(svg.GetAttributeValue("aria-label", null)));
+        }
+
+        [Test]
+        public void MinimizedAttribute_IsCopied()
+        {
+            var svg = RootSvg(RenderSvg("<svg></svg>", new TagHelperAttributeList { new TagHelperAttribute("hidden") }));
+
+            ClassicAssert.IsTrue(svg.Attributes.Contains("hidden"));
+        }
+
+        private static HtmlAgilityPack.HtmlNode RootSvg(string html)
+        {
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(html);
+            return doc.DocumentNode.SelectSingleNode("//svg");
+        }
+
+        private string RenderSvg(string svg, TagHelperAttributeList? attributes = null)
         {
             var tagHelper = new InlineSvgTagHelper(null!, CreateHostEnvironment(svg), null!, _settings, null!, Mock.Of<ILogger<InlineSvgTagHelper>>())
             {
                 FileSource = "/test.svg",
             };
-            var output = new TagHelperOutput("our-svg", new TagHelperAttributeList(), (_, _) =>
+            var output = new TagHelperOutput("our-svg", attributes ?? new TagHelperAttributeList(), (_, _) =>
                 Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
             tagHelper.Process(_context, output);
             return output.Content.GetContent();
