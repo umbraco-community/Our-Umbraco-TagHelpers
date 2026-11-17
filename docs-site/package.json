@@ -1,0 +1,25 @@
+{
+  "name": "our-umbraco-taghelpers-docs",
+  "private": true,
+  "description": "Documentation site for Our.Umbraco.TagHelpers, built with Astro Starlight",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.43.1",
+    "@fontsource-variable/montserrat": "^5.3.0",
+    "@fontsource/source-sans-3": "^5.3.1",
+    "astro": "^7.4.12",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^6.0.3"
+  }
+}
