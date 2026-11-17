@@ -10,6 +10,8 @@ const apiBase = '/umbraco/management/api/v1';
 export const homeKey = 'b0c59e4c-158c-4fd4-9beb-ebe907693f1c';
 /** "Page A" under Home (invariant), served at /en/page-a/. */
 export const pageAKey = 'c455b06a-7fcc-4959-bacf-dc5e1dbc0c21';
+/** The face-savoring-food.svg media item, picked as the home page's Logo. */
+export const logoMediaKey = 'c928617e-1f81-4586-aee4-49be07205b90';
 
 /**
  * Authorization header for a saved backoffice session.
@@ -53,6 +55,15 @@ export class ManagementApi {
         data: { publishSchedules: cultures.map((culture) => ({ culture })) },
       }),
       `Publishing ${documentKey}`,
+    );
+  }
+
+  /** Saves a media item unchanged, as clicking Save in the backoffice does, which refreshes the media caches. */
+  async saveMedia(mediaKey: string): Promise<void> {
+    const media = await (await ensureOk(await this.context.get(`${apiBase}/media/${mediaKey}`), `Reading media ${mediaKey}`)).json();
+    await ensureOk(
+      await this.context.put(`${apiBase}/media/${mediaKey}`, { data: { values: media.values, variants: media.variants } }),
+      `Saving media ${mediaKey}`,
     );
   }
 

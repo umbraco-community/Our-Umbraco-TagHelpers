@@ -70,6 +70,14 @@
 </div>
 
 <p>
+    A cached SVG from the media library is cleared when media is saved, on every server of a load-balanced site,
+    so a new file shows straight away:
+</p>
+<div data-demo="cached-media" style="display: inline-block; max-width: 5vw">
+    <our-svg media-item="logo" cache="true" />
+</div>
+
+<p>
     SVGs are inlined into the page, so <code>our-svg</code> removes anything in them that could run script:
     scripts, event handlers such as <code>onload</code>, <code>foreignObject</code> and script links.
     This one has all of those, and renders as a plain circle:

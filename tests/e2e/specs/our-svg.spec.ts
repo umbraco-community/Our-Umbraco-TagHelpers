@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { test, expect, section, siteRoot, type Locator, type Page } from '../fixtures';
+import { test, expect, section, siteRoot, authFile, type Locator, type Page } from '../fixtures';
+import { ManagementApi, logoMediaKey } from '../umbraco-api';
 
 // The two original samples; the option samples below are each wrapped in <div data-demo="...">
 const originalSvgs = (page: Page) => section(page, 'our-svg').locator(':scope > div:not([data-demo]) > svg');
@@ -64,6 +65,39 @@ test('cache serves the cached svg after the file changes', async ({ page, umbrac
     await expect(demo(page, 'cached').locator('title')).toHaveText('original');
   } finally {
     writeFileSync(file, original);
+  }
+});
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/117
+// Saving media clears the cached media SVGs, through MediaCacheRefresherNotification, which Umbraco raises on every
+// server of a load-balanced site. This single site shows the handler is registered and clears the cache.
+test('saving media clears the cached media svg', async ({ page, umbracoMajor, baseURL }) => {
+  // The published site's copy of the Logo media file (it has no <title>); the other samples using it only check
+  // that it's inlined with a viewBox, which this doesn't change
+  const file = join(siteRoot(umbracoMajor), 'wwwroot', 'media', 'rtoiuk20', 'face-savoring-food.svg');
+  const original = readFileSync(file, 'utf8');
+  const cachedMedia = demo(page, 'cached-media');
+
+  await page.goto('/en/');
+  await expect(cachedMedia.locator('title')).toHaveCount(0);
+
+  const api = await ManagementApi.create(baseURL!, authFile(umbracoMajor, 'backoffice'));
+  try {
+    writeFileSync(file, original.replace('xmlns="http://www.w3.org/2000/svg">', 'xmlns="http://www.w3.org/2000/svg"><title>changed</title>'));
+
+    // Still the cached copy
+    await page.reload();
+    await expect(cachedMedia).toBeVisible();
+    await expect(cachedMedia.locator('title')).toHaveCount(0);
+
+    // Saving the media item clears it, so the changed file is read
+    await api.saveMedia(logoMediaKey);
+    await page.reload();
+    await expect(cachedMedia.locator('title')).toHaveText('changed');
+  } finally {
+    writeFileSync(file, original);
+    // Clear the changed copy from the cache again for the rest of the run
+    await api.saveMedia(logoMediaKey).finally(() => api.dispose());
   }
 });
 
