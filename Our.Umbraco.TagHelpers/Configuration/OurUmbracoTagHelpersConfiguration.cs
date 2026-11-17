@@ -72,9 +72,10 @@ namespace Our.Umbraco.TagHelpers.Configuration
         public string[] AllowedHosts { get; set; } = Array.Empty<string>();
 
         /// <summary>
-        /// The largest file that's downloaded, in kilobytes (default 10240, 10 MB). Larger files keep the original URL.
+        /// The largest file that's downloaded, in kilobytes (default 1024, 1 MB). Larger files keep the original URL;
+        /// raise it to self host bigger files such as large images.
         /// </summary>
-        public int MaxFileSizeKilobytes { get; set; } = 10240;
+        public int MaxFileSizeKilobytes { get; set; } = 1024;
 
         /// <summary>
         /// How long to wait for a download, in seconds (default 30). A slower download keeps the original URL.

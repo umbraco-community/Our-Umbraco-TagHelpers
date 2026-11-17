@@ -677,14 +677,14 @@ These can be set in appsettings.json under `Our.Umbraco.TagHelpers:OurSelfHost` 
         "OurSelfHost": {
           "RootFolder": "/assets",
           "AllowedHosts": [],
-          "MaxFileSizeKilobytes": 10240,
+          "MaxFileSizeKilobytes": 1024,
           "DownloadTimeoutSeconds": 30
         }
       }
     }
 
 - `AllowedHosts` - the hosts files may be downloaded from, for example `["unpkg.com", "cdn.jsdelivr.net"]`. When it's empty, any host is allowed; a URL on another host keeps pointing at the original.
-- `MaxFileSizeKilobytes` - the largest file that's downloaded (10 MB by default).
+- `MaxFileSizeKilobytes` - the largest file that's downloaded, in kilobytes (1024, 1 MB, by default). That's plenty for scripts, stylesheets, fonts and web-ready images; raise it if you self host bigger files such as large photos.
 - `DownloadTimeoutSeconds` - how long to wait for a download.
 
 ## Demo site & cross-version tests

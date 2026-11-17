@@ -89,6 +89,15 @@ namespace Our.Umbraco.TagHelpers.Tests
         private bool Saved(string relativePath) => File.Exists(Path.Combine(_webRoot, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)));
 
         [Test]
+        public void Defaults_DownloadAnyHost_UpTo1MB_For30Seconds()
+        {
+            var defaults = new SelfHostTagHelperConfiguration();
+            CollectionAssert.IsEmpty(defaults.AllowedHosts);
+            ClassicAssert.AreEqual(1024, defaults.MaxFileSizeKilobytes);
+            ClassicAssert.AreEqual(30, defaults.DownloadTimeoutSeconds);
+        }
+
+        [Test]
         public async Task SmallFile_IsSavedAndServedLocally()
         {
             var file = await Service().SelfHostFile($"{_baseUrl}/lib/small.js");
