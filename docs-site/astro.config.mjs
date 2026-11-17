@@ -28,6 +28,8 @@ export default defineConfig({
 			components: {
 				SiteTitle: './src/components/SiteTitle.astro',
 				PageTitle: './src/components/PageTitle.astro',
+				ThemeProvider: './src/components/ThemeProvider.astro',
+				ThemeSelect: './src/components/ThemeSelect.astro',
 			},
 			routeMiddleware: './src/route-middleware.ts',
 			// Code block themes and styles are in ec.config.mjs
