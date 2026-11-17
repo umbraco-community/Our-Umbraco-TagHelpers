@@ -228,8 +228,22 @@ Additional properties have been added to cache the output and also to ensure the
 - `ensure-viewbox` - Enables the feature to "fix" the output SVG which always ensures the SVG utilises a viewbox rather than width & height. This is a `boolean` value.
 - `cache` - Caches the SVG file's contents in Umbraco's runtime cache, so the file isn't read on every page load. This is a `boolean` value. When it's on the tag, it wins over the global `Cache` setting, so `cache="false"` turns caching off for that element even when it's on globally. See [When is an SVG cached?](#when-is-an-svg-cached) below.
 - `cache-minutes` - How long (in minutes) a cached SVG is kept. When it isn't set, the global `CacheMinutes` is used (180 by default). This is an `integer` value.
-- `ignore-appsettings` - Ignores the global `EnsureViewBox` and `Cache` settings for this element, so only the attributes on the tag apply. This is a `boolean` value.
+- `scope-styles` - Scopes the SVG's `<style>` blocks to this SVG, so class names such as `.st0` from two SVGs on one page don't restyle each other. This is a `boolean` value; see [Scoped styles](#scoped-styles) below.
+- `ignore-appsettings` - Ignores the global `EnsureViewBox`, `Cache` and `ScopeStyles` settings for this element, so only the attributes on the tag apply. This is a `boolean` value.
 - Any **other attributes**, such as `aria-hidden`, `aria-label`, `role`, `id`, `data-*`, `width` or `height`, are copied onto the inlined `<svg>`, replacing the file's own values. For example `<our-svg src="/assets/icon.svg" aria-hidden="true" />` for a decorative icon, or `role="img" aria-label="Company logo"` for a meaningful one.
+
+### Scoped styles
+
+Design tools such as Illustrator export SVGs with generic class names in an inline `<style>`, such as `<style>.st0{fill:#3544b1}</style>`. Once inlined, those rules apply to the whole page, so when two SVGs both define `.st0`, the last rule wins for both and one is recoloured.
+
+With `scope-styles="true"` (or `"ScopeStyles": true` under `OurSVG` in appsettings), the `<svg>` gets a class made from its file path or media key, such as `svg-1a2b3c4d5e6f`, and every selector in its `<style>` blocks is prefixed with it: `.st0` becomes `.svg-1a2b3c4d5e6f .st0`.
+
+- Rules inside `@media`, `@supports`, `@container` and `@layer` are scoped too; `@keyframes`, `@font-face` and other at-rules are left as they are.
+- Selectors for the SVG itself (`svg`, `svg .a`, `:root`) target that `<svg>`.
+- Comma-separated selectors are each prefixed, and comments, strings and a `<![CDATA[ ]]>` wrapper are kept.
+- The same file always gets the same class, so the output is the same on every render. SVGs without a `<style>` are left as they are.
+
+This is based on the Umbraco Community site's [scoping inline SVG styles](https://community.umbraco.com/docs/tutorials/refinements/scoping-inline-svg-styles/).
 
 ### When is an SVG cached?
 
@@ -273,7 +287,8 @@ Applying any of the below configurations within your `appsettings.json` file wil
         "OurSVG": {
           "EnsureViewBox": false,
           "Cache": false,
-          "CacheMinutes": 180
+          "CacheMinutes": 180,
+          "ScopeStyles": false
         }
       }
     }
