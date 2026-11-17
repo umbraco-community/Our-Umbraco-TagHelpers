@@ -227,6 +227,18 @@ Additional properties have been added to cache the output and also to ensure the
 
 Only the file's contents are cached, so `class` and `ensure-viewbox` still apply to each tag separately, even when several tags share one cached file.
 
+### What is removed from the SVG
+
+The SVG is inlined into the page, so anything in it that could run script is removed first:
+- `<script>`, `<foreignObject>`, `<iframe>`, `<embed>` and `<object>` elements,
+- event handler attributes such as `onload` and `onclick`,
+- links that aren't internal (`#…`), web (`http`, `https`, `mailto`, relative) or, for images, image references, such as `javascript:` and `data:text/html`,
+- `<set>` and `<animate>` elements that change a link or an event handler.
+
+Everything else, including styles, gradients, internal references and animations, is kept as it is.
+
+Media library SVGs are uploaded by backoffice users. To also stop unsafe SVGs from being uploaded at all (they can be opened directly from the media URL), add a file validator with Umbraco's [server-side file validation](https://docs.umbraco.com/umbraco-cms/run-in-production/security/serverside-file-validation).
+
 ### Global settings via appsettings.json
 
 Applying any of the below configurations within your `appsettings.json` file will apply global settings to all elements using this tag helper. See the `ignore-appsettings` to override these global settings at element level. The values shown below are the hard-coded default values.

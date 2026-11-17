@@ -1,4 +1,4 @@
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
 @using Umbraco.Cms.Core.Models
 @{
     // Umbraco 19 returns a list from MediaPicker3 even when it is limited to one item
@@ -67,4 +67,13 @@
 </div>
 <div data-demo="cached-class-b" style="display: inline-block; max-width: 5vw">
     <our-svg src="/samples/partying-face.svg" cache="true" class="demo-svg-b" />
+</div>
+
+<p>
+    SVGs are inlined into the page, so <code>our-svg</code> removes anything in them that could run script:
+    scripts, event handlers such as <code>onload</code>, <code>foreignObject</code> and script links.
+    This one has all of those, and renders as a plain circle:
+</p>
+<div data-demo="unsafe" style="display: inline-block">
+    <our-svg src="/samples/unsafe.svg" />
 </div>

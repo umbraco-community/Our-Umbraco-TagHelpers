@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" onload="window.ourSvgUnsafeRan = true">
+  <title>Unsafe SVG used by the e2e tests: our-svg must remove everything that could run script</title>
+  <circle cx="20" cy="20" r="18" fill="#3544b1" onclick="window.ourSvgUnsafeRan = true"/>
+  <a href="javascript:window.ourSvgUnsafeRan = true"><text x="4" y="24" fill="#fff">link</text></a>
+  <foreignObject width="40" height="40"><div xmlns="http://www.w3.org/1999/xhtml"><img src="x" onerror="window.ourSvgUnsafeRan = true"/></div></foreignObject>
+</svg>

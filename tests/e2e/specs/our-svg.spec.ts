@@ -75,3 +75,19 @@ test('cached copies of the same svg keep their own class', async ({ page }) => {
   await expect(demo(page, 'cached-class-a')).toHaveClass('demo-svg-a');
   await expect(demo(page, 'cached-class-b')).toHaveClass('demo-svg-b');
 });
+
+test('removes everything from an svg that could run script', async ({ page }) => {
+  await page.goto('/en/');
+  const svg = demo(page, 'unsafe');
+  await expect(svg.locator('circle')).toHaveCount(1);
+
+  // No event handlers, foreignObject or script links survive, and none of them ran
+  const handlers = await svg.evaluate((el) =>
+    [el, ...el.querySelectorAll('*')].flatMap((node) => [...node.attributes].map((a) => a.name)).filter((name) => name.startsWith('on')),
+  );
+  expect(handlers).toEqual([]);
+  await expect(svg.locator('foreignObject')).toHaveCount(0);
+  expect(await svg.locator('a').getAttribute('href')).toBeNull();
+  await svg.locator('circle').dispatchEvent('click'); // would run an onclick handler if one were left
+  expect(await page.evaluate(() => (window as unknown as { ourSvgUnsafeRan?: boolean }).ourSvgUnsafeRan)).toBeUndefined();
+});
