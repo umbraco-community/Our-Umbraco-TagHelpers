@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Configuration;
+using Our.Umbraco.TagHelpers.Notifications;
 using Our.Umbraco.TagHelpers.Utils;
 using System;
 using System.Linq;
@@ -123,7 +124,7 @@ namespace Our.Umbraco.TagHelpers
 
                 if (MediaItem is not null)
                 {
-                    cacheName = string.Concat("MediaItem-SvgContents (", MediaItem.Key.ToString(), ")");
+                    cacheName = string.Concat(InlineSvgTagHelperNotifications.MediaCacheKeyPrefix, " (", MediaItem.Key.ToString(), ")");
                 }
                 else if (string.IsNullOrWhiteSpace(FileSource) == false)
                 {
