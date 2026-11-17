@@ -78,6 +78,17 @@
 </div>
 
 <p>
+    <code>unique-ids</code> gives each copy of an SVG ids of its own, so the filters this face uses
+    (referenced 14 times with <code>url(#...)</code>) aren't duplicated or shared between the two copies:
+</p>
+<div data-demo="unique-ids-a" style="display: inline-block; max-width: 5vw">
+    <our-svg src="/samples/partying-face.svg" unique-ids="true" />
+</div>
+<div data-demo="unique-ids-b" style="display: inline-block; max-width: 5vw">
+    <our-svg src="/samples/partying-face.svg" unique-ids="true" />
+</div>
+
+<p>
     SVGs are inlined into the page, so <code>our-svg</code> removes anything in them that could run script:
     scripts, event handlers such as <code>onload</code>, <code>foreignObject</code> and script links.
     This one has all of those, and renders as a plain circle:
