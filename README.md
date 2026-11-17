@@ -670,6 +670,7 @@ If a file couldn't be saved (see below), the tag uses the original URL and tries
 ### Limits on what's downloaded
 `our-self-host` is meant for URLs written in your views, such as the CDN links above, not for values that editors or visitors enter. To keep downloads in check:
 - Only `http` and `https` URLs are downloaded, and the file must end up inside the root folder (a `folder` attribute such as `../..` isn't allowed).
+- Redirects are followed (up to 5) only to URLs that pass the same checks, including `AllowedHosts`, and never from `https` to `http`.
 - If a download fails, takes too long or is too large, the tag keeps the original URL instead of breaking the page, and a warning is logged. The download is tried again after 5 minutes.
 
 These can be set in appsettings.json under `Our.Umbraco.TagHelpers:OurSelfHost` (the values shown are the defaults):
