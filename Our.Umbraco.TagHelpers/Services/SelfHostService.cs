@@ -9,6 +9,7 @@ using Our.Umbraco.TagHelpers.Models;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core.Cache;
@@ -167,10 +168,18 @@ namespace Our.Umbraco.TagHelpers.Services
         // One HttpClient for every download, as Microsoft recommends: a new one per download can exhaust sockets, and
         // PooledConnectionLifetime replaces connections every few minutes so DNS changes (e.g. a CDN moving) are picked
         // up. The timeout is per download (DownloadTimeoutSeconds), so the client's own timeout is off.
-        private static readonly HttpClient HttpClient = new(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+        // Redirects are followed by GetFollowingAllowedRedirects, so each new URL is checked like the first one.
+        private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            AllowAutoRedirect = false,
+        })
         {
             Timeout = Timeout.InfiniteTimeSpan,
         };
+
+        // As many redirects as a CDN needs (e.g. unpkg.com/alpinejs to the versioned file), not a loop
+        private const int MaxRedirects = 5;
 
         // Logging without changing the public constructor (IProfilingLogger can't log warnings)
         private static ILogger? Logger => StaticServiceProvider.Instance?.GetService<ILogger<SelfHostService>>();
@@ -200,6 +209,45 @@ namespace Our.Umbraco.TagHelpers.Services
         }
 
         /// <summary>
+        /// GETs the URL, following up to <see cref="MaxRedirects"/> redirects. Each redirect's URL must pass the same checks
+        /// as the first one (http/https and <c>AllowedHosts</c>) and mustn't go from https to http; otherwise it isn't
+        /// requested at all and null is returned, so the tag keeps the original URL.
+        /// </summary>
+        private async Task<HttpResponseMessage?> GetFollowingAllowedRedirects(Uri url, CancellationToken cancellationToken)
+        {
+            var current = url;
+            for (var redirects = 0; ; redirects++)
+            {
+                var response = await HttpClient.GetAsync(current, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                if (!IsRedirect(response.StatusCode))
+                {
+                    return response;
+                }
+
+                var location = response.Headers.Location;
+                response.Dispose();
+                if (location is null || redirects == MaxRedirects)
+                {
+                    Logger?.LogWarning("Not self hosting {Url}: it redirects more than {MaxRedirects} times, or without a location", url, MaxRedirects);
+                    return null;
+                }
+
+                var next = location.IsAbsoluteUri ? location : new Uri(current, location);
+                if ((current.Scheme == Uri.UriSchemeHttps && next.Scheme != Uri.UriSchemeHttps) || !IsAllowedUrl(next.AbsoluteUri))
+                {
+                    Logger?.LogWarning("Not self hosting {Url}: it redirects to {RedirectUrl}, which isn't allowed", url, next);
+                    return null;
+                }
+
+                current = next;
+            }
+        }
+
+        private static bool IsRedirect(HttpStatusCode statusCode) => statusCode is
+            HttpStatusCode.MovedPermanently or HttpStatusCode.Found or HttpStatusCode.SeeOther or
+            HttpStatusCode.TemporaryRedirect or HttpStatusCode.PermanentRedirect;
+
+        /// <summary>
         /// Downloads the file, or returns null when the download fails, takes longer than DownloadTimeoutSeconds
         /// or is larger than MaxFileSizeKilobytes. The tag then keeps the original URL instead of breaking the page.
         /// </summary>
@@ -210,7 +258,12 @@ namespace Our.Umbraco.TagHelpers.Services
             try
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(settings.DownloadTimeoutSeconds));
-                using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+                using var response = await GetFollowingAllowedRedirects(new Uri(url), timeout.Token);
+                if (response is null)
+                {
+                    return null;
+                }
+
                 if (!response.IsSuccessStatusCode)
                 {
                     Logger?.LogWarning("Not self hosting {Url}: the download returned {StatusCode}", url, (int)response.StatusCode);

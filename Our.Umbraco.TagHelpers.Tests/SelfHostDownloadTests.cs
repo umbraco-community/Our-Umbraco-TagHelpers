@@ -27,6 +27,12 @@ namespace Our.Umbraco.TagHelpers.Tests
         private string _baseUrl = null!;
         private string _webRoot = null!;
 
+        // A second host for redirects: a minimal HTTP server on 127.0.0.1 (raw TCP, so it needs no URL reservation on
+        // Windows), which counts its requests and answers each with a small file
+        private TcpListener _otherHost = null!;
+        private string _otherHostUrl = null!;
+        private int _otherHostRequests;
+
         // flaky.js answers 503 until _flakyUp is set, and counts its requests
         private volatile bool _flakyUp;
         private int _flakyRequests;
@@ -44,10 +50,41 @@ namespace Our.Umbraco.TagHelpers.Tests
             _server.Prefixes.Add(_baseUrl + "/");
             _server.Start();
             _ = Task.Run(ServeAsync);
+
+            _otherHost = new TcpListener(IPAddress.Loopback, 0);
+            _otherHost.Start();
+            _otherHostUrl = $"http://127.0.0.1:{((IPEndPoint)_otherHost.LocalEndpoint).Port}";
+            _ = Task.Run(ServeOtherHostAsync);
         }
 
         [OneTimeTearDown]
-        public void StopServer() => _server.Close();
+        public void StopServer()
+        {
+            _server.Close();
+            _otherHost.Stop();
+        }
+
+        private async Task ServeOtherHostAsync()
+        {
+            while (true)
+            {
+                TcpClient client;
+                try { client = await _otherHost.AcceptTcpClientAsync(); } catch { return; }
+                using (client)
+                {
+                    try
+                    {
+                        var stream = client.GetStream();
+                        var reader = new StreamReader(stream, Encoding.ASCII);
+                        while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) { } // the request line and headers
+                        Interlocked.Increment(ref _otherHostRequests);
+                        var body = new string('b', 100);
+                        await stream.WriteAsync(Encoding.ASCII.GetBytes($"HTTP/1.1 200 OK\r\nContent-Length: {body.Length}\r\nConnection: close\r\n\r\n{body}"));
+                    }
+                    catch { }
+                }
+            }
+        }
 
         private async Task ServeAsync()
         {
@@ -60,6 +97,9 @@ namespace Our.Umbraco.TagHelpers.Tests
                 {
                     if (path.EndsWith("/flaky.js")) Interlocked.Increment(ref _flakyRequests);
                     if (path.EndsWith("/missing.js")) { context.Response.StatusCode = 404; }
+                    else if (path.EndsWith("/to-same-host.js")) { context.Response.StatusCode = 302; context.Response.RedirectLocation = "/lib/small.js"; }
+                    else if (path.EndsWith("/to-other-host.js")) { context.Response.StatusCode = 302; context.Response.RedirectLocation = _otherHostUrl + "/lib/other.js"; }
+                    else if (path.EndsWith("/loop.js")) { context.Response.StatusCode = 302; context.Response.RedirectLocation = path; }
                     else if (path.EndsWith("/flaky.js") && !_flakyUp) { context.Response.StatusCode = 503; }
                     else
                     {
@@ -224,6 +264,46 @@ namespace Our.Umbraco.TagHelpers.Tests
             var file = await Service(s => s.AllowedHosts = new[] { "unpkg.com", "LOCALHOST" }).SelfHostFile($"{_baseUrl}/lib/small.js");
 
             ClassicAssert.AreEqual("/assets/lib/small.js", file.Url);
+        }
+
+        [Test]
+        public async Task RedirectOnTheSameHost_IsFollowed()
+        {
+            // e.g. unpkg.com/alpinejs redirecting to the versioned file
+            var file = await Service(s => s.AllowedHosts = new[] { "localhost" }).SelfHostFile($"{_baseUrl}/lib/to-same-host.js");
+
+            ClassicAssert.AreEqual("/assets/lib/to-same-host.js", file.Url);
+        }
+
+        [Test]
+        public async Task RedirectToAHostNotInAllowedHosts_IsNotFollowed()
+        {
+            var url = $"{_baseUrl}/lib/to-other-host.js";
+            var before = _otherHostRequests;
+
+            var file = await Service(s => s.AllowedHosts = new[] { "localhost" }).SelfHostFile(url);
+
+            ClassicAssert.AreEqual(url, file.Url);
+            ClassicAssert.IsFalse(Saved("assets/lib/to-other-host.js"));
+            ClassicAssert.AreEqual(before, _otherHostRequests, "the other host is never contacted");
+        }
+
+        [Test]
+        public async Task RedirectToAnotherHost_IsFollowed_WhenAnyHostIsAllowed()
+        {
+            var before = _otherHostRequests;
+
+            var file = await Service().SelfHostFile($"{_baseUrl}/lib/to-other-host.js");
+
+            ClassicAssert.AreEqual("/assets/lib/to-other-host.js", file.Url);
+            ClassicAssert.AreEqual(before + 1, _otherHostRequests);
+        }
+
+        [Test]
+        public async Task EndlessRedirects_KeepTheOriginalUrl()
+        {
+            var url = $"{_baseUrl}/lib/loop.js";
+            ClassicAssert.AreEqual(url, (await Service().SelfHostFile(url)).Url);
         }
 
         [Test]
