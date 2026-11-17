@@ -1,4 +1,5 @@
-﻿using Our.Umbraco.TagHelpers.Enums;
+﻿using System;
+using Our.Umbraco.TagHelpers.Enums;
 
 namespace Our.Umbraco.TagHelpers.Configuration
 {
@@ -68,7 +69,7 @@ namespace Our.Umbraco.TagHelpers.Configuration
         /// Hosts that files may be downloaded from, e.g. "unpkg.com". When it's empty (the default), any host is allowed.
         /// A URL on another host isn't downloaded; the tag keeps pointing at the original.
         /// </summary>
-        public string[] AllowedHosts { get; set; } = System.Array.Empty<string>();
+        public string[] AllowedHosts { get; set; } = Array.Empty<string>();
 
         /// <summary>
         /// The largest file that's downloaded, in kilobytes (default 10240, 10 MB). Larger files keep the original URL.
