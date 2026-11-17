@@ -3,6 +3,7 @@ import { test, expect } from '../fixtures';
 const sampleHeadings = [
   'our-dictionary',
   'our-if',
+  'our-text-if',
   'Replacement for BeginUmbracoForm',
   'our-lang-switcher',
   'our-svg',

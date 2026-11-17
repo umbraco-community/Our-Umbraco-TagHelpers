@@ -71,6 +71,20 @@ This is a tag helper attribute that can be applied to any DOM element in the raz
 </a>
 ```
 
+## `our-text-if`
+This is a tag helper attribute that fills its element with the text in the attribute, or leaves the element out of the page when there's no text. It saves wrapping a value in an `our-if` that checks it isn't empty.
+
+```cshtml
+<h1 our-text-if="@Model.Heading" />
+<p class="intro" our-text-if="@Model.Summary">This placeholder is replaced, or removed with the element</p>
+```
+
+With a heading of "Welcome" this renders `<h1>Welcome</h1>`; with an empty heading, nothing at all.
+
+- The text is HTML-encoded, as `@Model.Heading` is in Razor. Values that are already HTML, such as rich text (`IHtmlEncodedString`), are output as HTML.
+- The text replaces any content inside the element.
+- Self-closing elements such as `<h1 ... />` are written with an end tag so they can hold the text.
+
 ## `<our-macro>`
 
 > [!WARNING]

@@ -1,0 +1,17 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
+
+<h2>our-text-if</h2>
+<p>
+    This tag helper attribute fills its element with the text in the attribute,
+    or leaves the element out of the page when there's no text. It saves wrapping
+    <code>@@Model.Heading</code> in an <code>our-if</code> that checks it isn't empty.
+</p>
+
+<p>This page's Header:</p>
+<h3 data-demo="with-text" our-text-if="@Model.Header" />
+
+<p>A property with no value, so the heading below isn't rendered:</p>
+<h3 data-demo="empty" our-text-if='@Model.Value<string>("noSuchProperty")'>This heading isn't rendered</h3>
+
+<p>Text is HTML-encoded, so markup in it is shown as text:</p>
+<p data-demo="markup" our-text-if='@("<em>Shown as text, not emphasised</em>")' />
