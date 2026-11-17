@@ -30,7 +30,10 @@ public class AreaContactFormController : SurfaceController
     {
     }
 
+    // SurfaceController already has [AutoValidateAntiforgeryToken]; this says it here too, for anyone copying the
+    // demo and for code scanning, which doesn't see the inherited attribute. The form tag helper adds the token.
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Submit(string name)
     {
         TempData["AreaFormSubmitted"] = name;
