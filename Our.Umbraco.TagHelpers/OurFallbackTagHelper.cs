@@ -70,8 +70,9 @@ namespace Our.Umbraco.TagHelpers
             // If we have a value that can be
             if (string.IsNullOrWhiteSpace($"{result}") == false)
             {
-                // As @Model.Value(...) in Razor: values that are already HTML (e.g. rich text) are output as HTML,
-                // anything else (e.g. a Textstring) is HTML-encoded so markup in it is shown as text
+                // As @Model.Value(...) in Razor: values that are already HTML are output as HTML, anything else
+                // (e.g. a Textstring) is HTML-encoded so markup in it is shown as text. (Rich Text and Markdown
+                // properties don't get here: their model type is complex, so they're suppressed above.)
                 switch (result)
                 {
                     case IHtmlEncodedString html:

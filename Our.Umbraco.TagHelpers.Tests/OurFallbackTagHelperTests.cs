@@ -16,8 +16,9 @@ using Umbraco.Cms.Core.Strings;
 
 namespace Our.Umbraco.TagHelpers.Tests
 {
-    // our-fallback must output a property's value the way @Model.Value(...) in Razor does:
-    // plain values HTML-encoded, values that are already HTML (rich text) as HTML
+    // our-fallback must output a property's value the way @Model.Value(...) in Razor does: plain values
+    // HTML-encoded, values that are already HTML as HTML. Note: Rich Text and Markdown properties don't reach
+    // this, because their ModelsBuilder type (IHtmlEncodedString) is a complex type, which our-fallback suppresses.
     public class OurFallbackTagHelperTests
     {
         private IServiceProvider? _originalServiceProvider;
@@ -51,14 +52,15 @@ namespace Our.Umbraco.TagHelpers.Tests
             ClassicAssert.AreEqual(expected, Render(value));
         }
 
+        // A value that's already HTML, from a property whose model type is simple
         [Test]
-        public void RichText_IsRenderedAsHtml()
+        public void HtmlEncodedStringValue_IsRenderedAsHtml()
         {
             ClassicAssert.AreEqual("<p><strong>Rich</strong> text</p>", Render(new HtmlEncodedString("<p><strong>Rich</strong> text</p>")));
         }
 
         [Test]
-        public void HtmlContent_IsRenderedAsHtml()
+        public void HtmlContentValue_IsRenderedAsHtml()
         {
             ClassicAssert.AreEqual("<b>Html</b>", Render(new HtmlString("<b>Html</b>")));
         }
