@@ -91,3 +91,14 @@ test('removes everything from an svg that could run script', async ({ page }) =>
   await svg.locator('circle').dispatchEvent('click'); // would run an onclick handler if one were left
   expect(await page.evaluate(() => (window as unknown as { ourSvgUnsafeRan?: boolean }).ourSvgUnsafeRan)).toBeUndefined();
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/116
+test('other attributes on our-svg are copied onto the svg', async ({ page }) => {
+  await page.goto('/en/');
+  const svg = demo(page, 'attributes');
+
+  await expect(svg).toHaveAttribute('aria-hidden', 'true');
+  await expect(svg).toHaveAttribute('id', 'decorative-face');
+  await expect(svg).toHaveAttribute('data-track', 'demo-face');
+  await expect(svg).toHaveAttribute('width', '32'); // replaces the file's own width (246)
+});
