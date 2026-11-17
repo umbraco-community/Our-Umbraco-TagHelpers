@@ -35,6 +35,8 @@ This is a tag helper element `<our-dictionary>` that will use the current page's
 <h3><our-dictionary key="home" fallback-lang="da-DK">My Header</our-dictionary></h3>
 ```
 
+> **Note:** the translation is output as **HTML**, so markup in it is rendered: a translation of `Hello <strong>there</strong>` shows bold text. This is different from `@Umbraco.GetDictionaryValue("home")` in Razor, which HTML-encodes the value and shows the tags as text. Treat dictionary items like rich text: only let trusted users edit them, and use `@Umbraco.GetDictionaryValue(...)` instead when a translation should always be plain text.
+
 ## `our-if`
 
 This is a tag helper attribute that can be applied to any DOM element in the razor template or partial. It will include its element and children on the page if the expression inside the `our-if` attribute evaluates to true.

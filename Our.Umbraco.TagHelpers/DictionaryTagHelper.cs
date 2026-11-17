@@ -11,6 +11,10 @@ namespace Our.Umbraco.TagHelpers
     /// Translates an Umbraco Dictionary Key for the current language
     /// or a fallback language and uses an element
     /// </summary>
+    /// <remarks>
+    /// The translation is output as HTML, so markup in it is rendered (unlike @Umbraco.GetDictionaryValue in Razor,
+    /// which HTML-encodes it). Only trusted users should be able to edit dictionary items.
+    /// </remarks>
     [HtmlTargetElement("our-dictionary", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class DictionaryTagHelper : TagHelper
     {
