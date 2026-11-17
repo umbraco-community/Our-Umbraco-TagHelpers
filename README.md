@@ -267,6 +267,30 @@ This tag helper element `<our-fallback>` uses the same fallback mode logic that 
 <h3><our-fallback property="Header" mode="Fallback.ToAncestors">I do NOT have a Header property set on ANY parent and ancestors</our-fallback></h3>
 ```
 
+## `<our-hreflang>`
+
+This tag helper element outputs the `hreflang` alternate links for the current page, which search engines use to find each language version of a page. Use it in the `<head>` of a multilingual site:
+
+```cshtml
+<head>
+    <our-hreflang />
+</head>
+```
+
+On `/en/about/`, for a page published in English, Danish and Spanish:
+
+```html
+<link rel="alternate" hreflang="en-US" href="https://example.com/en/about/" />
+<link rel="alternate" hreflang="da" href="https://example.com/da/om-os/" />
+<link rel="alternate" hreflang="es" href="https://example.com/es/acerca/" />
+<link rel="alternate" hreflang="x-default" href="https://example.com/en/about/" />
+```
+
+- There's a link for each culture the page is **published** in, including the current one, with **absolute** URLs from Umbraco's URL provider, so culture domains on the same or different hosts work.
+- `hreflang` is the culture's ISO code as configured in Umbraco.
+- `x-default` points to the default language's version. Use `x-default="da"` to point it at another culture, or `x-default="false"` to leave it out.
+- Nothing is output for content that doesn't vary by culture, a page published in only one culture, or a request that isn't for an Umbraco page.
+
 ## `<our-version>`
 
 This tag helper element `<our-version>` prints out version number for a given Assembly name loaded into the current AppDomain or if none is given then the EntryAssembly version is displayed, which would be the Umbraco website project you are building.
