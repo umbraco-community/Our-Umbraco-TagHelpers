@@ -62,3 +62,26 @@ test('our-controller with the Controller suffix reaches the surface controller',
   await expect(page).toHaveURL(/\/en\/$/);
   await expect(sample.locator('.form-success')).toHaveText('Thanks E2E Suffix, your message was sent.');
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/security/code-scanning/1
+// The demo surface controllers validate the anti-forgery token that ASP.NET's form tag helper adds to each form,
+// so a cross-site POST, which can't read the token, is rejected.
+for (const [formId, fields] of [
+  ['testContactForm', { Name: 'Forged', Email: 'forged@example.com', Message: 'Cross-site post' }],
+  ['testSuffixForm', { Name: 'Forged', Email: 'forged@example.com', Message: 'Cross-site post' }],
+  ['testAreaForm', { name: 'Forged' }],
+] as const) {
+  test(`a post to #${formId} without the anti-forgery token is rejected`, async ({ page }) => {
+    await page.goto('/en/');
+    const form = section(page, 'our-form').locator(`form#${formId}`);
+
+    // The real form carries the token
+    await expect(form.locator('input[type="hidden"][name="__RequestVerificationToken"]')).toHaveCount(1);
+
+    // The same post, with the route field (ufprt) but without the token
+    const ufprt = await form.locator('input[name="ufprt"]').getAttribute('value');
+    const response = await page.request.post('/en/', { form: { ...fields, ufprt: ufprt! }, maxRedirects: 0 });
+
+    expect(response.status()).toBe(400);
+  });
+}
