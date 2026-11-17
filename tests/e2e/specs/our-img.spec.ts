@@ -95,3 +95,32 @@ test('large breakpoints render sources with the large media queries', async ({ p
   await expect(extraExtraLarge).toHaveAttribute('width', '800');
   await expect(extraExtraLarge).toHaveAttribute('srcset', new RegExp(`^${mediaFile}\\?cc=`));
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/51
+const fallbackDemo = (page: Page, name: string) => section(page, 'our-img').locator(`[data-demo="${name}"] img`);
+
+test('fallback-img is shown when the src file is missing', async ({ page }) => {
+  await page.goto('/en/');
+  const img = fallbackDemo(page, 'fallback-missing-src');
+
+  await expect(img).toHaveAttribute('src', /^\/samples\/cute-unicorn\.jpg\?width=150&height=100&hmac=/);
+  await expect(img).toHaveAttribute('alt', 'Missing file');
+});
+
+test('fallback-img is shown when no media item was picked', async ({ page }) => {
+  await page.goto('/en/');
+  await expect(fallbackDemo(page, 'fallback-no-media')).toHaveAttribute('src', /^\/samples\/cute-unicorn\.jpg\?width=150&height=100&hmac=/);
+});
+
+test('fallback-img is not used when the src file exists', async ({ page }) => {
+  await page.goto('/en/');
+  await expect(fallbackDemo(page, 'fallback-not-needed')).toHaveAttribute('src', /^\/samples\/cute-unicorn\.jpg\?width=150&height=100&hmac=/);
+  await expect(section(page, 'our-img').locator('img[src*="this-fallback-is-not-used"]')).toHaveCount(0);
+});
+
+test('a fallback image loads', async ({ page }) => {
+  await page.goto('/en/');
+  const img = fallbackDemo(page, 'fallback-missing-src');
+  await img.scrollIntoViewIfNeeded();
+  await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(0);
+});
