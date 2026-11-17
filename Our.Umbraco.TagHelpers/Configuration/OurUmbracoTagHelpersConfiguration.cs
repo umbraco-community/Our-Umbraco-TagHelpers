@@ -16,6 +16,12 @@ namespace Our.Umbraco.TagHelpers.Configuration
         public bool EnsureViewBox { get; set; } = false;
         public bool Cache { get; set; } = false;
         public int CacheMinutes { get; set; } = 180;
+
+        /// <summary>
+        /// Scopes each inlined SVG's &lt;style&gt; blocks to that SVG, so class names such as .st0 from two SVGs on one
+        /// page don't restyle each other. Off by default.
+        /// </summary>
+        public bool ScopeStyles { get; set; } = false;
     }
 
     public class ImgTagHelperConfiguration
