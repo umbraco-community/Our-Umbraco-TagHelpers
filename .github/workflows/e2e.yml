@@ -9,6 +9,11 @@ on:
     branches: [ v2/dev ]
   workflow_dispatch:
 
+# Least privilege: the jobs only read the repository and upload/download this run's artifacts
+# (artifacts use the run's own token, not GITHUB_TOKEN)
+permissions:
+  contents: read
+
 jobs:
   pack:
     name: Pack NuGet package
