@@ -1,18 +1,18 @@
-﻿using Umbraco.Cms.Core.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System.Threading;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Options;
-using Our.Umbraco.TagHelpers.Configuration;
-using Our.Umbraco.TagHelpers.Models;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Our.Umbraco.TagHelpers.Configuration;
+using Our.Umbraco.TagHelpers.Models;
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Logging;
 using Umbraco.Extensions;
 
@@ -24,6 +24,25 @@ namespace Our.Umbraco.TagHelpers.Services
         private readonly IAppPolicyCache _runtimeCache;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly OurUmbracoTagHelpersConfiguration _globalSettings;
+
+        // One HttpClient for every download, as Microsoft recommends: a new one per download can exhaust sockets, and
+        // PooledConnectionLifetime replaces connections every few minutes so DNS changes (e.g. a CDN moving) are picked
+        // up. The timeout is per download (DownloadTimeoutSeconds), so the client's own timeout is off.
+        // Redirects are followed by GetFollowingAllowedRedirects, so each new URL is checked like the first one.
+        private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            AllowAutoRedirect = false,
+        })
+        {
+            Timeout = Timeout.InfiniteTimeSpan,
+        };
+
+        // As many redirects as a CDN needs (e.g. unpkg.com/alpinejs to the versioned file), not a loop
+        private const int MaxRedirects = 5;
+
+        // Logging without changing the public constructor (IProfilingLogger can't log warnings)
+        private static ILogger? Logger => StaticServiceProvider.Instance?.GetService<ILogger<SelfHostService>>();
 
         public SelfHostService(
             IProfilingLogger logger,
@@ -131,6 +150,7 @@ namespace Our.Umbraco.TagHelpers.Services
 
             return string.Empty;
         }
+
         private async Task<string> GetSelfHostedUrl(SelfHostedFile file)
         {
             var filePath = $"{file.FolderPath}/{file.FileName}";
@@ -164,25 +184,6 @@ namespace Our.Umbraco.TagHelpers.Services
 
             return filePath;
         }
-
-        // One HttpClient for every download, as Microsoft recommends: a new one per download can exhaust sockets, and
-        // PooledConnectionLifetime replaces connections every few minutes so DNS changes (e.g. a CDN moving) are picked
-        // up. The timeout is per download (DownloadTimeoutSeconds), so the client's own timeout is off.
-        // Redirects are followed by GetFollowingAllowedRedirects, so each new URL is checked like the first one.
-        private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
-        {
-            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
-            AllowAutoRedirect = false,
-        })
-        {
-            Timeout = Timeout.InfiniteTimeSpan,
-        };
-
-        // As many redirects as a CDN needs (e.g. unpkg.com/alpinejs to the versioned file), not a loop
-        private const int MaxRedirects = 5;
-
-        // Logging without changing the public constructor (IProfilingLogger can't log warnings)
-        private static ILogger? Logger => StaticServiceProvider.Instance?.GetService<ILogger<SelfHostService>>();
 
         private bool IsAllowedUrl(string url)
         {
@@ -276,7 +277,7 @@ namespace Our.Umbraco.TagHelpers.Services
                     return null;
                 }
 
-                // Read at most one byte more than allowed, in case the size wasn't sent
+                // Stop reading as soon as it's over the limit, in case the size wasn't sent (or was wrong)
                 await using var stream = await response.Content.ReadAsStreamAsync(timeout.Token);
                 using var content = new MemoryStream();
                 var buffer = new byte[81920];
