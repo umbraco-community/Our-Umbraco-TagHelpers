@@ -1,0 +1,415 @@
+/*
+ * Hack Make Do design system (November 2026) applied to Starlight.
+ * Night (navy) is the dark theme and the brand ground; Paper is the light theme for long reads.
+ * Token values are the design system's own; the --hmd-* names match its token names.
+ */
+
+/* ============ Tokens ============ */
+:root {
+	--hmd-ground: #0b1c2f;
+	--hmd-panel: #16293d;
+	--hmd-ink: #eceaf7;
+	--hmd-ink-muted: #a9abd2;
+	--hmd-rule: #2a2f66;
+	--hmd-border-strong: #6a70a3;
+	--hmd-pink: #ffb1a4;
+	--hmd-on-pink: #0b1c2f;
+	--hmd-accent-text: #ffb1a4;
+	--hmd-type-role: #8e99ff;
+	--hmd-type-community: #7fe0c3;
+	--hmd-focus-ring: #eceaf7;
+	--hmd-shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.35);
+
+	--hmd-font-display: 'Montserrat Variable', 'Montserrat', 'Avenir Next', 'Segoe UI', sans-serif;
+	--hmd-radius-sm: 4px;
+	--hmd-radius-md: 8px;
+	--hmd-radius-lg: 16px;
+	--hmd-radius-pill: 999px;
+}
+
+:root[data-theme='light'] {
+	--hmd-ground: #f6f3fa;
+	--hmd-panel: #ffffff;
+	--hmd-ink: #0b1c2f;
+	--hmd-ink-muted: #4a4f7a;
+	--hmd-rule: #d6d2e8;
+	--hmd-accent-text: #a8321f;
+	--hmd-type-role: #3d4bd1;
+	--hmd-type-community: #0b6b57;
+	--hmd-focus-ring: #0b1c2f;
+	--hmd-shadow-panel: 0 8px 32px rgba(11, 28, 47, 0.12);
+}
+
+/* ============ Starlight mapping ============ */
+:root,
+:root[data-theme='light'] {
+	--sl-font: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+	--sl-font-mono: 'Cascadia Code', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+	--sl-color-white: var(--hmd-ink);
+	--sl-color-gray-1: var(--hmd-ink);
+	--sl-color-gray-2: var(--hmd-ink);
+	--sl-color-gray-3: var(--hmd-ink-muted);
+	--sl-color-gray-4: var(--hmd-border-strong);
+	--sl-color-gray-5: var(--hmd-rule);
+	--sl-color-gray-6: var(--hmd-panel);
+	--sl-color-black: var(--hmd-ground);
+
+	--sl-color-accent-low: var(--hmd-panel);
+	--sl-color-accent: var(--hmd-pink);
+	--sl-color-accent-high: var(--hmd-accent-text);
+
+	--sl-color-text: var(--hmd-ink);
+	--sl-color-text-accent: var(--hmd-accent-text);
+	--sl-color-text-invert: var(--hmd-on-pink);
+	--sl-color-bg: var(--hmd-ground);
+	--sl-color-bg-nav: var(--hmd-ground);
+	--sl-color-bg-sidebar: var(--hmd-ground);
+	--sl-color-bg-inline-code: var(--hmd-panel);
+	--sl-color-bg-accent: var(--hmd-pink);
+	--sl-color-hairline-light: var(--hmd-rule);
+	--sl-color-hairline: var(--hmd-rule);
+	--sl-color-hairline-shade: var(--hmd-rule);
+
+	/* Type scale: body 17px, leads 20px, h1 48px, h2 36px, h3 24px (scaled down on phones) */
+	--sl-text-body: 1.0625rem;
+	--sl-line-height: 1.65;
+	--sl-line-height-headings: 1.15;
+	--sl-text-h1: clamp(2.25rem, 1.6rem + 2.4vw, 3rem);
+	--sl-text-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
+	--sl-text-h3: 1.5rem;
+	--sl-text-h4: 1.25rem;
+	--sl-text-code: 0.9375rem;
+
+	--sl-content-width: 45rem; /* container-text, 720px */
+	--sl-nav-height: 4.5rem; /* header-height, 72px */
+}
+
+/* Colour changes ease, as on hackmakedo.com; none at all for people who ask for less motion */
+a,
+button {
+	transition:
+		color 0.2s ease-in-out,
+		background-color 0.2s ease-in-out,
+		border-color 0.2s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition: none !important;
+		animation: none !important;
+	}
+}
+
+/* ============ Type ============ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+.hero .tagline + .actions a,
+.sl-link-button {
+	font-family: var(--hmd-font-display);
+}
+h1,
+.sl-markdown-content h1 {
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+.sl-markdown-content h2 {
+	font-weight: 700;
+}
+.sl-markdown-content :is(h3, h4, h5, h6) {
+	font-weight: 600;
+}
+
+/* ============ Focus ============ */
+:focus-visible {
+	outline: 3px solid var(--hmd-focus-ring);
+	outline-offset: 3px;
+}
+
+/* ============ Header ============ */
+header.header {
+	border-bottom: 1px solid var(--hmd-rule);
+}
+
+/* ============ Sidebar ============ */
+nav.sidebar .top-level > li > details > summary .group-label > span,
+nav.sidebar .large {
+	font-family: var(--hmd-font-display);
+	font-weight: 700;
+	color: var(--hmd-ink);
+}
+/* The current page is a pink fill with navy text (9.9:1), in both themes */
+nav.sidebar a[aria-current='page'],
+nav.sidebar a[aria-current='page']:hover,
+nav.sidebar a[aria-current='page']:focus {
+	background: var(--hmd-pink);
+	color: var(--hmd-on-pink);
+	font-weight: 600;
+	border-radius: var(--hmd-radius-pill);
+}
+
+/* ============ Links and inline code ============ */
+.sl-markdown-content a:not(:where(.not-content *)) {
+	color: var(--hmd-accent-text);
+	text-underline-offset: 0.2em;
+}
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+	text-decoration-thickness: 2px;
+}
+.sl-markdown-content code:not(:where(.not-content *, pre *)) {
+	border-radius: var(--hmd-radius-sm);
+	border: 1px solid var(--hmd-rule);
+	padding: 0.1em 0.35em;
+	font-size: 0.9em;
+}
+
+/* ============ Buttons ============ */
+.sl-link-button {
+	border-radius: var(--hmd-radius-pill) !important;
+	font-weight: 700;
+}
+.sl-link-button.primary {
+	background: var(--hmd-pink) !important;
+	border-color: var(--hmd-pink) !important;
+	color: var(--hmd-on-pink) !important;
+}
+.sl-link-button.secondary,
+.sl-link-button.minimal {
+	border: 2px solid var(--hmd-border-strong) !important;
+	color: var(--hmd-ink) !important;
+}
+.sl-link-button.minimal {
+	padding-inline: 1.25rem !important;
+}
+
+/* ============ Asides (callouts) ============ */
+/* An even border all round: the brand doesn't use left-border accent cards */
+.starlight-aside {
+	border-radius: var(--hmd-radius-md);
+	border: 1px solid var(--sl-color-asides-border);
+	background: var(--hmd-panel);
+}
+.starlight-aside--note {
+	--sl-color-asides-text-accent: var(--hmd-type-role);
+	--sl-color-asides-border: var(--hmd-type-role);
+}
+.starlight-aside--tip {
+	--sl-color-asides-text-accent: var(--hmd-type-community);
+	--sl-color-asides-border: var(--hmd-type-community);
+}
+.starlight-aside--caution,
+.starlight-aside--danger {
+	--sl-color-asides-text-accent: var(--hmd-accent-text);
+	--sl-color-asides-border: var(--hmd-accent-text);
+}
+
+/* ============ Tables ============ */
+.sl-markdown-content table:not(:where(.not-content *)) {
+	display: table;
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.95em;
+}
+.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+	border-bottom: 1px solid var(--hmd-rule);
+	padding: 0.5rem 0.75rem;
+	vertical-align: top;
+}
+.sl-markdown-content thead th:not(:where(.not-content *)) {
+	font-family: var(--hmd-font-display);
+	font-size: 0.8125rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--hmd-ink-muted);
+	border-bottom: 2px solid var(--hmd-border-strong);
+}
+/* Code in a heading cell keeps its case: Model.Heading, not MODEL.HEADING */
+.sl-markdown-content thead th code {
+	text-transform: none;
+	letter-spacing: 0;
+}
+@media (max-width: 50rem) {
+	/* Wide reference tables scroll sideways on phones rather than stretching the page */
+	.sl-markdown-content table:not(:where(.not-content *)) {
+		display: block;
+		overflow-x: auto;
+	}
+}
+
+/* ============ Version badges ============ */
+.hmd-title-badges {
+	margin: 0.75rem 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+.hmd-version {
+	display: inline-block;
+	font-family: var(--hmd-font-display);
+	font-size: 0.8125rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	line-height: 1.2;
+	text-transform: uppercase;
+	text-decoration: none;
+	padding: 0.35rem 0.75rem;
+	border-radius: var(--hmd-radius-pill);
+	border: 2px solid var(--hmd-border-strong);
+	color: var(--hmd-ink);
+	white-space: nowrap;
+}
+.sl-markdown-content a.hmd-version {
+	color: var(--hmd-ink);
+	text-decoration: none;
+}
+.hmd-version--coming,
+.sl-markdown-content a.hmd-version--coming {
+	background: var(--hmd-pink);
+	border-color: var(--hmd-pink);
+	color: var(--hmd-on-pink);
+}
+.hmd-version--removed,
+.sl-markdown-content a.hmd-version--removed {
+	border-style: dashed;
+	color: var(--hmd-accent-text);
+	border-color: var(--hmd-accent-text);
+}
+.hmd-version:hover {
+	border-color: var(--hmd-ink);
+}
+.hmd-version--inline {
+	font-size: 0.6875rem;
+	padding: 0.15rem 0.5rem;
+	border-width: 1px;
+	vertical-align: 0.15em;
+	margin-inline-start: 0.35rem;
+}
+/* Sidebar badges (New, Coming soon, Removed) */
+nav.sidebar .sl-badge {
+	font-family: var(--hmd-font-display);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	border-radius: var(--hmd-radius-pill);
+	border: 0;
+	background: var(--hmd-pink);
+	color: var(--hmd-on-pink);
+}
+/* On the current (pink) item, the badge flips to navy so it stays visible */
+nav.sidebar a[aria-current='page'] .sl-badge {
+	background: var(--hmd-on-pink);
+	color: var(--hmd-pink);
+	box-shadow: none;
+}
+nav.sidebar .sl-badge.caution {
+	background: transparent;
+	color: var(--hmd-accent-text);
+	box-shadow: inset 0 0 0 1px var(--hmd-accent-text);
+}
+
+/* ============ Overview table ============ */
+.hmd-th-table td:last-child {
+	white-space: nowrap;
+}
+.hmd-th-table .hmd-version--inline {
+	margin-inline-start: 0;
+}
+
+/* ============ Release notes ============ */
+.hmd-release {
+	padding-block: 1.5rem;
+	border-top: 1px solid var(--hmd-rule);
+}
+.hmd-release:first-of-type {
+	border-top: 0;
+	padding-top: 0;
+}
+.hmd-release h2 {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+.hmd-release__pre {
+	font-size: 0.8125rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 0.25rem 0.6rem;
+	border-radius: var(--hmd-radius-pill);
+	border: 2px solid var(--hmd-border-strong);
+	color: var(--hmd-ink-muted);
+}
+.sl-markdown-content .hmd-release__meta {
+	margin-top: 0.25rem;
+	color: var(--hmd-ink-muted);
+	font-size: 0.875rem;
+}
+.hmd-release__body h2 {
+	font-size: 1.25rem;
+}
+
+/* ============ Home (splash) ============ */
+.hero {
+	padding-block: 3rem 2rem;
+}
+.hero h1 {
+	font-family: var(--hmd-font-display);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1;
+}
+.hero .tagline {
+	font-size: 1.25rem;
+	line-height: 1.6;
+	color: var(--hmd-ink-muted);
+}
+.hmd-box {
+	background: var(--hmd-pink);
+	color: var(--hmd-on-pink);
+	padding: 0 0.15em;
+	border-radius: 0;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+}
+
+/* Cards: panel surface, a lift on hover only */
+.card {
+	border-radius: var(--hmd-radius-lg) !important;
+	border: 1px solid var(--hmd-rule) !important;
+	background: var(--hmd-panel) !important;
+}
+.card .title {
+	font-family: var(--hmd-font-display);
+	font-weight: 700;
+}
+.card .icon {
+	background: var(--hmd-pink) !important;
+	color: var(--hmd-on-pink) !important;
+	border-radius: 0 !important;
+	border: 0 !important;
+}
+a.sl-link-card,
+.sl-link-card {
+	border-radius: var(--hmd-radius-lg) !important;
+	border-color: var(--hmd-rule) !important;
+	background: var(--hmd-panel);
+}
+.sl-link-card:hover {
+	box-shadow: var(--hmd-shadow-panel);
+	border-color: var(--hmd-border-strong) !important;
+}
+
+/* ============ Footer credit ============ */
+.hmd-credit {
+	margin-top: 2rem;
+	font-size: 0.875rem;
+	color: var(--hmd-ink-muted);
+}
