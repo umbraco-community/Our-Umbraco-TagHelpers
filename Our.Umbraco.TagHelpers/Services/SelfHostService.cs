@@ -131,8 +131,13 @@ namespace Our.Umbraco.TagHelpers.Services
             return filePath;
         }
 
-        // One HttpClient for every download (a new one per download can exhaust sockets); the timeout is per download
-        private static readonly HttpClient HttpClient = new() { Timeout = Timeout.InfiniteTimeSpan };
+        // One HttpClient for every download, as Microsoft recommends: a new one per download can exhaust sockets, and
+        // PooledConnectionLifetime replaces connections every few minutes so DNS changes (e.g. a CDN moving) are picked
+        // up. The timeout is per download (DownloadTimeoutSeconds), so the client's own timeout is off.
+        private static readonly HttpClient HttpClient = new(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(2) })
+        {
+            Timeout = Timeout.InfiniteTimeSpan,
+        };
 
         // Logging without changing the public constructor (IProfilingLogger can't log warnings)
         private static ILogger? Logger => StaticServiceProvider.Instance?.GetService<ILogger<SelfHostService>>();
