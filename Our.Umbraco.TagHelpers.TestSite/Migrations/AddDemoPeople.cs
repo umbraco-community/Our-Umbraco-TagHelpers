@@ -121,13 +121,13 @@ public class AddDemoPeople : AsyncMigrationBase
     {
         if (_userService.GetByEmail(email) is not null)
         {
-            _logger.LogInformation("Demo people: user {Email} already exists", email);
+            _logger.LogInformation("Demo people: user {Name} already exists", name);
             return;
         }
 
         if (group is null)
         {
-            _logger.LogWarning("Demo people: skipped user {Email} because its user group is missing", email);
+            _logger.LogWarning("Demo people: skipped user {Name} because its user group is missing", name);
             return;
         }
 
@@ -144,7 +144,7 @@ public class AddDemoPeople : AsyncMigrationBase
 
         if (!created.Success || created.Result.CreatedUser is null)
         {
-            _logger.LogWarning("Demo people: could not create user {Email}: {Status}", email, created.Status);
+            _logger.LogWarning("Demo people: could not create user {Name}: {Status}", name, created.Status);
             return;
         }
 
@@ -154,11 +154,11 @@ public class AddDemoPeople : AsyncMigrationBase
 
         if (!passwordResult.Success)
         {
-            _logger.LogWarning("Demo people: created user {Email} but could not set its password: {Status}", email, passwordResult.Status);
+            _logger.LogWarning("Demo people: created user {Name} but could not set its password: {Status}", name, passwordResult.Status);
             return;
         }
 
-        _logger.LogInformation("Demo people: created user {Email} in {Group}", email, group.Alias);
+        _logger.LogInformation("Demo people: created user {Name} in {Group}", name, group.Alias);
     }
 
     private async Task<IMemberGroup?> EnsureMemberGroupAsync(string name)
@@ -185,7 +185,7 @@ public class AddDemoPeople : AsyncMigrationBase
     {
         if (_memberService.GetByEmail(email) is not null)
         {
-            _logger.LogInformation("Demo people: member {Email} already exists", email);
+            _logger.LogInformation("Demo people: member {Name} already exists", name);
             return;
         }
 
@@ -193,7 +193,7 @@ public class AddDemoPeople : AsyncMigrationBase
         var superUser = await _userService.GetAsync(Constants.Security.SuperUserKey);
         if (group is null || memberType is null || superUser is null)
         {
-            _logger.LogWarning("Demo people: skipped member {Email} because its member group, the default member type or the admin user is missing", email);
+            _logger.LogWarning("Demo people: skipped member {Name} because its member group, the default member type or the admin user is missing", name);
             return;
         }
 
@@ -212,10 +212,10 @@ public class AddDemoPeople : AsyncMigrationBase
 
         if (!result.Success)
         {
-            _logger.LogWarning("Demo people: could not create member {Email}: {Status}", email, result.Status);
+            _logger.LogWarning("Demo people: could not create member {Name}: {Status}", name, result.Status);
             return;
         }
 
-        _logger.LogInformation("Demo people: created member {Email} in {Group}", email, group.Name);
+        _logger.LogInformation("Demo people: created member {Name} in {Group}", name, group.Name);
     }
 }
