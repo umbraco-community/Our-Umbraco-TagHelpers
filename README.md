@@ -229,6 +229,7 @@ Additional properties have been added to cache the output and also to ensure the
 - `cache` - Caches the SVG file's contents in Umbraco's runtime cache, so the file isn't read on every page load. This is a `boolean` value. When it's on the tag, it wins over the global `Cache` setting, so `cache="false"` turns caching off for that element even when it's on globally. See [When is an SVG cached?](#when-is-an-svg-cached) below.
 - `cache-minutes` - How long (in minutes) a cached SVG is kept. When it isn't set, the global `CacheMinutes` is used (180 by default). This is an `integer` value.
 - `ignore-appsettings` - Ignores the global `EnsureViewBox` and `Cache` settings for this element, so only the attributes on the tag apply. This is a `boolean` value.
+- Any **other attributes**, such as `aria-hidden`, `aria-label`, `role`, `id`, `data-*`, `width` or `height`, are copied onto the inlined `<svg>`, replacing the file's own values. For example `<our-svg src="/assets/icon.svg" aria-hidden="true" />` for a decorative icon, or `role="img" aria-label="Company logo"` for a meaningful one.
 
 ### When is an SVG cached?
 

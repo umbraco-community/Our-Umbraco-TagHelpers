@@ -1,5 +1,7 @@
 ﻿using HtmlAgilityPack;
 using Microsoft.AspNetCore.Hosting;
+using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -159,9 +161,62 @@ namespace Our.Umbraco.TagHelpers
             output.Attributes.RemoveAll("src");
             output.Attributes.RemoveAll("media-item");
 
+            // Any other attributes on <our-svg> (aria-*, role, id, data-*, width...) go onto the <svg>, as the
+            // <our-svg> element itself isn't rendered. Razor has already removed the tag helper's own attributes.
+            cleanedFileContents = CopyAttributesToSvg(cleanedFileContents, output.Attributes);
+            output.Attributes.Clear();
+
             output.TagName = null; // Remove <our-svg>
             output.Content.SetHtmlContent(cleanedFileContents);
        }
+
+        /// <summary>
+        /// Sets the given attributes on the root &lt;svg&gt;, replacing the file's own values, with their values
+        /// HTML-encoded. Returns the SVG unchanged when there are no attributes.
+        /// </summary>
+        private static string CopyAttributesToSvg(string svg, TagHelperAttributeList attributes)
+        {
+            if (attributes.Count == 0)
+            {
+                return svg;
+            }
+
+            var doc = new HtmlDocument();
+            doc.LoadHtml(svg);
+            var root = doc.DocumentNode.SelectSingleNode("//svg");
+            if (root is null)
+            {
+                return svg;
+            }
+
+            foreach (var attribute in attributes)
+            {
+                var value = attribute.ValueStyle == HtmlAttributeValueStyle.Minimized ? string.Empty : EncodeAttributeValue(attribute.Value);
+                root.Attributes.Remove(attribute.Name);
+                // HtmlAgilityPack writes attribute values as given, so the value is already HTML-encoded here
+                root.Attributes.Add(doc.CreateAttribute(attribute.Name, value));
+            }
+
+            return doc.DocumentNode.OuterHtml;
+        }
+
+        private static string EncodeAttributeValue(object? value)
+        {
+            switch (value)
+            {
+                case null:
+                    return string.Empty;
+                case IHtmlContent html:
+                    // e.g. aria-label="@Model.Name": Razor has already encoded it
+                    using (var writer = new StringWriter())
+                    {
+                        html.WriteTo(writer, HtmlEncoder.Default);
+                        return writer.ToString();
+                    }
+                default:
+                    return HtmlEncoder.Default.Encode(value.ToString() ?? string.Empty);
+            }
+        }
 
         private string? GetFileContents()
         {

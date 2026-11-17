@@ -85,3 +85,11 @@
 <div data-demo="unsafe" style="display: inline-block">
     <our-svg src="/samples/unsafe.svg" />
 </div>
+
+<p>
+    Other attributes on <code>our-svg</code>, such as <code>aria-hidden</code>, <code>role</code>, <code>id</code>,
+    <code>data-*</code> or <code>width</code>, are copied onto the inlined <code>&lt;svg&gt;</code>:
+</p>
+<div data-demo="attributes" style="display: inline-block; max-width: 5vw">
+    <our-svg src="/samples/partying-face.svg" aria-hidden="true" id="decorative-face" data-track="demo-face" width="32" />
+</div>
