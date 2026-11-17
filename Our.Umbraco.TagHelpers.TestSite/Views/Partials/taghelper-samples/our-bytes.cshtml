@@ -1,0 +1,14 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Home>
+
+<h2>our-bytes</h2>
+<p>
+    This tag helper element our-bytes shows a number of bytes as a readable size, in steps of 1024
+    (B, KB, MB, GB, TB, PB), with the number formatted for the page's culture.
+</p>
+
+<ul>
+    <li>The image media item's file size: <span data-demo="media-item"><our-bytes media-item="@Model.Image" /></span></li>
+    <li>1536 bytes: <span data-demo="value"><our-bytes value="1536" /></span></li>
+    <li>1234567 bytes with two decimals: <span data-demo="decimals"><our-bytes value="1234567" decimals="2" /></span></li>
+    <li>No value, so nothing is shown: <span data-demo="empty"><our-bytes value="null" /></span></li>
+</ul>
