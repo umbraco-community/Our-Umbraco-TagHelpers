@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -25,6 +26,10 @@ namespace Our.Umbraco.TagHelpers.Tests
         private HttpListener _server = null!;
         private string _baseUrl = null!;
         private string _webRoot = null!;
+
+        // flaky.js answers 503 until _flakyUp is set, and counts its requests
+        private volatile bool _flakyUp;
+        private int _flakyRequests;
 
         [OneTimeSetUp]
         public void StartServer()
@@ -53,7 +58,9 @@ namespace Our.Umbraco.TagHelpers.Tests
                 var path = context.Request.Url!.AbsolutePath;
                 try
                 {
+                    if (path.EndsWith("/flaky.js")) Interlocked.Increment(ref _flakyRequests);
                     if (path.EndsWith("/missing.js")) { context.Response.StatusCode = 404; }
+                    else if (path.EndsWith("/flaky.js") && !_flakyUp) { context.Response.StatusCode = 503; }
                     else
                     {
                         if (path.EndsWith("/slow.js")) await Task.Delay(TimeSpan.FromSeconds(3));
@@ -74,16 +81,26 @@ namespace Our.Umbraco.TagHelpers.Tests
         [TearDown]
         public void DeleteWebRoot() => Directory.Delete(_webRoot, recursive: true);
 
-        private SelfHostService Service(Action<SelfHostTagHelperConfiguration>? configure = null)
+        private sealed class TestClock : TimeProvider
+        {
+            private DateTimeOffset _now = DateTimeOffset.UtcNow;
+            public override DateTimeOffset GetUtcNow() => _now;
+            public void Advance(TimeSpan time) => _now += time;
+        }
+
+        private SelfHostService Service(Action<SelfHostTagHelperConfiguration>? configure = null, IAppPolicyCache? cache = null, TimeProvider? clock = null)
         {
             var settings = new SelfHostTagHelperConfiguration { RootFolder = "/assets", MaxFileSizeKilobytes = 10, DownloadTimeoutSeconds = 10 };
             configure?.Invoke(settings);
             var hostEnv = Mock.Of<IWebHostEnvironment>(e => e.WebRootPath == _webRoot && e.ContentRootPath == _webRoot);
             return new SelfHostService(
                 Mock.Of<IProfilingLogger>(),
-                Mock.Of<IAppPolicyCache>(),
+                cache ?? Mock.Of<IAppPolicyCache>(),
                 hostEnv,
-                Options.Create(new OurUmbracoTagHelpersConfiguration { OurSelfHost = settings }));
+                Options.Create(new OurUmbracoTagHelpersConfiguration { OurSelfHost = settings }))
+            {
+                TimeProvider = clock ?? TimeProvider.System,
+            };
         }
 
         private bool Saved(string relativePath) => File.Exists(Path.Combine(_webRoot, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)));
@@ -95,6 +112,56 @@ namespace Our.Umbraco.TagHelpers.Tests
             CollectionAssert.IsEmpty(defaults.AllowedHosts);
             ClassicAssert.AreEqual(1024, defaults.MaxFileSizeKilobytes);
             ClassicAssert.AreEqual(30, defaults.DownloadTimeoutSeconds);
+        }
+
+        [Test]
+        public async Task FailedDownload_IsTriedAgainAfter5Minutes_ThenTheSelfHostedFileIsKept()
+        {
+            // With Umbraco's real runtime cache: a failed download used to be cached until the site restarted
+            var url = $"{_baseUrl}/lib/flaky.js";
+            var clock = new TestClock();
+            var service = Service(cache: new ObjectCacheAppCache(), clock: clock);
+            _flakyUp = false;
+            _flakyRequests = 0;
+
+            // The server is down: the original URL is used
+            ClassicAssert.AreEqual(url, (await service.SelfHostFile(url)).Url);
+            ClassicAssert.AreEqual(1, _flakyRequests);
+
+            // The server is back, but within 5 minutes the fallback is still cached, with no new download
+            _flakyUp = true;
+            clock.Advance(TimeSpan.FromMinutes(4));
+            ClassicAssert.AreEqual(url, (await service.SelfHostFile(url)).Url);
+            ClassicAssert.AreEqual(1, _flakyRequests);
+
+            // After 5 minutes it's tried again, and the file is self hosted
+            clock.Advance(TimeSpan.FromMinutes(1));
+            ClassicAssert.AreEqual("/assets/lib/flaky.js", (await service.SelfHostFile(url)).Url);
+            ClassicAssert.AreEqual(2, _flakyRequests);
+            ClassicAssert.IsTrue(Saved("assets/lib/flaky.js"));
+
+            // A self-hosted file stays cached: no more downloads
+            clock.Advance(TimeSpan.FromHours(1));
+            ClassicAssert.AreEqual("/assets/lib/flaky.js", (await service.SelfHostFile(url)).Url);
+            ClassicAssert.AreEqual(2, _flakyRequests);
+        }
+
+        [Test]
+        public async Task RequestsAtTheSameTime_After5Minutes_ShareOneNewDownload()
+        {
+            var url = $"{_baseUrl}/lib/flaky.js";
+            var clock = new TestClock();
+            var service = Service(cache: new ObjectCacheAppCache(), clock: clock);
+            _flakyUp = false;
+            _flakyRequests = 0;
+            await service.SelfHostFile(url);
+
+            _flakyUp = true;
+            clock.Advance(TimeSpan.FromMinutes(5));
+            var files = await Task.WhenAll(Enumerable.Range(0, 20).Select(_ => Task.Run(() => service.SelfHostFile(url))));
+
+            ClassicAssert.AreEqual(2, _flakyRequests, "one download on the first render, one when it's tried again");
+            ClassicAssert.IsTrue(files.All(f => f.Url == "/assets/lib/flaky.js"));
         }
 
         [Test]

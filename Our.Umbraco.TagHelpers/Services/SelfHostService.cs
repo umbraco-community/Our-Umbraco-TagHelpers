@@ -37,9 +37,21 @@ namespace Our.Umbraco.TagHelpers.Services
             _globalSettings = globalSettings.Value;
         }
 
+        // A file that couldn't be self hosted (the download failed, timed out or was too large) keeps its original URL
+        // for this long, then the download is tried again. Self-hosted files stay cached.
+        internal static readonly TimeSpan RetryFailedDownloadAfter = TimeSpan.FromMinutes(5);
+
+        private static readonly object RetryLock = new();
+
+        // The clock for retrying failed downloads; tests replace it to move time forward
+        internal TimeProvider TimeProvider { get; set; } = TimeProvider.System;
+
+        // What's cached for a URL: the file, and when to try again if it wasn't self hosted
+        private sealed record CachedFile(SelfHostedFile File, DateTimeOffset? RetryAfter);
+
         public async Task<SelfHostedFile> SelfHostFile(string url, string? subfolder = null, string? fileExtension = null)
         {
-            async Task<SelfHostedFile> CreateSelfHostedFile()
+            async Task<CachedFile> CreateCachedFile()
             {
                 using (_logger.TraceDuration<ISelfHostService>($"Start generating SelfHostedFile: {url}", $"Finished generating SelfHostedFile: {url}"))
                 {
@@ -53,7 +65,10 @@ namespace Our.Umbraco.TagHelpers.Services
                     };
 
                     selfHostedFile.Url = await GetSelfHostedUrl(selfHostedFile);
-                    return selfHostedFile;
+
+                    // Still the original URL: try again later, rather than not until the site restarts
+                    var retryAfter = selfHostedFile.Url == url ? TimeProvider.GetUtcNow() + RetryFailedDownloadAfter : (DateTimeOffset?)null;
+                    return new CachedFile(selfHostedFile, retryAfter);
                 }
             }
 
@@ -64,7 +79,25 @@ namespace Our.Umbraco.TagHelpers.Services
             }
 
             var cacheKey = $"Our.Umbraco.TagHelpers.Services.SelfHostService.SelfHostedFile({url}, {subfolder}, {fileExtension})";
-            return await (_runtimeCache.GetCacheItem(cacheKey, CreateSelfHostedFile) ?? CreateSelfHostedFile());
+            var cached = _runtimeCache.GetCacheItem(cacheKey, CreateCachedFile);
+            var entry = await (cached ?? CreateCachedFile());
+
+            if (cached is not null && entry.RetryAfter is { } retryAfter && TimeProvider.GetUtcNow() >= retryAfter)
+            {
+                // Only the first request to find the old entry removes it; requests at the same time then share the
+                // one new download, as on the first render
+                lock (RetryLock)
+                {
+                    if (ReferenceEquals(_runtimeCache.Get(cacheKey), cached))
+                    {
+                        _runtimeCache.Clear(cacheKey);
+                    }
+                }
+
+                entry = await (_runtimeCache.GetCacheItem(cacheKey, CreateCachedFile) ?? CreateCachedFile());
+            }
+
+            return entry.File;
         }
 
         public string GetFolderPath(Uri uri, string? subfolder = null)

@@ -76,4 +76,8 @@
 
   </ItemGroup>
 
+	<ItemGroup>
+		<!-- The unit tests set internal members, such as SelfHostService's clock -->
+		<InternalsVisibleTo Include="Our.Umbraco.TagHelpers.Tests" />
+	</ItemGroup>
 </Project>
