@@ -16,6 +16,12 @@ namespace Our.Umbraco.TagHelpers.Configuration
         public bool EnsureViewBox { get; set; } = false;
         public bool Cache { get; set; } = false;
         public int CacheMinutes { get; set; } = 180;
+
+        /// <summary>
+        /// Gives the ids in each inlined SVG a prefix of their own (and updates the references to them), so SVGs on
+        /// one page don't share gradients, clip paths or filters. Off by default.
+        /// </summary>
+        public bool UniqueIds { get; set; } = false;
     }
 
     public class ImgTagHelperConfiguration
