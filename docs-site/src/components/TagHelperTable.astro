@@ -1,0 +1,41 @@
+---
+/** Every tag helper page, with how it's used and when it arrived. Built from the pages' frontmatter. */
+import { getCollection } from 'astro:content';
+import VersionBadge from './VersionBadge.astro';
+
+const pages = (await getCollection('docs', (e) => e.id.startsWith('tag-helpers/') && e.data.usage && !e.data.removedIn)).sort(
+	(a, b) => sortName(a.data.title).localeCompare(sortName(b.data.title), 'en'),
+);
+
+/** Sort <our-cache> and our-if together by name, ignoring the angle brackets. */
+function sortName(title: string) {
+	return title.replace(/[<>]/g, '');
+}
+---
+
+<table class="hmd-th-table">
+	<thead>
+		<tr>
+			<th scope="col">Tag helper</th>
+			<th scope="col">Used as</th>
+			<th scope="col">What it does</th>
+			<th scope="col">Since</th>
+		</tr>
+	</thead>
+	<tbody>
+		{
+			pages.map((page) => (
+				<tr>
+					<th scope="row">
+						<a href={`${import.meta.env.BASE_URL}${page.id}/`}>
+							<code>{page.data.title}</code>
+						</a>
+					</th>
+					<td>{page.data.usage === 'element' ? 'Element' : 'Attribute'}</td>
+					<td>{page.data.description}</td>
+					<td>{page.data.addedIn && <VersionBadge version={page.data.addedIn} inline />}</td>
+				</tr>
+			))
+		}
+	</tbody>
+</table>
