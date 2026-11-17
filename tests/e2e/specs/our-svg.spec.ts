@@ -158,3 +158,35 @@ test('scope-styles keeps each svg its own colour', async ({ page }) => {
   expect(await scopeClass('scoped-blue')).toMatch(/^svg-[0-9a-f]{12}$/);
   expect(await scopeClass('scoped-blue')).not.toBe(await scopeClass('scoped-red'));
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/115
+// The ids an inlined svg defines, and the ids its url(#...) and href="#..." references point at
+async function idsAndReferences(svg: Locator) {
+  return svg.evaluate((el) => {
+    const ids = [...el.querySelectorAll('[id]')].map((e) => e.id);
+    const references: string[] = [];
+    for (const e of [el, ...el.querySelectorAll('*')]) {
+      for (const attribute of [...e.attributes]) {
+        for (const match of attribute.value.matchAll(/url\(\s*['"]?#([^)'"\s]+)/g)) references.push(match[1]);
+        if ((attribute.name === 'href' || attribute.name === 'xlink:href') && attribute.value.startsWith('#')) references.push(attribute.value.slice(1));
+      }
+    }
+    return { ids, references };
+  });
+}
+
+test('unique-ids gives each copy of an svg its own ids, and its references point at them', async ({ page }) => {
+  await page.goto('/en/');
+  const a = await idsAndReferences(demo(page, 'unique-ids-a'));
+  const b = await idsAndReferences(demo(page, 'unique-ids-b'));
+
+  // partying-face.svg defines filters and uses them 14 times with url(#...)
+  expect(a.ids.length).toBeGreaterThan(0);
+  expect(a.references).toHaveLength(14);
+  expect(a.ids.filter((id) => b.ids.includes(id))).toEqual([]);
+
+  // Every reference resolves to an id in the same copy, never the other copy's
+  for (const { ids, references } of [a, b]) {
+    for (const reference of references) expect(ids).toContain(reference);
+  }
+});
