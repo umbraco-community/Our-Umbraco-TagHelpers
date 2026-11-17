@@ -63,5 +63,21 @@ namespace Our.Umbraco.TagHelpers.Configuration
     public class SelfHostTagHelperConfiguration
     {
         public string RootFolder { get; set; } = "/assets";
+
+        /// <summary>
+        /// Hosts that files may be downloaded from, e.g. "unpkg.com". When it's empty (the default), any host is allowed.
+        /// A URL on another host isn't downloaded; the tag keeps pointing at the original.
+        /// </summary>
+        public string[] AllowedHosts { get; set; } = System.Array.Empty<string>();
+
+        /// <summary>
+        /// The largest file that's downloaded, in kilobytes (default 10240, 10 MB). Larger files keep the original URL.
+        /// </summary>
+        public int MaxFileSizeKilobytes { get; set; } = 10240;
+
+        /// <summary>
+        /// How long to wait for a download, in seconds (default 30). A slower download keeps the original URL.
+        /// </summary>
+        public int DownloadTimeoutSeconds { get; set; } = 30;
     }
 }
