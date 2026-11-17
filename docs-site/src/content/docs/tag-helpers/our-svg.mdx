@@ -1,0 +1,94 @@
+---
+title: <our-svg>
+description: Inlines an SVG file or media item into the page, with caching, a viewBox fix and script removed.
+addedIn: 0.1.0
+usage: element
+---
+
+import VersionBadge from '../../../components/VersionBadge.astro';
+
+`<our-svg>` reads an SVG and writes it into the page as an inline `<svg>`, so you can style it with CSS. The SVG can be a static file in `wwwroot` (`src`) or a media item picked in Umbraco (`media-item`).
+
+```cshtml
+<our-svg src="/assets/icon.svg" />
+<our-svg media-item="@Model.Logo" />
+```
+
+## Options
+
+```cshtml
+<our-svg src="/assets/icon.svg" class="my-css-class" ensure-viewbox="true" cache="true" cache-minutes="180" ignore-appsettings="true" />
+<our-svg media-item="@Model.Logo" class="my-css-class" ensure-viewbox="true" cache="true" cache-minutes="180" ignore-appsettings="true" />
+```
+
+| Attribute | Type | What it does |
+|---|---|---|
+| `src` | `string` | The path to an SVG file in `wwwroot`. |
+| `media-item` | `IPublishedContent` | A media item whose file is an SVG. |
+| `class` | `string` | A CSS class for the `<svg>`. |
+| `ensure-viewbox` <VersionBadge version="1.0.0" inline /> | `bool` | Replaces the SVG's `width` and `height` with a `viewBox`, so it scales with its container. |
+| `cache` <VersionBadge version="1.0.0" inline /> | `bool` | Keeps the file's contents in Umbraco's runtime cache, so it isn't read on every request. Wins over the global `Cache` setting, so `cache="false"` turns caching off for this tag. See [When is an SVG cached?](#when-is-an-svg-cached) |
+| `cache-minutes` <VersionBadge version="1.0.0" inline /> | `int` | How long a cached SVG is kept. Without it, the global `CacheMinutes` is used (180 by default). |
+| `ignore-appsettings` <VersionBadge version="1.0.0" inline /> | `bool` | Ignores the global `EnsureViewBox` and `Cache` settings for this tag, so only its own attributes apply. |
+| Any other attribute <VersionBadge version="2.1.0" inline /> | | Copied onto the `<svg>`, replacing the file's own value. |
+
+Other attributes such as `aria-hidden`, `aria-label`, `role`, `id`, `data-*`, `width` or `height` reach the inlined `<svg>`. Use `aria-hidden="true"` for a decorative icon, or `role="img" aria-label="Company logo"` for one that means something:
+
+```cshtml
+<our-svg src="/assets/icon.svg" aria-hidden="true" />
+<our-svg media-item="@Model.Logo" role="img" aria-label="Company logo" />
+```
+
+## When is an SVG cached?
+
+`cache` on the tag always decides when it's there. When it isn't, the global `Cache` setting decides, unless the tag has `ignore-appsettings="true"`, in which case the SVG isn't cached.
+
+| `cache` on the tag | `ignore-appsettings` on the tag | Global `Cache` | Cached? |
+|---|---|---|---|
+| not set | not set | `false` | no |
+| not set | not set | `true` | **yes** |
+| not set | `true` | `false` | no |
+| not set | `true` | `true` | no |
+| `true` | not set | `false` | **yes** |
+| `true` | not set | `true` | **yes** |
+| `true` | `true` | `false` | **yes** |
+| `true` | `true` | `true` | **yes** |
+| `false` | not set | `false` | no |
+| `false` | not set | `true` | no |
+| `false` | `true` | `false` | no |
+| `false` | `true` | `true` | no |
+
+Only the file's contents are cached, so `class` and `ensure-viewbox` still apply to each tag separately, even when several tags share one cached file.
+
+Cached SVGs from the media library (`media-item`) are cleared when media is saved or changed, on every server of a load-balanced site. SVGs from `wwwroot` (`src`) stay cached until `cache-minutes` runs out or the site restarts.
+
+## What's removed from the SVG
+
+The SVG is inlined into the page, so anything in it that could run script is removed first:
+
+- `<script>`, `<foreignObject>`, `<iframe>`, `<embed>` and `<object>` elements,
+- event handler attributes such as `onload` and `onclick`,
+- links that aren't internal (`#…`), web (`http`, `https`, `mailto`, relative) or, for images, image references, such as `javascript:` and `data:text/html`,
+- `<set>` and `<animate>` elements that change a link or an event handler.
+
+Everything else, including styles, gradients, internal references and animations, is kept as it is.
+
+:::caution[SVGs in the media library]
+Media library SVGs are uploaded by backoffice users, and can still be opened directly from their media URL. To stop unsafe SVGs being uploaded at all, add a file validator with Umbraco's [server-side file validation](https://docs.umbraco.com/umbraco-cms/run-in-production/security/serverside-file-validation).
+:::
+
+## Global settings
+
+Set defaults for every `<our-svg>` in `appsettings.json`. The values shown are the defaults. See [Configuration](../../getting-started/configuration/#oursvg).
+
+```json title="appsettings.json"
+{
+  "Our.Umbraco.TagHelpers": {
+    "OurSVG": {
+      "EnsureViewBox": false,
+      "Cache": false,
+      "CacheMinutes": 180
+    }
+  }
+}
+```
