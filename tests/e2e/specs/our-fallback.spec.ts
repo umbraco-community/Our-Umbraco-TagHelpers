@@ -26,3 +26,12 @@ test('falls back to the tag content when there is no value', async ({ page }) =>
   await page.goto('/en/page-a/fallback-demo/');
   await expect(demo(page, 'content')).toHaveText('This page has no header, so the tag content is shown');
 });
+
+test('a plain-text property is shown as text, not rendered as HTML', async ({ page }) => {
+  // The Markup Demo page's Header (a Textstring) is "<em>Shown as text, not emphasised</em>"
+  await page.goto('/en/page-a/markup-demo/');
+  const header = section(page, 'our-fallback').locator('[data-demo="ancestors"]');
+
+  await expect(header).toHaveText('<em>Shown as text, not emphasised</em>');
+  await expect(header.locator('em')).toHaveCount(0);
+});
