@@ -1,7 +1,7 @@
 ---
 /**
- * Dark (Night, the default) or Light (Paper). No "Auto": following a light system setting would
- * turn the brand's navy ground white for most visitors.
+ * Light (the default) or Dark. No "Auto": the site has one default look for everyone, and anyone
+ * who prefers dark can pick it once.
  */
 import { Icon } from '@astrojs/starlight/components';
 import Select from '@astrojs/starlight/components/Select.astro';
@@ -11,8 +11,8 @@ import Select from '@astrojs/starlight/components/Select.astro';
 	<Select
 		label={Astro.locals.t('themeSelect.accessibleLabel')}
 		options={[
-			{ label: Astro.locals.t('themeSelect.dark'), selected: true, value: 'dark' },
-			{ label: Astro.locals.t('themeSelect.light'), selected: false, value: 'light' },
+			{ label: Astro.locals.t('themeSelect.light'), selected: true, value: 'light' },
+			{ label: Astro.locals.t('themeSelect.dark'), selected: false, value: 'dark' },
 		]}
 		width="6.25em"
 	>
@@ -27,8 +27,9 @@ import Select from '@astrojs/starlight/components/Select.astro';
 <script
 	is:inline
 	set:html={`(() => {
-		const theme = typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
-		if (theme === 'light') document.querySelectorAll('starlight-theme-select select').forEach((s) => { s.value = 'light'; });
+		let theme = null;
+		try { theme = localStorage.getItem('starlight-theme'); } catch (e) {}
+		if (theme === 'dark') document.querySelectorAll('starlight-theme-select select').forEach((s) => { s.value = 'dark'; });
 	})();`}
 />
 
@@ -64,10 +65,10 @@ import Select from '@astrojs/starlight/components/Select.astro';
 			try {
 				stored = localStorage.getItem(storageKey);
 			} catch {}
-			setTheme(stored === 'light' ? 'light' : 'dark', false);
+			setTheme(stored === 'dark' ? 'dark' : 'light', false);
 			this.querySelector('select')?.addEventListener('change', (e) => {
 				if (e.currentTarget instanceof HTMLSelectElement) {
-					setTheme(e.currentTarget.value === 'light' ? 'light' : 'dark', true);
+					setTheme(e.currentTarget.value === 'dark' ? 'dark' : 'light', true);
 				}
 			});
 		}

@@ -1,6 +1,6 @@
 {/*
-	Night navy is the brand ground, so it's the default for everyone, whatever their system's light or
-	dark setting. Paper (light) is only used when someone picks it. Inlined to avoid a flash of the wrong theme.
+	Light (warm paper) is the default for everyone, whatever their system's light or dark setting.
+	Dark is used only when someone picks it. Inlined to avoid a flash of the wrong theme.
 */}
 <script is:inline>
 	(() => {
@@ -8,6 +8,6 @@
 		try {
 			stored = localStorage.getItem('starlight-theme');
 		} catch {}
-		document.documentElement.dataset.theme = stored === 'light' ? 'light' : 'dark';
+		document.documentElement.dataset.theme = stored === 'dark' ? 'dark' : 'light';
 	})();
 </script>
