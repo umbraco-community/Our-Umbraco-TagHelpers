@@ -3,12 +3,15 @@ name: Docs site
 # Builds the Astro Starlight site in docs-site/ and publishes it to GitHub Pages at
 # https://umbraco-community.github.io/Our-Umbraco-TagHelpers/
 #
+# The release notes, the "Coming in" / "New" badges and the contributors are read from GitHub at build
+# time, so the site is rebuilt whenever any of them could have changed. Nothing is updated by hand.
+#
 # - Pull requests that touch the site: build and type check only, no deploy.
-# - Pushes to v2/dev that touch the site: build and deploy.
-# - A published GitHub release: rebuild and deploy v2/dev, so the release notes page (read from the
-#   GitHub releases at build time) and the "Coming in" / "New" badges update straight away.
-# - Weekly: rebuild and deploy, so new contributors (read from GitHub at build time) appear even
-#   when their pull request didn't touch the docs.
+# - Every push to v2/dev (so every merged pull request): build and deploy. A new contributor appears
+#   as soon as their pull request is merged, whatever it changed.
+# - A published GitHub release: rebuild and deploy v2/dev, so the release notes and badges update
+#   straight away.
+# - Weekly: rebuild and deploy, to pick up changed GitHub names and avatars.
 #
 # One-time setup: Settings > Pages > Build and deployment > Source: "GitHub Actions".
 on:
@@ -18,9 +21,6 @@ on:
       - .github/workflows/docs.yml
   push:
     branches: [ v2/dev ]
-    paths:
-      - docs-site/**
-      - .github/workflows/docs.yml
   release:
     types: [ published ]
   schedule:
