@@ -7,6 +7,8 @@ name: Docs site
 # - Pushes to v2/dev that touch the site: build and deploy.
 # - A published GitHub release: rebuild and deploy v2/dev, so the release notes page (read from the
 #   GitHub releases at build time) and the "Coming in" / "New" badges update straight away.
+# - Weekly: rebuild and deploy, so new contributors (read from GitHub at build time) appear even
+#   when their pull request didn't touch the docs.
 #
 # One-time setup: Settings > Pages > Build and deployment > Source: "GitHub Actions".
 on:
@@ -21,6 +23,8 @@ on:
       - .github/workflows/docs.yml
   release:
     types: [ published ]
+  schedule:
+    - cron: '17 3 * * 1' # Mondays, 03:17 UTC
   workflow_dispatch:
 
 permissions:
