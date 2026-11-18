@@ -1,6 +1,6 @@
 # Our.Umbraco.TagHelpers documentation site
 
-The source of https://umbraco-community.github.io/Our-Umbraco-TagHelpers/, built with [Astro Starlight](https://starlight.astro.build) and the Hack Make Do design system.
+The source of https://umbraco-community.github.io/Our-Umbraco-TagHelpers/, built with [Astro Starlight](https://starlight.astro.build).
 
 ```bash
 npm ci

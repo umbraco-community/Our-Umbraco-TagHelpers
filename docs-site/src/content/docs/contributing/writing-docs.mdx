@@ -82,7 +82,7 @@ The [release notes](../../release-notes/) page is built from the [GitHub release
 - Write short, plain sentences. Start each page with one that says what the tag helper does.
 - Show a Razor example straight after, in a ` ```cshtml ` code block.
 - Links between pages are relative, such as `[our-if](../our-if/)`, so they work under the site's `/Our-Umbraco-TagHelpers/` path.
-- The site uses the Hack Make Do design system: colours, fonts and shapes are in `src/styles/brand.css`, and code colours in `src/lib/code-themes.mjs` and `ec.config.mjs`.
+- Colours, fonts and shapes are in `src/styles/brand.css`, and code colours in `src/lib/code-themes.mjs` and `ec.config.mjs`.
 
 :::caution[After changing code colours]
 Astro caches rendered Markdown in `node_modules/.astro`, and doesn't notice changes to the code block settings. Delete that folder after changing `ec.config.mjs` or `code-themes.mjs`, or Markdown pages link to a code stylesheet that no longer exists.
