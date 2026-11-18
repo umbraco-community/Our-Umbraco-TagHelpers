@@ -21,10 +21,9 @@ export default defineConfig({
 			social: [{ icon: 'github', label: 'GitHub', href: repo }],
 			editLink: { baseUrl: `${repo}/edit/v2/dev/docs-site/` },
 			customCss: [
-				'@fontsource-variable/montserrat/wght.css',
-				'@fontsource/source-sans-3/400.css',
-				'@fontsource/source-sans-3/600.css',
-				'@fontsource/source-sans-3/700.css',
+				'@fontsource-variable/literata/opsz.css',
+				'@fontsource-variable/source-sans-3/wght.css',
+				'@fontsource-variable/jetbrains-mono/wght.css',
 				'./src/styles/brand.css',
 			],
 			components: {
