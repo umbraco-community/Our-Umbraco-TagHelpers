@@ -371,13 +371,9 @@ nav.sidebar .sl-badge.caution {
 	line-height: 1.6;
 	color: var(--hmd-ink-muted);
 }
-.hmd-box {
-	background: var(--hmd-pink);
-	color: var(--hmd-on-pink);
-	padding: 0 0.15em;
-	border-radius: 0;
-	box-decoration-break: clone;
-	-webkit-box-decoration-break: clone;
+/* The highlighted words in the hero title: accent colour, no box */
+.hero-accent {
+	color: var(--sl-color-text-accent);
 }
 
 /* Cards: panel surface, a lift on hover only */

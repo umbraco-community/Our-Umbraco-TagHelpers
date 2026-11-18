@@ -1,21 +1,21 @@
 ---
 /**
- * The site name, with TagHelpers in a square pink box like the Hack Make Do SectionHeading. Plain
- * text, so it reads as one name to screen readers and search engines.
+ * The site name as plain text, with TagHelpers in the accent colour. One text link, so it reads as
+ * one name to screen readers and search engines.
  */
 const href = Astro.locals.starlightRoute.siteTitleHref;
 ---
 
 <a href={href} class="hmd-site-title" translate="no" aria-label="Our Umbraco TagHelpers, home">
 	<span class="hmd-site-title__our">Our Umbraco</span>
-	<span class="hmd-site-title__box">TagHelpers</span>
+	<span class="hmd-site-title__name">TagHelpers</span>
 </a>
 
 <style>
 	.hmd-site-title {
 		display: inline-flex;
-		align-items: center;
-		gap: 0.4em;
+		align-items: baseline;
+		gap: 0.3em;
 		font-family: var(--hmd-font-display);
 		font-weight: 800;
 		font-size: 1.25rem;
@@ -25,11 +25,8 @@ const href = Astro.locals.starlightRoute.siteTitleHref;
 		text-decoration: none;
 		white-space: nowrap;
 	}
-	.hmd-site-title__box {
-		background: var(--hmd-pink);
-		color: var(--hmd-on-pink);
-		padding: 0.2em 0.3em 0.22em;
-		border-radius: 0;
+	.hmd-site-title__name {
+		color: var(--sl-color-text-accent);
 	}
 	@media (max-width: 30rem) {
 		.hmd-site-title {
