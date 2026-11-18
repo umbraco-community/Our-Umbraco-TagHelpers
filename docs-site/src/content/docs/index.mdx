@@ -18,6 +18,7 @@ hero:
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Contributors from '../../components/Contributors.astro';
 
 ## Install in two steps
 
@@ -77,6 +78,14 @@ Tag helpers turn Razor logic into attributes and elements. This link only render
 		[`<our-edit-link>`](tag-helpers/our-edit-link/) and [`<our-version>`](tag-helpers/our-version/).
 	</Card>
 </CardGrid>
+
+## Built by the Umbraco community
+
+Our Umbraco TagHelpers is a community project: the tag helpers, fixes, tests and these docs come from people across the Umbraco community.
+
+<Contributors layout="row" />
+
+[Meet the contributors](contributors/), or [find out how to join them](contributing/writing-docs/).
 
 <LinkCard title="Release notes" description="What changed in each version, straight from GitHub." href="release-notes/" />
 

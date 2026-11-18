@@ -10,6 +10,8 @@ export default defineConfig({
 	site: 'https://umbraco-community.github.io',
 	base: '/Our-Umbraco-TagHelpers',
 	trailingSlash: 'always',
+	// Contributors' GitHub avatars are downloaded and resized at build time
+	image: { remotePatterns: [{ protocol: 'https', hostname: 'avatars.githubusercontent.com' }] },
 	integrations: [
 		starlight({
 			title: 'Our Umbraco TagHelpers',
@@ -37,6 +39,7 @@ export default defineConfig({
 				{ label: 'Getting started', items: [{ autogenerate: { directory: 'getting-started' } }] },
 				{ label: 'Tag helpers', items: [{ autogenerate: { directory: 'tag-helpers' } }] },
 				{ label: 'Release notes', slug: 'release-notes' },
+				{ label: 'Contributors', slug: 'contributors' },
 				{ label: 'Contributing', items: [{ autogenerate: { directory: 'contributing' } }] },
 			],
 		}),

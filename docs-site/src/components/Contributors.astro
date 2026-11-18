@@ -1,0 +1,133 @@
+---
+/**
+ * The people who've contributed to the package, from GitHub, in name order. No commit counts: it's a
+ * thank you, not a leaderboard. Avatars are downloaded and resized when the site is built, so
+ * visitors' browsers don't call GitHub.
+ */
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+
+interface Props {
+	/** `grid` for the contributors page; `row` for a compact line of avatars, such as on the home page. */
+	layout?: 'grid' | 'row';
+}
+
+const { layout = 'grid' } = Astro.props;
+const repo = 'https://github.com/umbraco-community/Our-Umbraco-TagHelpers';
+const people = (await getCollection('contributors')).sort((a, b) =>
+	a.data.name.localeCompare(b.data.name, 'en', { sensitivity: 'base' }),
+);
+---
+
+{
+	people.length === 0 ? (
+		<p>
+			See everyone who has contributed on <a href={`${repo}/graphs/contributors`}>GitHub</a>.
+		</p>
+	) : layout === 'row' ? (
+		<ul class="hmd-people-row not-content" aria-label={`${people.length} contributors`}>
+			{people.map(({ data }) => (
+				<li>
+					<a href={data.profile} title={data.name}>
+						<Image src={data.avatar} width={96} height={96} alt={data.name} loading="lazy" />
+					</a>
+				</li>
+			))}
+		</ul>
+	) : (
+		<ul class="hmd-people not-content">
+			{people.map(({ data }) => (
+				<li>
+					<a href={data.profile}>
+						<Image src={data.avatar} width={96} height={96} alt="" loading="lazy" />
+						<span class="hmd-people__name">{data.name}</span>
+						{data.name !== data.login && <span class="hmd-people__login">@{data.login}</span>}
+					</a>
+				</li>
+			))}
+		</ul>
+	)
+}
+
+<style>
+	ul {
+		list-style: none;
+		margin: 1.5rem 0 0;
+		padding: 0;
+	}
+	img {
+		display: block;
+		border-radius: 50%;
+		background: var(--hmd-panel);
+	}
+
+	/* Contributors page: a card per person */
+	.hmd-people {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+		gap: 1rem;
+	}
+	.hmd-people a {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		height: 100%;
+		padding: 1.25rem 0.75rem;
+		text-align: center;
+		text-decoration: none;
+		color: var(--sl-color-white);
+		background: var(--hmd-panel);
+		border: 1px solid var(--hmd-rule);
+		border-radius: var(--hmd-radius-lg);
+	}
+	.hmd-people a:hover {
+		border-color: var(--hmd-border-strong);
+		box-shadow: var(--hmd-shadow-panel);
+	}
+	.hmd-people img {
+		width: 4.5rem;
+		height: 4.5rem;
+		margin-bottom: 0.5rem;
+	}
+	.hmd-people__name {
+		font-weight: 600;
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+	.hmd-people__login {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+		overflow-wrap: anywhere;
+	}
+
+	/* Home page: a row of overlapping avatars */
+	.hmd-people-row {
+		display: flex;
+		flex-wrap: wrap;
+		padding-inline-start: 0.5rem;
+	}
+	.hmd-people-row li {
+		margin-inline-start: -0.5rem;
+	}
+	.hmd-people-row a {
+		display: block;
+		border-radius: 50%;
+	}
+	.hmd-people-row img {
+		width: 3rem;
+		height: 3rem;
+		border: 3px solid var(--sl-color-bg);
+		transition: transform 0.2s ease-in-out;
+	}
+	.hmd-people-row a:hover img,
+	.hmd-people-row a:focus-visible img {
+		transform: translateY(-4px);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.hmd-people-row a:hover img,
+		.hmd-people-row a:focus-visible img {
+			transform: none;
+		}
+	}
+</style>
