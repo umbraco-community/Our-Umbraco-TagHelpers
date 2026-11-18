@@ -1,5 +1,6 @@
 import type { Loader } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { createGitHubClient } from '../lib/github';
 
 /**
  * Loads the repository's GitHub releases at build time, with each release's notes rendered from
@@ -20,29 +21,9 @@ export function githubReleasesLoader({ repo }: { repo: string }): Loader {
 			prerelease: z.boolean(),
 		}),
 		async load({ store, logger, parseData, renderMarkdown, generateDigest }) {
-			const headers: Record<string, string> = {
-				Accept: 'application/vnd.github+json',
-				'X-GitHub-Api-Version': '2022-11-28',
-				'User-Agent': 'our-umbraco-taghelpers-docs',
-			};
-			if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-
-			const releases: GitHubRelease[] = [];
+			let releases: GitHubRelease[];
 			try {
-				for (let page = 1; page <= 10; page++) {
-					const url = `https://api.github.com/repos/${repo}/releases?per_page=100&page=${page}`;
-					let res = await fetch(url, { headers });
-					if (res.status === 401 && headers.Authorization) {
-						// An expired or unrelated token in the environment; the releases are public, so carry on without it
-						logger.warn('GITHUB_TOKEN was rejected, so loading releases without it');
-						delete headers.Authorization;
-						res = await fetch(url, { headers });
-					}
-					if (!res.ok) throw new Error(`GitHub API responded ${res.status} ${res.statusText}`);
-					const batch = (await res.json()) as GitHubRelease[];
-					releases.push(...batch);
-					if (batch.length < 100) break;
-				}
+				releases = await createGitHubClient(logger).getAll<GitHubRelease>(`repos/${repo}/releases`);
 			} catch (error) {
 				// Keep the existing entries (from a previous build in dev) rather than failing the whole site
 				logger.warn(`Couldn't load releases from GitHub, so the release notes page will be empty: ${error}`);

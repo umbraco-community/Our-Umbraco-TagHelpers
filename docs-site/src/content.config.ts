@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { docsLoader } from '@astrojs/starlight/loaders';
 import { docsSchema } from '@astrojs/starlight/schema';
+import { githubContributorsLoader } from './loaders/github-contributors';
 import { githubReleasesLoader } from './loaders/github-releases';
 
 const version = z.string().regex(/^\d+\.\d+\.\d+$/, 'Use a plain version such as 2.1.0');
@@ -22,5 +23,8 @@ export const collections = {
 	}),
 	releases: defineCollection({
 		loader: githubReleasesLoader({ repo: 'umbraco-community/Our-Umbraco-TagHelpers' }),
+	}),
+	contributors: defineCollection({
+		loader: githubContributorsLoader({ repo: 'umbraco-community/Our-Umbraco-TagHelpers' }),
 	}),
 };
