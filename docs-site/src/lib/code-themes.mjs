@@ -1,10 +1,10 @@
-// Syntax colours for code blocks, from the Hack Make Do design system's CodeBlock guidance:
-// keywords `type-role`, strings `type-community`, comments `ink-muted`, constants and numbers
-// `accent-text`. Each reads at 4.5:1 or better on `panel` in its theme.
+// Syntax colours for code blocks, matching the site's palette: keywords and tags in violet blue,
+// strings in green, comments muted, and attribute names and constants in a warm brown, so tag helper
+// attributes such as our-if stand out. Every colour reads at 6:1 or better on the code background.
 import { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 
 /** @param {{ name: string, type: 'dark' | 'light', c: Record<string, string> }} t */
-function brandTheme({ name, type, c }) {
+function siteTheme({ name, type, c }) {
 	return new ExpressiveCodeTheme({
 		name,
 		type,
@@ -21,49 +21,49 @@ function brandTheme({ name, type, c }) {
 		},
 		tokenColors: [
 			{ scope: ['comment', 'punctuation.definition.comment'], settings: { foreground: c.muted, fontStyle: 'italic' } },
-			{ scope: ['keyword', 'storage', 'storage.type', 'storage.modifier', 'keyword.control', 'keyword.operator.new'], settings: { foreground: c.role } },
-			{ scope: ['string', 'string.quoted', 'punctuation.definition.string'], settings: { foreground: c.community } },
-			{ scope: ['constant', 'constant.numeric', 'constant.language', 'support.constant', 'constant.character'], settings: { foreground: c.accent } },
-			{ scope: ['entity.name.tag', 'meta.tag', 'punctuation.definition.tag'], settings: { foreground: c.role } },
-			// Tag helper attributes such as our-if are what these docs are about, so they get the accent
-			{ scope: ['entity.other.attribute-name'], settings: { foreground: c.accent } },
-			{ scope: ['support.type.property-name', 'meta.object-literal.key'], settings: { foreground: c.accent } },
+			{ scope: ['keyword', 'storage', 'storage.type', 'storage.modifier', 'keyword.control', 'keyword.operator.new'], settings: { foreground: c.keyword } },
+			{ scope: ['string', 'string.quoted', 'punctuation.definition.string'], settings: { foreground: c.string } },
+			{ scope: ['constant', 'constant.numeric', 'constant.language', 'support.constant', 'constant.character'], settings: { foreground: c.warm } },
+			{ scope: ['entity.name.tag', 'meta.tag', 'punctuation.definition.tag'], settings: { foreground: c.keyword } },
+			// Tag helper attributes such as our-if are what these docs are about, so they get the warm colour
+			{ scope: ['entity.other.attribute-name'], settings: { foreground: c.warm } },
+			{ scope: ['support.type.property-name', 'meta.object-literal.key'], settings: { foreground: c.warm } },
 			{ scope: ['entity.name.type', 'entity.name.class', 'support.class', 'support.type'], settings: { foreground: c.ink } },
 			{ scope: ['entity.name.function', 'support.function'], settings: { foreground: c.ink } },
 			{ scope: ['keyword.operator', 'punctuation'], settings: { foreground: c.ink } },
-			{ scope: ['markup.inserted'], settings: { foreground: c.community } },
-			{ scope: ['markup.deleted'], settings: { foreground: c.accent } },
+			{ scope: ['markup.inserted'], settings: { foreground: c.string } },
+			{ scope: ['markup.deleted'], settings: { foreground: c.warm } },
 		],
 	});
 }
 
 export const codeThemes = [
-	brandTheme({
-		name: 'hmd-night',
+	siteTheme({
+		name: 'th-dark',
 		type: 'dark',
 		c: {
-			ground: '#0b1c2f',
-			panel: '#16293d',
-			ink: '#eceaf7',
-			muted: '#a9abd2',
-			role: '#8e99ff',
-			community: '#7fe0c3',
-			accent: '#ffb1a4',
-			selection: '#2a2f66',
+			ground: '#1a1917',
+			panel: '#23211e',
+			ink: '#ece8e1',
+			muted: '#b3ada3',
+			keyword: '#9aa5ff',
+			string: '#8fcf9a',
+			warm: '#e8a77a',
+			selection: '#33302b',
 		},
 	}),
-	brandTheme({
-		name: 'hmd-paper',
+	siteTheme({
+		name: 'th-light',
 		type: 'light',
 		c: {
-			ground: '#f6f3fa',
+			ground: '#faf8f3',
 			panel: '#ffffff',
-			ink: '#0b1c2f',
-			muted: '#4a4f7a',
-			role: '#3d4bd1',
-			community: '#0b6b57',
-			accent: '#a8321f',
-			selection: '#d6d2e8',
+			ink: '#1d1d1b',
+			muted: '#57534e',
+			keyword: '#3544b1',
+			string: '#2f6b3a',
+			warm: '#8a4510',
+			selection: '#e4dfd4',
 		},
 	}),
 ];

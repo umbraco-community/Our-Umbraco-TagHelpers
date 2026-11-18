@@ -17,19 +17,19 @@ const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'lo
 		</p>
 	) : (
 		rendered.map(({ release, Content }) => (
-			<section class="hmd-release" id={release.data.tag.replaceAll('.', '-')} aria-labelledby={`${release.id}-title`}>
+			<section class="th-release" id={release.data.tag.replaceAll('.', '-')} aria-labelledby={`${release.id}-title`}>
 				<h2 id={`${release.id}-title`}>
 					{release.data.name}
-					{release.data.prerelease && <span class="hmd-release__pre">Prerelease</span>}
+					{release.data.prerelease && <span class="th-release__pre">Prerelease</span>}
 				</h2>
-				<p class="hmd-release__meta">
+				<p class="th-release__meta">
 					<time datetime={release.data.publishedAt.toISOString()}>{dateFormat.format(release.data.publishedAt)}</time>
 					{' · '}
 					<a href={release.data.url}>View on GitHub</a>
 					{' · '}
 					<a href={`https://www.nuget.org/packages/Our.Umbraco.TagHelpers/${release.data.version}`}>NuGet</a>
 				</p>
-				<div class="hmd-release__body">
+				<div class="th-release__body">
 					{release.body?.trim() ? <Content /> : <p>No notes were written for this release.</p>}
 				</div>
 			</section>

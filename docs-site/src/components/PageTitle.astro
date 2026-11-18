@@ -9,7 +9,7 @@ const { addedIn, removedIn } = Astro.locals.starlightRoute.entry.data;
 <Default />
 {
 	(addedIn || removedIn) && (
-		<p class="hmd-title-badges">
+		<p class="th-title-badges">
 			{addedIn && <VersionBadge version={addedIn} />}
 			{removedIn && <VersionBadge version={removedIn} kind="removed" />}
 		</p>

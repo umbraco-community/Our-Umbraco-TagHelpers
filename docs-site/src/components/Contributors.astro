@@ -25,7 +25,7 @@ const people = (await getCollection('contributors')).sort((a, b) =>
 			See everyone who has contributed on <a href={`${repo}/graphs/contributors`}>GitHub</a>.
 		</p>
 	) : layout === 'row' ? (
-		<ul class="hmd-people-row not-content" aria-label={`${people.length} contributors`}>
+		<ul class="th-people-row not-content" aria-label={`${people.length} contributors`}>
 			{people.map(({ data }) => (
 				<li>
 					<a href={data.profile} title={data.name}>
@@ -35,13 +35,13 @@ const people = (await getCollection('contributors')).sort((a, b) =>
 			))}
 		</ul>
 	) : (
-		<ul class="hmd-people not-content">
+		<ul class="th-people not-content">
 			{people.map(({ data }) => (
 				<li>
 					<a href={data.profile}>
 						<Image src={data.avatar} width={96} height={96} alt="" loading="lazy" />
-						<span class="hmd-people__name">{data.name}</span>
-						{data.name !== data.login && <span class="hmd-people__login">@{data.login}</span>}
+						<span class="th-people__name">{data.name}</span>
+						{data.name !== data.login && <span class="th-people__login">@{data.login}</span>}
 					</a>
 				</li>
 			))}
@@ -58,16 +58,16 @@ const people = (await getCollection('contributors')).sort((a, b) =>
 	img {
 		display: block;
 		border-radius: 50%;
-		background: var(--hmd-panel);
+		background: var(--th-panel);
 	}
 
 	/* Contributors page: a card per person */
-	.hmd-people {
+	.th-people {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
 		gap: 1rem;
 	}
-	.hmd-people a {
+	.th-people a {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -77,56 +77,56 @@ const people = (await getCollection('contributors')).sort((a, b) =>
 		text-align: center;
 		text-decoration: none;
 		color: var(--sl-color-white);
-		background: var(--hmd-panel);
-		border: 1px solid var(--hmd-rule);
-		border-radius: var(--hmd-radius-lg);
+		background: var(--th-panel);
+		border: 1px solid var(--th-rule);
+		border-radius: var(--th-radius-lg);
 	}
-	.hmd-people a:hover {
-		border-color: var(--hmd-border-strong);
-		box-shadow: var(--hmd-shadow-panel);
+	.th-people a:hover {
+		border-color: var(--th-border-strong);
+		box-shadow: var(--th-shadow);
 	}
-	.hmd-people img {
+	.th-people img {
 		width: 4.5rem;
 		height: 4.5rem;
 		margin-bottom: 0.5rem;
 	}
-	.hmd-people__name {
+	.th-people__name {
 		font-weight: 600;
 		line-height: 1.3;
 		overflow-wrap: anywhere;
 	}
-	.hmd-people__login {
+	.th-people__login {
 		font-size: var(--sl-text-sm);
 		color: var(--sl-color-gray-3);
 		overflow-wrap: anywhere;
 	}
 
 	/* Home page: a row of overlapping avatars */
-	.hmd-people-row {
+	.th-people-row {
 		display: flex;
 		flex-wrap: wrap;
 		padding-inline-start: 0.5rem;
 	}
-	.hmd-people-row li {
+	.th-people-row li {
 		margin-inline-start: -0.5rem;
 	}
-	.hmd-people-row a {
+	.th-people-row a {
 		display: block;
 		border-radius: 50%;
 	}
-	.hmd-people-row img {
+	.th-people-row img {
 		width: 3rem;
 		height: 3rem;
 		border: 3px solid var(--sl-color-bg);
 		transition: transform 0.2s ease-in-out;
 	}
-	.hmd-people-row a:hover img,
-	.hmd-people-row a:focus-visible img {
+	.th-people-row a:hover img,
+	.th-people-row a:focus-visible img {
 		transform: translateY(-4px);
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.hmd-people-row a:hover img,
-		.hmd-people-row a:focus-visible img {
+		.th-people-row a:hover img,
+		.th-people-row a:focus-visible img {
 			transform: none;
 		}
 	}
