@@ -100,6 +100,23 @@ namespace Our.Umbraco.TagHelpers
         /// A boolean to ignore the appsettings. 
         /// NOTE: Applies to 'ensure-viewbox' & 'cache' only
         /// </summary>
+        /// <summary>
+        /// Scopes the SVG's &lt;style&gt; blocks to this SVG: the &lt;svg&gt; gets a class made from the file path or media key
+        /// (svg- and 12 hex characters), and every selector in its &lt;style&gt; is prefixed with it, so class names such as
+        /// .st0 from two SVGs on one page don't restyle each other. SVGs without a &lt;style&gt; are left as they are.
+        /// When it isn't set, the appsettings value is used (unless 'ignore-appsettings' is set).
+        /// NOTE: Use the appsettings configuration to apply this globally (e.g. "Our.Umbraco.TagHelpers": { "OurSVG": { "ScopeStyles": true } } ).
+        /// </summary>
+        [HtmlAttributeName("scope-styles")]
+        public bool ScopeStyles
+        {
+            get => _scopeStyles ?? false;
+            set => _scopeStyles = value;
+        }
+
+        // Like _cache: null means the tag has no scope-styles attribute, so appsettings is used
+        private bool? _scopeStyles;
+
         [HtmlAttributeName("ignore-appsettings")]
         public bool IgnoreAppSettings { get; set; }
 
@@ -157,6 +174,14 @@ namespace Our.Umbraco.TagHelpers
                 return;
             }
 
+            // After the cache, as the setting can differ between tags sharing a cached file (#114). The class comes from
+            // the file, so every render of it is the same.
+            if (_scopeStyles ?? (_globalSettings.OurSVG.ScopeStyles && !IgnoreAppSettings))
+            {
+                var scopeClass = SvgStyleScope.ScopeClass(MediaItem is not null ? MediaItem.Key.ToString() : FileSource ?? string.Empty);
+                cleanedFileContents = ScopeStyleBlocks(cleanedFileContents, scopeClass);
+            }
+
             // Remove the src attribute or media-item from the <svg>
             output.Attributes.RemoveAll("src");
             output.Attributes.RemoveAll("media-item");
@@ -195,6 +220,35 @@ namespace Our.Umbraco.TagHelpers
                 root.Attributes.Remove(attribute.Name);
                 // HtmlAgilityPack writes attribute values as given, so the value is already HTML-encoded here
                 root.Attributes.Add(doc.CreateAttribute(attribute.Name, value));
+            }
+
+            return doc.DocumentNode.OuterHtml;
+        }
+
+        /// <summary>
+        /// Adds the scope class to the root &lt;svg&gt; and prefixes the selectors in every &lt;style&gt; block with it.
+        /// Returns the SVG unchanged when it has no &lt;style&gt;.
+        /// </summary>
+        private static string ScopeStyleBlocks(string svg, string scopeClass)
+        {
+            if (svg.IndexOf("<style", StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return svg;
+            }
+
+            var doc = new HtmlDocument();
+            doc.LoadHtml(svg);
+            var root = doc.DocumentNode.SelectSingleNode("//svg");
+            var styles = doc.DocumentNode.SelectNodes("//style");
+            if (root is null || styles is null)
+            {
+                return svg;
+            }
+
+            root.AddClass(scopeClass);
+            foreach (var style in styles)
+            {
+                style.InnerHtml = SvgStyleScope.ScopeCss(style.InnerHtml, scopeClass);
             }
 
             return doc.DocumentNode.OuterHtml;
