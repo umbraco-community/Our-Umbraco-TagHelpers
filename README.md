@@ -292,6 +292,11 @@ This tag helper element `<our-fallback>` uses the same fallback mode logic that 
 <h3><our-fallback property="Header" mode="Fallback.ToAncestors">I do NOT have a Header property set on ANY parent and ancestors</our-fallback></h3>
 ```
 
+The value is output the way `@Model.Value(...)` outputs it in Razor:
+- plain text, such as a Textstring or Textarea, is HTML-encoded, so markup in it is shown as text,
+- Rich Text and Markdown properties are output as HTML, e.g. `<our-fallback property="BodyText" mode="Fallback.ToAncestors">No body text</our-fallback>`,
+- other complex values, such as a content picker or a list, aren't rendered, since there's no single way to display them.
+
 ## `<our-hreflang>`
 
 This tag helper element outputs the `hreflang` alternate links for the current page, which search engines use to find each language version of a page. Use it in the `<head>` of a multilingual site:

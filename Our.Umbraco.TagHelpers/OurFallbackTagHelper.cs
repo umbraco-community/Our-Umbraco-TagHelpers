@@ -36,8 +36,12 @@ namespace Our.Umbraco.TagHelpers
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            // Check to see that the Model Property is NOT a complex type or a collection of things
-            var isComplexType = ModelProperty != null && ModelProperty.ModelExplorer.Metadata.IsComplexType;
+            // Check to see that the Model Property is NOT a complex type or a collection of things.
+            // Properties whose value is already HTML (Rich Text and Markdown, which ModelsBuilder types as
+            // IHtmlEncodedString) are complex types to ASP.NET, but they're output as HTML below (#121).
+            var modelType = ModelProperty?.ModelExplorer.Metadata.ModelType;
+            var isHtml = modelType is not null && (typeof(IHtmlEncodedString).IsAssignableFrom(modelType) || typeof(IHtmlContent).IsAssignableFrom(modelType));
+            var isComplexType = ModelProperty != null && ModelProperty.ModelExplorer.Metadata.IsComplexType && !isHtml;
             var isEnumerableType = ModelProperty != null && ModelProperty.ModelExplorer.Metadata.IsEnumerableType;
 
             // Only can support simpler things such as strings (as if collection)
@@ -70,9 +74,8 @@ namespace Our.Umbraco.TagHelpers
             // If we have a value that can be
             if (string.IsNullOrWhiteSpace($"{result}") == false)
             {
-                // As @Model.Value(...) in Razor: values that are already HTML are output as HTML, anything else
-                // (e.g. a Textstring) is HTML-encoded so markup in it is shown as text. (Rich Text and Markdown
-                // properties don't get here: their model type is complex, so they're suppressed above.)
+                // As @Model.Value(...) in Razor: values that are already HTML (e.g. Rich Text and Markdown) are output
+                // as HTML, anything else (e.g. a Textstring) is HTML-encoded so markup in it is shown as text
                 switch (result)
                 {
                     case IHtmlEncodedString html:
