@@ -77,10 +77,34 @@ namespace Our.Umbraco.TagHelpers.Tests
             StringAssert.Contains("<link rel=\"alternate\" hreflang=\"x-default\" href=\"https://example.dk/om-os/\" />", await Render(xDefault: "da"));
         }
 
-        [Test]
-        public async Task XDefault_CanBeLeftOut()
+        // Not set, empty or "true": the default language (en-US)
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("true")]
+        [TestCase("TRUE")]
+        public async Task XDefault_IsTheDefaultLanguage_WhenNotSetOrTrue(string? xDefault)
         {
-            StringAssert.DoesNotContain("x-default", await Render(xDefault: "false"));
+            StringAssert.Contains("<link rel=\"alternate\" hreflang=\"x-default\" href=\"https://example.com/en/about/\" />", await Render(xDefault: xDefault));
+        }
+
+        [TestCase("da")]
+        [TestCase("DA")]
+        public async Task XDefault_CultureCode_IgnoresCase(string xDefault)
+        {
+            StringAssert.Contains("<link rel=\"alternate\" hreflang=\"x-default\" href=\"https://example.dk/om-os/\" />", await Render(xDefault: xDefault));
+        }
+
+        [TestCase("false")]
+        [TestCase("False")]
+        public async Task XDefault_CanBeLeftOut(string xDefault)
+        {
+            StringAssert.DoesNotContain("x-default", await Render(xDefault: xDefault));
+        }
+
+        [Test]
+        public async Task XDefault_IsLeftOut_ForACultureTheSiteDoesNotHave()
+        {
+            StringAssert.DoesNotContain("x-default", await Render(xDefault: "fr"));
         }
 
         [Test]

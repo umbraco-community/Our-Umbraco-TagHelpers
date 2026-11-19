@@ -40,8 +40,14 @@ namespace Our.Umbraco.TagHelpers
         }
 
         /// <summary>
-        /// The culture the x-default link points to. Defaults to the default language;
-        /// "false" leaves the x-default link out.
+        /// Which version the x-default link points to:
+        /// <list type="bullet">
+        /// <item>not set, empty or "true": the default language's version;</item>
+        /// <item>a culture's ISO code as set up in Umbraco, such as "da" or "en-US": that culture's version;</item>
+        /// <item>"false": no x-default link.</item>
+        /// </list>
+        /// Values ignore case. When the chosen culture isn't a language of the site, or the page isn't published in it,
+        /// the x-default link is left out.
         /// </summary>
         [HtmlAttributeName("x-default")]
         public string? XDefault { get; set; }
@@ -83,9 +89,12 @@ namespace Our.Umbraco.TagHelpers
                 AppendLink(html, culture, url);
             }
 
-            if (!string.Equals(XDefault, "false", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(XDefault?.Trim(), "false", StringComparison.OrdinalIgnoreCase))
             {
-                var xDefaultCulture = string.IsNullOrWhiteSpace(XDefault) ? languages.FirstOrDefault(l => l.IsDefault)?.IsoCode : XDefault;
+                // Not set or "true": the default language; otherwise the culture's ISO code
+                var xDefaultCulture = string.IsNullOrWhiteSpace(XDefault) || string.Equals(XDefault.Trim(), "true", StringComparison.OrdinalIgnoreCase)
+                    ? languages.FirstOrDefault(l => l.IsDefault)?.IsoCode
+                    : XDefault.Trim();
                 var xDefault = links.FirstOrDefault(l => string.Equals(l.Culture, xDefaultCulture, StringComparison.OrdinalIgnoreCase));
                 if (xDefault.Url is not null)
                 {
