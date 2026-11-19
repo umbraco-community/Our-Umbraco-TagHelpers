@@ -288,8 +288,24 @@ On `/en/about/`, for a page published in English, Danish and Spanish:
 
 - There's a link for each culture the page is **published** in, including the current one, with **absolute** URLs from Umbraco's URL provider, so culture domains on the same or different hosts work.
 - `hreflang` is the culture's ISO code as configured in Umbraco.
-- `x-default` points to the default language's version. Use `x-default="da"` to point it at another culture, or `x-default="false"` to leave it out.
+- The `x-default` link, for visitors whose language isn't one of the site's, is set with the `x-default` attribute (see below).
 - Nothing is output for content that doesn't vary by culture, a page published in only one culture, or a request that isn't for an Umbraco page.
+
+The `x-default` attribute takes **either a culture's ISO code or `true`/`false`**:
+
+| `x-default` | The `x-default` link points to |
+|---|---|
+| not set (or `"true"`) | the default language's version |
+| a culture's ISO code as set up in Umbraco, such as `"da"` or `"en-US"` | that culture's version |
+| `"false"` | no `x-default` link |
+
+```cshtml
+<our-hreflang />                    @* x-default: the default language *@
+<our-hreflang x-default="da" />     @* x-default: the Danish version *@
+<our-hreflang x-default="false" />  @* no x-default link *@
+```
+
+Values ignore case. If the culture isn't a language of the site, or the page isn't published in it, the `x-default` link is left out.
 
 ## `<our-version>`
 
