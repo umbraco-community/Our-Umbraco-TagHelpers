@@ -1,0 +1,111 @@
+---
+title: <our-img>
+description: Renders a fast, responsive <img> or <picture> from a media item or file, with crops and lazy loading.
+addedIn: 1.0.0
+usage: element
+---
+
+`<our-img>` renders an `<img>`, or a `<picture>` when you give sizes for different screen widths, tuned for page speed: dimensions set, lazy loading, and images resized to the size they're shown at. The image can be a media item picked in Umbraco (`media-item`) or a static file (`src`).
+
+```cshtml
+<our-img media-item="Model.Image" />
+```
+
+## Attributes
+
+Attributes ending `--s`, `--m`, `--l`, `--xl` and `--xxl` apply from the matching screen width, set in [`MediaQueries`](../../getting-started/configuration/#ourimg) (576, 768, 992, 1200 and 1400 pixels by default).
+
+| Attribute | What it does |
+|---|---|
+| `src` | The URL of an image file, absolute or relative, such as `/assets/image.jpg`. |
+| `media-item` | A picked image (`MediaWithCrops`), such as `Model.Image`. |
+| `alt` | The alt text. Without it, the media's alt text property, name or file name is used. |
+| `class` | CSS classes for the image. |
+| `style` | Inline styles for the image. |
+| `abovethefold` | Set to `true` for an image that's on screen when the page loads: it loads straight away with a high priority, instead of lazily. |
+| `width`, `height` | The image's size. Give one and the other is worked out from the image's shape. |
+| `width--s` … `width--xxl` | The width from each screen size up. Pair with the matching `height--*`. |
+| `height--s` … `height--xxl` | The height from each screen size up. Pair with the matching `width--*`. |
+| `cropalias` | The crop to use. |
+| `cropalias--s` … `cropalias--xxl` | The crop to use from each screen size up. |
+
+## Examples
+
+### A simple image
+
+Alt text comes from the media item, or is made from the file name:
+
+```cshtml
+<our-img media-item="Model.Image" />
+```
+
+```html title="Output"
+<img alt="Some alt text" width="1920" height="1280" src="/media/path/image.jpg?width=1920&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
+```
+
+### A set width, above the fold
+
+The height is worked out from the original image's shape, and the image isn't lazy loaded:
+
+```cshtml
+<our-img media-item="Model.Image" width="200" alt="My custom alt text" abovethefold="true" />
+```
+
+```html title="Output"
+<img alt="My custom alt text" width="200" height="133.33333333333331" src="/media/path/image.jpg?width=200&amp;rnd=133087885756657361" loading="eager" fetchpriority="high">
+```
+
+### JavaScript lazy loading
+
+With `UseNativeLazyLoading` set to `false` in `appsettings.json`, the image URL goes in `data-src`, `src` gets an empty SVG of the same shape, and the `lazyload` class is added for a library such as lazysizes:
+
+```cshtml
+<our-img media-item="article.ListingImage" width="200" />
+```
+
+```html title="Output"
+<img alt="Some alt text" width="200" height="133.33333333333331" data-src="/media/uv2bljv1/meetup-organizers-at-codegarden.jpg?width=200&amp;rnd=133087885756657361" src="data:image/svg&#x2B;xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 200 133.33333333333331&#x27;%3E%3C/svg%3E" class="lazyload" />
+```
+
+### Responsive sizes and crops
+
+Sizes for other screen widths make a `<picture>`:
+
+```cshtml
+<our-img media-item="Model.Image" width="200" width--s="400" width--m="600" cropalias="mobile" cropalias--m="desktop" />
+```
+
+```html title="Output"
+<picture>
+    <source srcset="/media/path/image.jpg?width=600&amp;height=300&amp;rnd=133087885756657361" media="(min-width: 768px)" width="600" height="300">
+    <source srcset="/media/path/image.jpg?width=400&amp;height=400&amp;rnd=133087885756657361" media="(min-width: 576px)" width="400" height="400">
+    <img alt="Some alt text" width="200" height="200" src="/media/path/image.jpg?width=200&amp;height=200&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
+</picture>
+```
+
+## Global settings
+
+Breakpoints, lazy loading and alt text are set for every `<our-img>` in `appsettings.json`. See [Configuration](../../getting-started/configuration/#ourimg) for each option and its default.
+
+```json title="appsettings.json"
+{
+  "Our.Umbraco.TagHelpers": {
+    "OurIMG": {
+      "MobileFirst": true,
+      "MediaQueries": {
+        "Small": 576,
+        "Medium": 768,
+        "Large": 992,
+        "ExtraLarge": 1200,
+        "ExtraExtraLarge": 1400
+      },
+      "UseNativeLazyLoading": true,
+      "LazyLoadCssClass": "lazyload",
+      "LazyLoadPlaceholder": "SVG",
+      "LazyLoadPlaceholderLowQualityImageQuality": 5,
+      "ApplyAspectRatio": false,
+      "AlternativeTextMediaTypePropertyAlias": "alternativeText"
+    }
+  }
+}
+```

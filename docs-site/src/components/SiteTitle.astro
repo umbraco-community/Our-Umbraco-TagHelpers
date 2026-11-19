@@ -1,0 +1,40 @@
+---
+/**
+ * The site name as plain text, with TagHelpers in the accent colour. One text link, so it reads as
+ * one name to screen readers and search engines.
+ */
+const href = Astro.locals.starlightRoute.siteTitleHref;
+---
+
+<a href={href} class="th-site-title" translate="no" aria-label="Our Umbraco TagHelpers, home">
+	<span class="th-site-title__our">Our Umbraco</span>
+	<span class="th-site-title__name">TagHelpers</span>
+</a>
+
+<style>
+	.th-site-title {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.3em;
+		font-family: var(--th-font-display);
+		font-weight: 650;
+		font-optical-sizing: auto;
+		font-size: 1.25rem;
+		letter-spacing: -0.01em;
+		line-height: 1;
+		color: var(--sl-color-white);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+	.th-site-title__name {
+		color: var(--sl-color-text-accent);
+	}
+	@media (max-width: 30rem) {
+		.th-site-title {
+			font-size: 1.05rem;
+		}
+		.th-site-title__our {
+			display: none;
+		}
+	}
+</style>

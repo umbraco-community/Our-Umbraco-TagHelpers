@@ -1,0 +1,106 @@
+name: Docs site
+
+# Builds the Astro Starlight site in docs-site/ and publishes it to GitHub Pages at
+# https://umbraco-community.github.io/Our-Umbraco-TagHelpers/
+#
+# The release notes, the "Coming in" / "New" badges and the contributors are read from GitHub at build
+# time, so the site is rebuilt whenever any of them could have changed. Nothing is updated by hand.
+#
+# - Pull requests that touch the site: build and type check only, no deploy.
+# - Every push to v2/dev (so every merged pull request): build and deploy. A new contributor appears
+#   as soon as their pull request is merged, whatever it changed.
+# - A published GitHub release: rebuild and deploy v2/dev, so the release notes and badges update
+#   straight away.
+# - Weekly: rebuild and deploy, to pick up changed GitHub names and avatars.
+#
+# One-time setup: Settings > Pages > Build and deployment > Source: "GitHub Actions".
+on:
+  pull_request:
+    paths:
+      - docs-site/**
+      - .github/workflows/docs.yml
+  push:
+    branches: [ v2/dev ]
+  release:
+    types: [ published ]
+  schedule:
+    - cron: '17 3 * * 1' # Mondays, 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time; a newer run waits rather than cancelling one that's part way through
+concurrency:
+  group: docs-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # A release event runs on the release's tag, which the github-pages environment doesn't deploy from.
+  # So start this workflow again on v2/dev instead.
+  rebuild-for-release:
+    name: Rebuild for the new release
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Run the docs workflow on v2/dev
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run docs.yml --repo "${{ github.repository }}" --ref v2/dev
+
+  build:
+    name: Build
+    if: github.event_name != 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: docs-site
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Build
+        env:
+          # Read-only token, so loading the GitHub releases isn't rate limited
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run build
+
+      - name: Upload site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs-site/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/v2/dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

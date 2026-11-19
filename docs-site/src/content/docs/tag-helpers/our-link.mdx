@@ -1,0 +1,56 @@
+---
+title: <our-link>
+description: Renders a link from a Multi URL Picker, with an optional fallback when no link is set.
+addedIn: 0.7.0
+usage: element
+---
+
+import VersionBadge from '../../../components/VersionBadge.astro';
+
+`<our-link>` renders an `<a>` from a link picked with the Multi URL Picker property editor (the `Umbraco.Cms.Core.Models.Link` model).
+
+```cshtml
+<our-link link="@Model.ctaLink">
+    <h2>Hi There</h2>
+</our-link>
+```
+
+Anything inside the element is wrapped in the `<a>`. With nothing inside, the link's title from the picker is used as the link text:
+
+```cshtml
+<our-link link="@Model.ctaLink"></our-link>
+```
+
+When the link opens in a new tab (`target="_blank"`) and goes to an external site, `rel="noopener"` is added.
+
+## Making the link optional <VersionBadge version="1.1.0" inline />
+
+With no link set, nothing is rendered. Add `Fallback="true"` to still render the content inside, and `FallbackElement` to wrap it in another element instead of the `<a>`.
+
+```cshtml
+<our-link link="@Model.ctaLink" Fallback="true" FallbackElement="div">
+    <span>some text</span>
+</our-link>
+
+@* With no link, that renders *@
+<div>
+    <span>some text</span>
+</div>
+```
+
+```cshtml
+<our-link link="@Model.ctaLink" Fallback="true">
+    <span>some text</span>
+</our-link>
+
+@* With no link and no FallbackElement, that renders just *@
+<span>some text</span>
+```
+
+## Attributes
+
+| Attribute | What it does |
+|---|---|
+| `link` | The `Link` to render, from a Multi URL Picker. |
+| `Fallback` | When `true` and no link is set, renders the content inside instead of nothing. |
+| `FallbackElement` | The element to wrap the content in when falling back, such as `div`. Leave it out for no wrapper. |

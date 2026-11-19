@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Build/">
     <File Path=".github/workflows/codeql-analysis.yml" />
+    <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/e2e.yml" />
     <File Path="appsettings-schema.our.umbraco.taghelpers.json" />
     <File Path="build.ps1" />
@@ -13,6 +14,7 @@
     <File Path="CLAUDE.md" />
     <File Path="docs/supporting-a-new-umbraco-version.md" />
   </Folder>
+  <Project Path="docs-site/Our.Umbraco.TagHelpers.Docs.csproj" />
   <Project Path="Our.Umbraco.TagHelpers.Tests/Our.Umbraco.TagHelpers.Tests.csproj" />
   <Project Path="Our.Umbraco.TagHelpers.TestSite/Our.Umbraco.TagHelpers.TestSite.csproj" />
   <Project Path="Our.Umbraco.TagHelpers/Our.Umbraco.TagHelpers.csproj" />

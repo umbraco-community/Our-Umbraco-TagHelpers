@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.7.134">
+  <!--
+    Not a .NET project: it builds nothing. It only makes the documentation site in this folder show up in the
+    solution, with new pages included automatically. Run the site with npm (see the "Writing the docs" page).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Generated and installed files: thousands of them, never edited -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);node_modules/**;dist/**;.astro/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

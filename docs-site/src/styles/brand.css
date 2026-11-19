@@ -1,0 +1,393 @@
+/*
+ * The docs site's look: Literata headings, Source Sans 3 body text and JetBrains Mono code, on warm
+ * paper (light, the default) or warm charcoal (dark), with Umbraco's violet blue for links and actions.
+ * Every text colour reads at 4.5:1 or better on the surfaces it sits on, in both themes.
+ */
+
+/* ============ Tokens ============ */
+/* Starlight's own structure: the dark values sit on :root, the light values on [data-theme='light'] */
+:root {
+	--th-ground: #1a1917; /* page background */
+	--th-panel: #23211e; /* code, cards, callouts */
+	--th-ink: #ece8e1; /* text */
+	--th-ink-muted: #b3ada3; /* secondary text */
+	--th-rule: #33302b; /* hairlines */
+	--th-border-strong: #6f695f; /* control outlines, 3:1 */
+	--th-accent: #9aa5ff; /* fills: primary button, current page */
+	--th-on-accent: #1a1917; /* text on --th-accent */
+	--th-link: #9aa5ff; /* links and accent text */
+	--th-note: #9aa5ff; /* note callouts */
+	--th-tip: #8fcf9a; /* tip callouts */
+	--th-caution: #f0a47a; /* caution callouts, removed badges */
+	--th-focus-ring: #ece8e1;
+	--th-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+
+	--th-font-display: 'Literata Variable', Georgia, 'Times New Roman', serif;
+	--th-radius-sm: 3px;
+	--th-radius-md: 6px;
+	--th-radius-lg: 8px;
+}
+
+:root[data-theme='light'] {
+	--th-ground: #faf8f3;
+	--th-panel: #ffffff;
+	--th-ink: #1d1d1b;
+	--th-ink-muted: #57534e;
+	--th-rule: #e4dfd4;
+	--th-border-strong: #8a8478;
+	--th-accent: #3544b1; /* Umbraco violet blue */
+	--th-on-accent: #ffffff;
+	--th-link: #3544b1;
+	--th-note: #3544b1;
+	--th-tip: #2f6b3a;
+	--th-caution: #9a3412;
+	--th-focus-ring: #3544b1;
+	--th-shadow: 0 6px 24px rgba(29, 29, 27, 0.1);
+}
+
+/* ============ Starlight mapping ============ */
+:root,
+:root[data-theme='light'] {
+	--sl-font: 'Source Sans 3 Variable', 'Segoe UI', system-ui, sans-serif;
+	--sl-font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+	--sl-color-white: var(--th-ink);
+	--sl-color-gray-1: var(--th-ink);
+	--sl-color-gray-2: var(--th-ink);
+	--sl-color-gray-3: var(--th-ink-muted);
+	--sl-color-gray-4: var(--th-border-strong);
+	--sl-color-gray-5: var(--th-rule);
+	--sl-color-gray-6: var(--th-panel);
+	--sl-color-black: var(--th-ground);
+
+	--sl-color-accent-low: var(--th-panel);
+	--sl-color-accent: var(--th-accent);
+	--sl-color-accent-high: var(--th-link);
+
+	--sl-color-text: var(--th-ink);
+	--sl-color-text-accent: var(--th-link);
+	--sl-color-text-invert: var(--th-on-accent);
+	--sl-color-bg: var(--th-ground);
+	--sl-color-bg-nav: var(--th-ground);
+	--sl-color-bg-sidebar: var(--th-ground);
+	--sl-color-bg-inline-code: var(--th-panel);
+	--sl-color-bg-accent: var(--th-accent);
+	--sl-color-hairline-light: var(--th-rule);
+	--sl-color-hairline: var(--th-rule);
+	--sl-color-hairline-shade: var(--th-rule);
+
+	/* Type scale: body 17px; h1 up to 48px, h2 up to 36px, scaled down on phones */
+	--sl-text-body: 1.0625rem;
+	--sl-line-height: 1.65;
+	--sl-line-height-headings: 1.2;
+	--sl-text-h1: clamp(2.25rem, 1.6rem + 2.4vw, 3rem);
+	--sl-text-h2: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
+	--sl-text-h3: 1.5rem;
+	--sl-text-h4: 1.25rem;
+	--sl-text-code: 0.875rem;
+
+	--sl-content-width: 45rem;
+	--sl-nav-height: 4.5rem;
+}
+
+a,
+button {
+	transition:
+		color 0.15s ease-out,
+		background-color 0.15s ease-out,
+		border-color 0.15s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition: none !important;
+		animation: none !important;
+	}
+}
+
+/* ============ Type ============ */
+/* Literata for headings; it has optical sizes, so large headings get its display cut automatically */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) {
+	font-family: var(--th-font-display);
+	font-optical-sizing: auto;
+}
+h1,
+.sl-markdown-content :is(h1, h2) {
+	font-weight: 650;
+	letter-spacing: -0.01em;
+}
+.sl-markdown-content :is(h3, h4, h5, h6) {
+	font-weight: 600;
+}
+
+/* ============ Focus ============ */
+:focus-visible {
+	outline: 2px solid var(--th-focus-ring);
+	outline-offset: 3px;
+}
+
+/* ============ Header ============ */
+header.header {
+	border-bottom: 1px solid var(--th-rule);
+}
+
+/* ============ Sidebar ============ */
+nav.sidebar .top-level > li > details > summary .group-label > span,
+nav.sidebar .large {
+	font-family: var(--th-font-display);
+	font-weight: 600;
+	color: var(--th-ink);
+}
+/* The current page: a violet blue fill (8:1 in light, 7.7:1 in dark) */
+nav.sidebar a[aria-current='page'],
+nav.sidebar a[aria-current='page']:hover,
+nav.sidebar a[aria-current='page']:focus {
+	background: var(--th-accent);
+	color: var(--th-on-accent);
+	font-weight: 600;
+	border-radius: var(--th-radius-md);
+}
+
+/* ============ Links and inline code ============ */
+.sl-markdown-content a:not(:where(.not-content *)) {
+	color: var(--th-link);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+	text-decoration-thickness: 2px;
+}
+.sl-markdown-content code:not(:where(.not-content *, pre *)) {
+	border-radius: var(--th-radius-sm);
+	border: 1px solid var(--th-rule);
+	padding: 0.1em 0.35em;
+	font-size: 0.875em;
+}
+
+/* ============ Buttons ============ */
+.sl-link-button {
+	border-radius: var(--th-radius-md) !important;
+	font-weight: 600;
+}
+.sl-link-button.primary {
+	background: var(--th-accent) !important;
+	border-color: var(--th-accent) !important;
+	color: var(--th-on-accent) !important;
+}
+.sl-link-button.secondary,
+.sl-link-button.minimal {
+	border: 1px solid var(--th-border-strong) !important;
+	color: var(--th-ink) !important;
+}
+.sl-link-button.minimal {
+	padding-inline: 1.25rem !important;
+}
+
+/* ============ Asides (callouts) ============ */
+/* An even border all round, in the callout's colour */
+.starlight-aside {
+	border-radius: var(--th-radius-md);
+	border: 1px solid var(--sl-color-asides-border);
+	background: var(--th-panel);
+}
+.starlight-aside--note {
+	--sl-color-asides-text-accent: var(--th-note);
+	--sl-color-asides-border: var(--th-note);
+}
+.starlight-aside--tip {
+	--sl-color-asides-text-accent: var(--th-tip);
+	--sl-color-asides-border: var(--th-tip);
+}
+.starlight-aside--caution,
+.starlight-aside--danger {
+	--sl-color-asides-text-accent: var(--th-caution);
+	--sl-color-asides-border: var(--th-caution);
+}
+
+/* ============ Tables ============ */
+.sl-markdown-content table:not(:where(.not-content *)) {
+	display: table;
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.95em;
+}
+.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+	border-bottom: 1px solid var(--th-rule);
+	padding: 0.5rem 0.75rem;
+	vertical-align: top;
+}
+.sl-markdown-content thead th:not(:where(.not-content *)) {
+	font-weight: 600;
+	color: var(--th-ink-muted);
+	border-bottom: 2px solid var(--th-border-strong);
+}
+@media (max-width: 50rem) {
+	/* Wide reference tables scroll sideways on phones rather than stretching the page */
+	.sl-markdown-content table:not(:where(.not-content *)) {
+		display: block;
+		overflow-x: auto;
+	}
+}
+
+/* ============ Version badges ============ */
+.th-title-badges {
+	margin: 0.75rem 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+.th-version {
+	display: inline-block;
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	padding: 0.3rem 0.65rem;
+	border-radius: var(--th-radius-md);
+	border: 1px solid var(--th-border-strong);
+	color: var(--th-ink);
+	white-space: nowrap;
+}
+.sl-markdown-content a.th-version {
+	color: var(--th-ink);
+	text-decoration: none;
+}
+.th-version--coming,
+.sl-markdown-content a.th-version--coming {
+	background: var(--th-accent);
+	border-color: var(--th-accent);
+	color: var(--th-on-accent);
+}
+.th-version--removed,
+.sl-markdown-content a.th-version--removed {
+	border-style: dashed;
+	color: var(--th-caution);
+	border-color: var(--th-caution);
+}
+.th-version:hover {
+	border-color: var(--th-ink);
+}
+.th-version--inline {
+	font-size: 0.75rem;
+	padding: 0.1rem 0.45rem;
+	border-radius: var(--th-radius-sm);
+	vertical-align: 0.15em;
+	margin-inline-start: 0.35rem;
+}
+/* Sidebar badges (New, Coming soon, Removed) */
+nav.sidebar .sl-badge {
+	font-family: var(--sl-font);
+	font-weight: 600;
+	border-radius: var(--th-radius-sm);
+	border: 0;
+	background: var(--th-accent);
+	color: var(--th-on-accent);
+}
+/* On the current (filled) item, the badge flips so it stays visible */
+nav.sidebar a[aria-current='page'] .sl-badge {
+	background: var(--th-on-accent);
+	color: var(--th-accent);
+	box-shadow: none;
+}
+nav.sidebar .sl-badge.caution {
+	background: transparent;
+	color: var(--th-caution);
+	box-shadow: inset 0 0 0 1px var(--th-caution);
+}
+
+/* ============ Overview table ============ */
+.th-overview-table td:last-child {
+	white-space: nowrap;
+}
+.th-overview-table .th-version--inline {
+	margin-inline-start: 0;
+}
+
+/* ============ Release notes ============ */
+.th-release {
+	padding-block: 1.5rem;
+	border-top: 1px solid var(--th-rule);
+}
+.th-release:first-of-type {
+	border-top: 0;
+	padding-top: 0;
+}
+.th-release h2 {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+.th-release__pre {
+	font-family: var(--sl-font);
+	font-size: 0.875rem;
+	font-weight: 600;
+	letter-spacing: 0;
+	padding: 0.2rem 0.55rem;
+	border-radius: var(--th-radius-sm);
+	border: 1px solid var(--th-border-strong);
+	color: var(--th-ink-muted);
+}
+.sl-markdown-content .th-release__meta {
+	margin-top: 0.25rem;
+	color: var(--th-ink-muted);
+	font-size: 0.875rem;
+}
+.th-release__body h2 {
+	font-size: 1.25rem;
+}
+
+/* ============ Home (splash) ============ */
+.hero {
+	padding-block: 3rem 2rem;
+}
+.hero h1 {
+	font-family: var(--th-font-display);
+	font-weight: 650;
+	letter-spacing: -0.015em;
+	line-height: 1.05;
+}
+.hero .tagline {
+	font-size: 1.25rem;
+	line-height: 1.6;
+	color: var(--th-ink-muted);
+}
+/* The highlighted words in the hero title */
+.hero-accent {
+	color: var(--sl-color-text-accent);
+}
+
+/* Cards: panel surface, a lift on hover only */
+.card {
+	border-radius: var(--th-radius-lg) !important;
+	border: 1px solid var(--th-rule) !important;
+	background: var(--th-panel) !important;
+}
+.card .title {
+	font-family: var(--th-font-display);
+	font-weight: 600;
+}
+a.sl-link-card,
+.sl-link-card {
+	border-radius: var(--th-radius-lg) !important;
+	border-color: var(--th-rule) !important;
+	background: var(--th-panel);
+}
+.sl-link-card:hover {
+	box-shadow: var(--th-shadow);
+	border-color: var(--th-border-strong) !important;
+}
+
+/* ============ Footer credit ============ */
+.th-credit {
+	margin-top: 2rem;
+	font-size: 0.875rem;
+	color: var(--th-ink-muted);
+}

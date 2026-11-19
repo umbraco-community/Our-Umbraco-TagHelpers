@@ -1,0 +1,26 @@
+---
+/**
+ * Says which package version a tag helper, or one of its options, arrived in. A version with no
+ * stable release yet reads "Coming in", so readers of v2/dev's docs know it isn't on NuGet yet.
+ */
+import { isUnreleased } from '../lib/versions';
+
+interface Props {
+	/** A plain version such as 2.1.0. */
+	version: string;
+	kind?: 'added' | 'removed';
+	/** Smaller, for use inline next to an option. */
+	inline?: boolean;
+}
+
+const { version, kind = 'added', inline = false } = Astro.props;
+const unreleased = kind === 'added' && (await isUnreleased(version));
+const text = kind === 'removed' ? `Removed in v${version}` : unreleased ? `Coming in v${version}` : `Added in v${version}`;
+const variant = kind === 'removed' ? 'removed' : unreleased ? 'coming' : 'added';
+// A released version links to its notes; one not yet released has none, so it links to the top of the page
+const releaseUrl = `${import.meta.env.BASE_URL}release-notes/${unreleased ? '' : `#v${version.replaceAll('.', '-')}`}`;
+---
+
+<a class:list={['th-version', `th-version--${variant}`, { 'th-version--inline': inline }]} href={releaseUrl}
+	>{text}</a
+>
