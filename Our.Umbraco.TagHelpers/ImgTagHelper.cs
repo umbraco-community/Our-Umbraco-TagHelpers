@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Classes;
 using Our.Umbraco.TagHelpers.Configuration;
@@ -52,6 +54,14 @@ namespace Our.Umbraco.TagHelpers
         /// </summary>
         [HtmlAttributeName("media-item")]
         public MediaWithCrops? MediaItem { get; set; }
+
+        /// <summary>
+        /// An image file such as /images/not-found.jpg to show instead when there's no media-item (nothing was picked),
+        /// or when src is a file on this site (starting with /) that doesn't exist in wwwroot. External src URLs aren't
+        /// checked. The fallback is used as src, so width, height and the other options apply to it.
+        /// </summary>
+        [HtmlAttributeName("fallback-img")]
+        public string? FallbackImage { get; set; }
 
         [HtmlAttributeName("alt")]
         public string? ImgAlt { get; set; }
@@ -139,6 +149,12 @@ namespace Our.Umbraco.TagHelpers
                 return;
             }
             #endregion
+
+            // No media item, or a src file that's missing: use the fallback image as the src (#51)
+            if (!string.IsNullOrWhiteSpace(FallbackImage) && MediaItem is null && !FileSourceExists())
+            {
+                FileSource = FallbackImage;
+            }
 
             var width = 0d;
             var height = 0d;
@@ -483,6 +499,32 @@ namespace Our.Umbraco.TagHelpers
         /// Splits a file URL into its path and its query without width and height. A root-relative path
         /// keeps its leading '/', and a page-relative one is resolved against the current request.
         /// </summary>
+        /// <summary>
+        /// Whether <see cref="FileSource"/> can be used: false when it's empty, or a file on this site (starting with /)
+        /// that isn't in wwwroot. External URLs, and anything that can't be checked, count as usable.
+        /// </summary>
+        private bool FileSourceExists()
+        {
+            if (string.IsNullOrWhiteSpace(FileSource))
+            {
+                return false;
+            }
+
+            if (!FileSource.StartsWith('/') || FileSource.StartsWith("//"))
+            {
+                return true;
+            }
+
+            var webRoot = ViewContext?.HttpContext?.RequestServices?.GetService<IWebHostEnvironment>()?.WebRootFileProvider;
+            if (webRoot is null)
+            {
+                return true;
+            }
+
+            var path = FileSource.Split('?', '#')[0];
+            return webRoot.GetFileInfo(Uri.UnescapeDataString(path)).Exists;
+        }
+
         private (string Path, string? Query) SplitFileUrl(string url)
         {
             Uri uri;

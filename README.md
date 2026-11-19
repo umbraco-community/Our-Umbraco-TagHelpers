@@ -602,6 +602,7 @@ Properties appended with s, m, l, xl & xxl translate to screen widths defined by
 
 - `src` - `string` based absolute or relative file URL. e.g. `/assets/image.jpg`.
 - `media-item` - `MediaWithCrops` based class property from the view model. e.g. `Model.Image`.
+- `fallback-img` - An image file to show instead when nothing was picked for `media-item`, or when `src` is a file on this site (starting with `/`) that doesn't exist in wwwroot. e.g. `/images/not-found.jpg`. It's used as the `src`, so the width, height and other properties apply to it. External `src` URLs and media files aren't checked, and nothing is checked unless `fallback-img` is set.
 - `alt` - Native alternative text property.
 - `style` - Native style property.
 - `class` - Native CSS class property.

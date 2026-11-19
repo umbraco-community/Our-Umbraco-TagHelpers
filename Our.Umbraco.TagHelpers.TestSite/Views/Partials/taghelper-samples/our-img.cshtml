@@ -173,6 +173,28 @@
     </tbody>
 </table>
 
+<h3>fallback-img</h3>
+<p>
+    <code>fallback-img</code> is shown instead when nothing was picked for <code>media-item</code>,
+    or when <code>src</code> is a file on this site that doesn't exist. Here the fallback is the unicorn:
+</p>
+<table class="our-img-demo">
+    <tbody>
+        <tr>
+            <td><code>src</code> is a missing file</td>
+            <td data-demo="fallback-missing-src"><our-img src="/samples/this-image-does-not-exist.jpg" fallback-img="/samples/cute-unicorn.jpg" width="150" height="100" alt="Missing file" /></td>
+        </tr>
+        <tr>
+            <td>Nothing picked for <code>media-item</code></td>
+            <td data-demo="fallback-no-media"><our-img media-item="null" fallback-img="/samples/cute-unicorn.jpg" width="150" height="100" alt="Nothing picked" /></td>
+        </tr>
+        <tr>
+            <td><code>src</code> exists, so the fallback isn't used</td>
+            <td data-demo="fallback-not-needed"><our-img src="/samples/cute-unicorn.jpg" fallback-img="/samples/this-fallback-is-not-used.jpg" width="150" height="100" alt="File exists" /></td>
+        </tr>
+    </tbody>
+</table>
+
 <div style="padding: 10px; font-style: italic;">
     <h3>Notes</h3>
     <ul>
