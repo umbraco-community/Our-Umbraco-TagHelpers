@@ -304,6 +304,24 @@ This tag helper element `<our-version>` prints out version number for a given As
 <our-version assembly="Our.Umbraco.TagHelpers" />
 ```
 
+## `<our-bytes>`
+
+This tag helper element shows a number of bytes as a readable size, such as a download's file size.
+
+```cshtml
+<our-bytes media-item="@Model.Brochure" />
+<our-bytes value="1152302" />
+<our-bytes value="1234567" decimals="2" />
+```
+
+These render `1.1 MB` (for a 1,152,302-byte file), `1.1 MB` and `1.18 MB`, as plain text with no wrapping element.
+
+- `value` - a number of bytes. When it's set, it's used instead of `media-item`.
+- `media-item` - a media item (`IPublishedContent`) whose file size is shown: the `umbracoBytes` property Umbraco sets when a file is uploaded.
+- `decimals` - the most decimals to show (default `1`). Trailing zeros are left out, so exactly 1 MB is `1 MB`.
+
+Sizes go up in steps of 1024 (B, KB, MB, GB, TB, PB), and the number is formatted for the page's culture, so a Danish page shows `1,1 MB`. Nothing is output when there's no value, or it's negative.
+
 ## `our-member-include` and `our-member-exclude`
 
 This is a tag helper attribute that can be applied to any DOM element in the razor template or partial. It will show or hide its element and children on the page when passing a comma seperated string of member groups that the current logged in member for the exclude or include variants.

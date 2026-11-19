@@ -9,6 +9,7 @@ const sampleHeadings = [
   'our-svg',
   'our-fallback',
   'our-version',
+  'our-bytes',
   'our-member-include and our-member-exclude',
   'our-user-include and our-user-exclude',
   'our-edit-link',
