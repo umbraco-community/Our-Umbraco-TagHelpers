@@ -136,3 +136,25 @@ test('other attributes on our-svg are copied onto the svg', async ({ page }) => 
   await expect(svg).toHaveAttribute('data-track', 'demo-face');
   await expect(svg).toHaveAttribute('width', '32'); // replaces the file's own width (246)
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/114
+// style-blue.svg and style-red.svg both style their circle with .st0 in an inline <style>
+const circleFill = (page: Page, name: string) => demo(page, name).locator('circle').evaluate((el) => getComputedStyle(el).fill);
+const blue = 'rgb(53, 68, 177)';
+const red = 'rgb(211, 58, 58)';
+
+test('without scope-styles, the last .st0 rule restyles the other svg', async ({ page }) => {
+  await page.goto('/en/');
+  expect(await circleFill(page, 'unscoped-blue')).toBe(await circleFill(page, 'unscoped-red'));
+});
+
+test('scope-styles keeps each svg its own colour', async ({ page }) => {
+  await page.goto('/en/');
+  expect(await circleFill(page, 'scoped-blue')).toBe(blue);
+  expect(await circleFill(page, 'scoped-red')).toBe(red);
+
+  // The class comes from the file, so the same file always gets the same class
+  const scopeClass = (name: string) => demo(page, name).evaluate((el) => [...el.classList].find((c) => c.startsWith('svg-')));
+  expect(await scopeClass('scoped-blue')).toMatch(/^svg-[0-9a-f]{12}$/);
+  expect(await scopeClass('scoped-blue')).not.toBe(await scopeClass('scoped-red'));
+});
