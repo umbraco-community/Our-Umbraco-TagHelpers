@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -25,7 +26,7 @@ namespace Our.Umbraco.TagHelpers.Tests
         private const string WithoutStyle = "<svg><path class=\"st0\"></path></svg>";
 
         private static string Render(string svg, bool? scopeStyles, bool appSettings = false, bool ignoreAppSettings = false,
-            string src = "/assets/logo.svg", string? cssClass = null, AppCaches? appCaches = null, bool cache = false)
+            string src = "/assets/logo.svg", string? cssClass = null, AppCaches? appCaches = null, bool cache = false, bool uniqueIds = false)
         {
             var fileProvider = new Mock<IFileProvider>();
             fileProvider.Setup(p => p.GetFileInfo(It.IsAny<string>()))
@@ -42,6 +43,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             };
             if (scopeStyles is bool value) tagHelper.ScopeStyles = value; // like Razor, only when the attribute is on the tag
             if (cache) tagHelper.Cache = true;
+            if (uniqueIds) tagHelper.UniqueIds = true;
 
             var attributes = new TagHelperAttributeList();
             var output = new TagHelperOutput("our-svg", attributes, (_, _) => Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
@@ -57,6 +59,22 @@ namespace Our.Umbraco.TagHelpers.Tests
             ClassicAssert.AreEqual(
                 $"<svg class=\"{LogoClass}\"><style>.{LogoClass} .st0{{fill:#3544b1}}</style><path class=\"st0\"></path></svg>",
                 Render(WithStyle, scopeStyles: true));
+        }
+
+        // https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/115
+        [Test]
+        public void WithUniqueIdsToo_SelectorsAreScoped_AndTheIdsInThemArePrefixed()
+        {
+            const string svg = "<svg><style>#glow{opacity:.5} .st0{fill:url(#glow)}</style><filter id=\"glow\"></filter><path class=\"st0\"></path></svg>";
+
+            var html = Render(svg, scopeStyles: true, uniqueIds: true);
+
+            var prefix = Regex.Match(html, "id=\"(?<prefix>s[0-9a-f]{8}-)glow\"").Groups["prefix"].Value;
+            ClassicAssert.IsNotEmpty(prefix, html);
+            ClassicAssert.AreEqual(
+                $"<svg class=\"{LogoClass}\"><style>.{LogoClass} #{prefix}glow{{opacity:.5}} .{LogoClass} .st0{{fill:url(#{prefix}glow)}}</style>" +
+                $"<filter id=\"{prefix}glow\"></filter><path class=\"st0\"></path></svg>",
+                html);
         }
 
         [Test]
