@@ -229,7 +229,8 @@ Additional properties have been added to cache the output and also to ensure the
 - `cache` - Caches the SVG file's contents in Umbraco's runtime cache, so the file isn't read on every page load. This is a `boolean` value. When it's on the tag, it wins over the global `Cache` setting, so `cache="false"` turns caching off for that element even when it's on globally. See [When is an SVG cached?](#when-is-an-svg-cached) below.
 - `cache-minutes` - How long (in minutes) a cached SVG is kept. When it isn't set, the global `CacheMinutes` is used (180 by default). This is an `integer` value.
 - `scope-styles` - Scopes the SVG's `<style>` blocks to this SVG, so class names such as `.st0` from two SVGs on one page don't restyle each other. This is a `boolean` value; see [Scoped styles](#scoped-styles) below.
-- `ignore-appsettings` - Ignores the global `EnsureViewBox`, `Cache` and `ScopeStyles` settings for this element, so only the attributes on the tag apply. This is a `boolean` value.
+- `unique-ids` - Gives every `id` in the SVG a prefix of its own for this element, and updates the references to them, so the same SVG twice on a page, or two SVGs that happen to use the same ids, don't share gradients, clip paths, masks or filters. This is a `boolean` value; see [Unique ids](#unique-ids) below.
+- `ignore-appsettings` - Ignores the global `EnsureViewBox`, `Cache`, `ScopeStyles` and `UniqueIds` settings for this element, so only the attributes on the tag apply. This is a `boolean` value.
 - Any **other attributes**, such as `aria-hidden`, `aria-label`, `role`, `id`, `data-*`, `width` or `height`, are copied onto the inlined `<svg>`, replacing the file's own values. For example `<our-svg src="/assets/icon.svg" aria-hidden="true" />` for a decorative icon, or `role="img" aria-label="Company logo"` for a meaningful one.
 
 ### Scoped styles
@@ -244,6 +245,19 @@ With `scope-styles="true"` (or `"ScopeStyles": true` under `OurSVG` in appsettin
 - The same file always gets the same class, so the output is the same on every render. SVGs without a `<style>` are left as they are.
 
 This is based on the Umbraco Community site's [scoping inline SVG styles](https://community.umbraco.com/docs/tutorials/refinements/scoping-inline-svg-styles/).
+
+### Unique ids
+
+SVGs often give gradients, clip paths, masks and filters an `id` and refer to them with `url(#id)` or `href="#id"`. Inlined into a page, those ids are shared with everything else on it: the same SVG twice gives duplicate ids, and two SVGs exported with the same ids can pick up each other's gradients.
+
+With `unique-ids="true"` (or `"UniqueIds": true` under `OurSVG` in appsettings), each `<our-svg>` prefixes the SVG's ids with a short random prefix of its own, such as `s1a2b3c4d-gradient`, and updates:
+
+- `url(#id)` in any attribute (`fill`, `clip-path`, `mask`, `filter`, `style`...) and in `<style>`,
+- `href="#id"` and `xlink:href="#id"`,
+- id references in `aria-labelledby`, `aria-describedby` and the other ARIA id attributes,
+- `#id` selectors in `<style>`.
+
+Only ids the SVG defines are changed, so colours such as `#fff` and links to ids elsewhere on the page stay as they are. An `id` you put on the `<our-svg>` tag itself is kept as written. It runs after the cache, so each element gets its own ids even when they share a cached file. The prefix changes on every render, so don't target these ids from your own CSS or JavaScript; use a `class` or an `id` on the `<our-svg>` tag instead.
 
 ### When is an SVG cached?
 
@@ -288,7 +302,8 @@ Applying any of the below configurations within your `appsettings.json` file wil
           "EnsureViewBox": false,
           "Cache": false,
           "CacheMinutes": 180,
-          "ScopeStyles": false
+          "ScopeStyles": false,
+          "UniqueIds": false
         }
       }
     }
