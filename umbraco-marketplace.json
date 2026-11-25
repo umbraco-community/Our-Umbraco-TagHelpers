@@ -3,7 +3,7 @@
 
     "AuthorDetails": {
         "Name": "Warren Buckley",
-        "Description": "Warren is an Umbraco freelancer and contractor and nine-time Umbraco MVP who loves to tinker and hack, and is available for hire. He has been working with Umbraco since the days of the Yahoo mailing list (aka way too long).",
+        "Description": "Warren is an Umbraco freelancer and contractor, nine-time Umbraco MVP and Umbraco Certified Master who loves to tinker and hack, and is available for hire. He has been working with Umbraco since the days of the Yahoo mailing list (aka way too long).",
         "Url": "https://hackmakedo.com",
         "ImageUrl": "https://hackmakedo.com/images/warren_square.jpg",
         "SyncContributorsFromRepository": true
