@@ -35,3 +35,28 @@ test('a plain-text property is shown as text, not rendered as HTML', async ({ pa
   await expect(header).toHaveText('<em>Shown as text, not emphasised</em>');
   await expect(header.locator('em')).toHaveCount(0);
 });
+
+// https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/121
+test('a Rich Text property is rendered as HTML', async ({ page }) => {
+  await page.goto('/en/page-a/markup-demo/');
+  const richText = section(page, 'our-fallback').locator('[data-demo="rich-text"]');
+
+  await expect(richText.locator('p > strong')).toHaveText('Rich text');
+  await expect(richText).toHaveText('Rich text from the Rich Text Editor');
+});
+
+test('a Markdown property is rendered as HTML', async ({ page }) => {
+  await page.goto('/en/page-a/markup-demo/');
+  const markdown = section(page, 'our-fallback').locator('[data-demo="markdown"]');
+
+  await expect(markdown.locator('strong')).toHaveText('Bold');
+  await expect(markdown).not.toContainText('**');
+});
+
+test('empty Rich Text and Markdown properties show the content inside the tag', async ({ page }) => {
+  await page.goto('/en/page-a/fallback-demo/');
+  const sample = section(page, 'our-fallback');
+
+  await expect(sample.locator('[data-demo="rich-text"]')).toHaveText('This page has no rich text');
+  await expect(sample.locator('[data-demo="markdown"]')).toHaveText('This page has no Markdown');
+});
