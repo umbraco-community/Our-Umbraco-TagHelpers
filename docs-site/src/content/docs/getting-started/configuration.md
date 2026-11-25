@@ -19,7 +19,9 @@ The package ships a JSON schema for these options. When you build the site, Umbr
     "OurSVG": {
       "EnsureViewBox": false,
       "Cache": false,
-      "CacheMinutes": 180
+      "CacheMinutes": 180,
+      "ScopeStyles": false,
+      "UniqueIds": false
     },
     "OurIMG": {
       "MobileFirst": true,
@@ -56,6 +58,8 @@ Used by [`<our-svg>`](../../tag-helpers/our-svg/). An attribute on the tag wins 
 | `EnsureViewBox` | `false` | Replaces the SVG's `width` and `height` with a `viewBox`, so it scales with its container. |
 | `Cache` | `false` | Keeps each SVG's contents in Umbraco's runtime cache, so the file isn't read on every request. |
 | `CacheMinutes` | `180` | How long a cached SVG is kept, in minutes. |
+| `ScopeStyles` | `false` | Scopes each SVG's `<style>` blocks to that SVG, so class names such as `.st0` from two SVGs don't restyle each other. See [Scoped styles](../../tag-helpers/our-svg/#scoped-styles). |
+| `UniqueIds` | `false` | Gives the ids in each SVG a prefix of their own and updates the references to them, so SVGs on one page don't share gradients, clip paths or filters. See [Unique ids](../../tag-helpers/our-svg/#unique-ids). |
 
 ## OurIMG
 
