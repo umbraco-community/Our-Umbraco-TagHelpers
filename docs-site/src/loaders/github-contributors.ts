@@ -4,9 +4,15 @@ import { createGitHubClient } from '../lib/github';
 
 /**
  * Loads the people who've contributed commits to the repository, from GitHub, each time the site is
- * built. Bots (Dependabot and the like) are left out. Display names come from each person's GitHub
- * profile when it can be read; otherwise their username is used.
+ * built. Bots (Dependabot and the like) and AI coding agents are left out. Display names come from
+ * each person's GitHub profile when it can be read; otherwise their username is used.
  */
+/**
+ * AI coding agents that commit with an ordinary GitHub user account rather than a [bot] one, so the
+ * bot filter doesn't catch them. Lowercase GitHub usernames.
+ */
+const aiAgentLogins = new Set(['claude']);
+
 export function githubContributorsLoader({ repo }: { repo: string }): Loader {
 	return {
 		name: 'github-contributors',
@@ -22,7 +28,7 @@ export function githubContributorsLoader({ repo }: { repo: string }): Loader {
 			let contributors: GitHubContributor[];
 			try {
 				contributors = (await github.getAll<GitHubContributor>(`repos/${repo}/contributors`)).filter(
-					(c) => c.type === 'User' && !c.login.endsWith('[bot]'),
+					(c) => c.type === 'User' && !c.login.endsWith('[bot]') && !aiAgentLogins.has(c.login.toLowerCase()),
 				);
 			} catch (error) {
 				logger.warn(`Couldn't load contributors from GitHub, so the contributors list will be empty: ${error}`);
