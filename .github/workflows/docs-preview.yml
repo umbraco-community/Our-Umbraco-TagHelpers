@@ -1,0 +1,151 @@
+name: Docs preview
+
+# Publishes each pull request's docs site build as a preview on Cloudflare, and links it on the pull
+# request. The live site stays on GitHub Pages (docs.yml).
+#
+# docs.yml builds the pull request and saves the site. This workflow runs after it, so it can use the
+# Cloudflare secrets even for pull requests from forks, which docs.yml never sees. To keep that safe:
+# - it never checks out or runs the pull request's code: only the static files are uploaded,
+# - the Worker config (docs-site/wrangler.jsonc) comes from v2/dev, so it serves static files only,
+# - the pull request number in the build is checked against the pull request that was built.
+#
+# A first-time contributor's pull request only builds once a maintainer approves its workflows.
+#
+# One-time setup (until then this workflow does nothing):
+# 1. In Cloudflare, choose your workers.dev subdomain (Workers & Pages > Overview).
+# 2. Create an API token with "Workers Scripts: Edit" for the account.
+# 3. Add the repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+# The first preview creates the Worker (our-umbraco-taghelpers-docs).
+#
+# GitHub only runs workflow_run workflows from the default branch (v2/dev), so changes to this file
+# take effect once they're merged.
+on:
+  workflow_run:
+    workflows: [ Docs site ]
+    types: [ completed ]
+
+permissions: {}
+
+concurrency:
+  group: docs-preview-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Publish the preview
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read        # download the build from the docs.yml run
+      contents: read       # check out wrangler.jsonc from v2/dev
+      issues: write        # comment the preview link on the pull request
+      pull-requests: read  # check the pull request that was built
+    steps:
+      - name: Check Cloudflare is set up
+        id: setup
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No preview: add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to publish docs previews."
+          fi
+
+      # The default branch's copy, never the pull request's
+      - name: Checkout the Worker config from v2/dev
+        if: steps.setup.outputs.ready == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: docs-site/wrangler.jsonc
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      # Outside the workspace, so nothing in it is picked up as config or code
+      - name: Download the build
+        if: steps.setup.outputs.ready == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: docs-preview
+          path: ${{ runner.temp }}/docs-preview
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      # The number comes from the build, so it's only used if that pull request's head is the commit
+      # that was built
+      - name: Check the pull request
+        if: steps.setup.outputs.ready == 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BUILT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          pr=$(head -c 16 "$RUNNER_TEMP/docs-preview/pr-number" | tr -d '[:space:]')
+          if ! [[ "$pr" =~ ^[0-9]{1,7}$ ]]; then
+            echo "::error::The build's pull request number isn't a number."
+            exit 1
+          fi
+          head_sha=$(gh api "repos/$REPO/pulls/$pr" --jq .head.sha)
+          if [ "$head_sha" != "$BUILT_SHA" ]; then
+            echo "::error::Pull request #$pr is at $head_sha, not the commit that was built ($BUILT_SHA)."
+            exit 1
+          fi
+          echo "number=$pr" >> "$GITHUB_OUTPUT"
+
+      - name: Put the site and the Worker config together
+        if: steps.setup.outputs.ready == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/deploy"
+          cp docs-site/wrangler.jsonc "$RUNNER_TEMP/deploy/"
+          cp -R "$RUNNER_TEMP/docs-preview/site" "$RUNNER_TEMP/deploy/dist"
+          # Only regular files are uploaded
+          find "$RUNNER_TEMP/deploy/dist" -type l -delete
+
+      - name: Publish to Cloudflare
+        if: steps.setup.outputs.ready == 'true'
+        id: deploy
+        working-directory: ${{ runner.temp }}/deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+          # Wrangler writes the Preview URL here
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.json
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          BUILT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          npx --yes wrangler@4.159.0 preview --name "pr-$PR_NUMBER" --message "Pull request #$PR_NUMBER at ${BUILT_SHA:0:7}"
+          url=$(jq -r 'select(.type == "preview") | .preview_urls[0] // empty' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n 1)
+          if [ -z "$url" ]; then
+            echo "::error::Wrangler didn't report a Preview URL."
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Docs preview: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      # One comment per pull request, updated on each push
+      - name: Link the preview on the pull request
+        if: steps.setup.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          URL: ${{ steps.deploy.outputs.url }}
+          BUILT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          marker='<!-- docs-preview -->'
+          body="$marker
+          **Docs preview:** $URL
+
+          Built from ${BUILT_SHA:0:7}. It updates on each push to this pull request."
+          comment=$(gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n 1)
+          if [ -n "$comment" ]; then
+            gh api --method PATCH "repos/$REPO/issues/comments/$comment" -f body="$body" > /dev/null
+          else
+            gh api --method POST "repos/$REPO/issues/$PR_NUMBER/comments" -f body="$body" > /dev/null
+          fi
