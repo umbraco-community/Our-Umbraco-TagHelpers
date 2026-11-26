@@ -21,8 +21,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(UmbracoVersion)' == '19'">
     <TargetFramework>net11.0</TargetFramework>
-    <UmbracoCmsVersion>19.0.0-rc1</UmbracoCmsVersion>
-    <USyncVersion>19.0.0-rc1</USyncVersion>
+    <UmbracoCmsVersion>19.0.0-rc2</UmbracoCmsVersion>
+    <USyncVersion>19.0.0-rc2</USyncVersion>
   </PropertyGroup>
 
   <PropertyGroup>
