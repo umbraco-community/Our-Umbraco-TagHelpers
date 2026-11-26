@@ -59,8 +59,8 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
-		<PackageReference Include="Umbraco.Cms.Core" Version="19.0.0-rc1" />
-		<PackageReference Include="Umbraco.Cms.Web.Common" Version="19.0.0-rc1" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="19.0.0-rc2" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="19.0.0-rc2" />
 	</ItemGroup>
 
   <ItemGroup>
