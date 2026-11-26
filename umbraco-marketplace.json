@@ -1,23 +1,70 @@
 {
     "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
-
     "AuthorDetails": {
         "Name": "Warren Buckley",
         "Description": "Warren is an Umbraco freelancer and contractor, nine-time Umbraco MVP and Umbraco Certified Master who loves to tinker and hack, and is available for hire. He has been working with Umbraco since the days of the Yahoo mailing list (aka way too long).",
         "Url": "https://hackmakedo.com",
         "ImageUrl": "https://hackmakedo.com/images/warren_square.jpg",
-        "SyncContributorsFromRepository": true
+        "SyncContributorsFromRepository": false,
+        "Contributors": [
+            {
+                "Name": "Andy Boot",
+                "Url": "https://github.com/AndyBoot"
+            },
+            {
+                "Name": "Chriztian Steinmeier",
+                "Url": "https://github.com/greystate"
+            },
+            {
+                "Name": "David Peck",
+                "Url": "https://github.com/drpeck"
+            },
+            {
+                "Name": "Marc Goodson",
+                "Url": "https://github.com/marcemarc"
+            },
+            {
+                "Name": "Matthew-Wise",
+                "Url": "https://github.com/Matthew-Wise"
+            },
+            {
+                "Name": "Nik",
+                "Url": "https://github.com/NikRimington"
+            },
+            {
+                "Name": "Paul Seal",
+                "Url": "https://github.com/prjseal"
+            },
+            {
+                "Name": "Rachel D",
+                "Url": "https://github.com/profcinders"
+            },
+            {
+                "Name": "Richard Thompson",
+                "Url": "https://github.com/richarth"
+            },
+            {
+                "Name": "Søren Kottal",
+                "Url": "https://github.com/skttl"
+            },
+            {
+                "Name": "Steven Hart",
+                "Url": "https://github.com/stayawakesteve"
+            }
+        ]
     },
-    "Category": "Developer Tools",    
+    "Category": "Developer Tools",
     "DocumentationUrl": "https://umbraco-community.github.io/Our-Umbraco-TagHelpers/",
     "DiscussionForumUrl": "https://github.com/umbraco-community/Our-Umbraco-TagHelpers/discussions",
     "IssueTrackerUrl": "https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues",
-    "LicenseTypes": ["Free"],
+    "LicenseTypes": [
+        "Free"
+    ],
     "PackageType": "Package",
     "Tags": [
         "TagHelper",
         "Helpers",
         "Utilities"
     ],
-    "VideoUrl": "https://www.youtube.com/watch?v=3fkDs0NwIE8"    
+    "VideoUrl": "https://www.youtube.com/watch?v=3fkDs0NwIE8"
 }
