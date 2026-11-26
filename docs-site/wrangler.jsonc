@@ -1,0 +1,17 @@
+// Cloudflare Worker that serves the docs site's pull request previews (.github/workflows/docs-preview.yml).
+// The live site stays on GitHub Pages; this Worker only has Preview URLs.
+// The preview workflow always uses this file from v2/dev, never a pull request's copy.
+{
+	"name": "our-umbraco-taghelpers-docs",
+	"compatibility_date": "2026-11-01",
+	// Static files only: there's no Worker script, so nothing in a preview can run code on Cloudflare
+	"assets": {
+		"directory": "./dist",
+		"html_handling": "auto-trailing-slash",
+		"not_found_handling": "404-page"
+	},
+	// No production workers.dev URL, only a Preview URL for each pull request
+	"workers_dev": false,
+	"preview_urls": true,
+	"previews": {}
+}

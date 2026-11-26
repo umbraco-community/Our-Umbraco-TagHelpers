@@ -6,7 +6,8 @@ name: Docs site
 # The release notes, the "Coming in" / "New" badges and the contributors are read from GitHub at build
 # time, so the site is rebuilt whenever any of them could have changed. Nothing is updated by hand.
 #
-# - Pull requests that touch the site: build and type check only, no deploy.
+# - Pull requests that touch the site: build and type check, no deploy. The built site is saved for
+#   docs-preview.yml, which publishes it as a preview on Cloudflare and links it on the pull request.
 # - Every push to v2/dev (so every merged pull request): build and deploy. A new contributor appears
 #   as soon as their pull request is merged, whatever it changed.
 # - A published GitHub release: rebuild and deploy v2/dev, so the release notes and badges update
@@ -62,6 +63,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # The build doesn't need git credentials, and its output is uploaded as an artifact
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v7
@@ -80,7 +84,29 @@ jobs:
         env:
           # Read-only token, so loading the GitHub releases isn't rate limited
           GITHUB_TOKEN: ${{ github.token }}
+          # Previews are served from the root of their own URL, not GitHub Pages' /Our-Umbraco-TagHelpers/
+          DOCS_BASE: ${{ github.event_name == 'pull_request' && '/' || '' }}
         run: npm run build
+
+      # Only static files and the pull request number. docs-preview.yml treats both as untrusted, as a
+      # fork's pull request can change what's built.
+      - name: Stage the preview
+        if: github.event_name == 'pull_request'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/docs-preview"
+          cp -R dist "$RUNNER_TEMP/docs-preview/site"
+          echo "$PR_NUMBER" > "$RUNNER_TEMP/docs-preview/pr-number"
+
+      - name: Upload the preview
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-preview
+          path: ${{ runner.temp }}/docs-preview
+          retention-days: 3
+          if-no-files-found: error
 
       - name: Upload site
         if: github.event_name != 'pull_request'

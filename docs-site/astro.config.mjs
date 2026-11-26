@@ -5,10 +5,11 @@ import starlight from '@astrojs/starlight';
 const repo = 'https://github.com/umbraco-community/Our-Umbraco-TagHelpers';
 
 // Served from GitHub Pages at https://umbraco-community.github.io/Our-Umbraco-TagHelpers/
-// To move to a custom domain later, set `site` to it and remove `base`.
+// To move to a custom domain later, set `site` to it and make the default `base` '/'.
+// Pull request previews (docs-preview.yml) are served from the root, so they build with DOCS_BASE=/.
 export default defineConfig({
 	site: 'https://umbraco-community.github.io',
-	base: '/Our-Umbraco-TagHelpers',
+	base: process.env.DOCS_BASE || '/Our-Umbraco-TagHelpers',
 	trailingSlash: 'always',
 	// Contributors' GitHub avatars are downloaded and resized at build time
 	image: { remotePatterns: [{ protocol: 'https', hostname: 'avatars.githubusercontent.com' }] },

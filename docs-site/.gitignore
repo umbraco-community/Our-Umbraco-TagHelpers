@@ -2,3 +2,5 @@
 dist/
 .astro/
 node_modules/
+# Wrangler state from local preview deploys
+.wrangler/
