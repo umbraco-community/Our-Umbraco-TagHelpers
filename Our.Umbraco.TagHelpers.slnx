@@ -4,6 +4,8 @@
     <File Path=".github/workflows/docs-preview.yml" />
     <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/e2e.yml" />
+    <File Path=".github/workflows/marketplace.yml" />
+    <File Path=".github/scripts/marketplace-contributors.mjs" />
     <File Path="appsettings-schema.our.umbraco.taghelpers.json" />
     <File Path="build.ps1" />
     <File Path="README.md" />
