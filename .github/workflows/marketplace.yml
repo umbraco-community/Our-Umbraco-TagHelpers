@@ -1,0 +1,89 @@
+name: Umbraco Marketplace
+
+# Keeps the Umbraco Marketplace listing (https://marketplace.umbraco.com/package/our.umbraco.taghelpers)
+# up to date. The Marketplace reads umbraco-marketplace.json and umbraco-marketplace-readme.md from the
+# root of v2/dev, the default branch.
+#
+# - Contributors: the listing's co-authors are listed in umbraco-marketplace.json rather than synced
+#   from GitHub by the Marketplace, so the author and AI coding agents can be left out
+#   (.github/scripts/marketplace-contributors.mjs). On every push to v2/dev and weekly, the list is
+#   rebuilt from GitHub, and a pull request is opened (or updated) when it has changed. Pull requests
+#   opened by this workflow don't start the other workflows' checks; it only changes the JSON file.
+# - Sync: when either Marketplace file changes on v2/dev, ask the Marketplace to read them again now,
+#   instead of at its next refresh (every 2 hours).
+on:
+  push:
+    branches: [ v2/dev ]
+  schedule:
+    - cron: '41 4 * * 1' # Mondays, 04:41 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: marketplace
+  cancel-in-progress: false
+
+jobs:
+  contributors:
+    name: Update the contributors
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write       # push the update branch
+      pull-requests: write  # open the pull request
+    env:
+      BRANCH: chore/marketplace-contributors
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: v2/dev
+          # Only the push below gets the token
+          persist-credentials: false
+
+      - name: Rebuild the contributors
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/marketplace-contributors.mjs
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if git diff --quiet -- umbraco-marketplace.json; then
+            echo "The contributors haven't changed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git commit -m "Update the Umbraco Marketplace contributors" -- umbraco-marketplace.json
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "$BRANCH"
+          if [ -z "$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --repo "$REPO" --base v2/dev --head "$BRANCH" \
+              --title "Update the Umbraco Marketplace contributors" \
+              --body "The repository's contributors have changed, so this updates the co-authors on the [Umbraco Marketplace listing](https://marketplace.umbraco.com/package/our.umbraco.taghelpers). Opened by \`.github/workflows/marketplace.yml\`; once merged, the listing is synced straight away."
+          fi
+
+  sync:
+    name: Sync the listing
+    # Runs on demand, or when a push to v2/dev changed one of the Marketplace files
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && contains(toJSON(github.event.commits), 'umbraco-marketplace'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # The endpoint allows one request a minute per package
+      - name: Ask the Marketplace to sync the package
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 60 -X POST \
+            https://functions.marketplace.umbraco.com/api/InitiateSinglePackageSyncFunction \
+            -H 'Content-Type: application/json' -d '{"PackageId": "Our.Umbraco.TagHelpers"}')
+          echo "The Marketplace replied $status."
+          case "$status" in
+            2??) ;;
+            *) echo "::warning::The Marketplace sync request returned $status. The listing will still update at its next refresh (every 2 hours)." ;;
+          esac

@@ -2,7 +2,7 @@
 
 **Less C# in your Razor, more HTML.** A community package of ASP.NET Core tag helpers for Umbraco CMS: translations, member-only content, responsive images, inline SVGs, forms and more, written as HTML. One NuGet package for Umbraco 16, 17, 18 and 19.
 
-**📖 Full documentation: https://umbraco-community.github.io/Our-Umbraco-TagHelpers/**
+**📖 [Full documentation: umbraco-community.github.io/Our-Umbraco-TagHelpers](https://umbraco-community.github.io/Our-Umbraco-TagHelpers/)**
 
 ## Install
 
