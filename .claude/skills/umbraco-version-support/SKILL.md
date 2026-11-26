@@ -29,7 +29,7 @@ Follow the checklist's sections in order, one commit per step:
    - Library fixes must keep every other version passing. A runtime `MissingMethodException` on a version that shares a target framework means building against the older version and avoiding the moved member.
    - Commit each fix separately, with a unit test when the fix is in the library.
    - A failure that's a genuine library bug outside the version work: mark the test `test.fixme` with a comment, draft a GitHub issue for the user, and ask before creating it.
-6. **README**: supported versions, target frameworks, `-p:UmbracoVersion` list, prerequisites.
+6. **Docs**: the supported versions tables in `README.md`, `umbraco-marketplace-readme.md` and the docs site's installation page (`docs-site/src/content/docs/getting-started/installation.md`), and the `-p:UmbracoVersion` list and prerequisites on its contributing pages.
 7. **Checklist upkeep**: add what broke this time to "What broke last time" in `docs/supporting-a-new-umbraco-version.md`.
 
 ## Rules

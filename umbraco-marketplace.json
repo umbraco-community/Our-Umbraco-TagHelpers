@@ -9,6 +9,7 @@
         "SyncContributorsFromRepository": true
     },
     "Category": "Developer Tools",    
+    "DocumentationUrl": "https://umbraco-community.github.io/Our-Umbraco-TagHelpers/",
     "DiscussionForumUrl": "https://github.com/umbraco-community/Our-Umbraco-TagHelpers/discussions",
     "IssueTrackerUrl": "https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues",
     "LicenseTypes": ["Free"],

@@ -266,7 +266,7 @@ namespace Our.Umbraco.TagHelpers.Tests
 
         // https://github.com/umbraco-community/Our-Umbraco-TagHelpers/issues/57
         // Each test renders the file, changes it, and renders again: the second render shows whether it was cached
-        // All 12 combinations, in the same order as the README's "When is an SVG cached?" table:
+        // All 12 combinations, in the same order as the "When is an SVG cached?" table on the docs site's our-svg page:
         // (appsettings Cache, cache attribute or null when not set, ignore-appsettings, expected cached)
         [TestCase(false, null, false, false)]
         [TestCase(true, null, false, true)]
