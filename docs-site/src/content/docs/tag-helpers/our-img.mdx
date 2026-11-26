@@ -5,6 +5,8 @@ addedIn: 1.0.0
 usage: element
 ---
 
+import VersionBadge from '../../../components/VersionBadge.astro';
+
 `<our-img>` renders an `<img>`, or a `<picture>` when you give sizes for different screen widths, tuned for page speed: dimensions set, lazy loading, and images resized to the size they're shown at. The image can be a media item picked in Umbraco (`media-item`) or a static file (`src`).
 
 ```cshtml
@@ -19,6 +21,7 @@ Attributes ending `--s`, `--m`, `--l`, `--xl` and `--xxl` apply from the matchin
 |---|---|
 | `src` | The URL of an image file, absolute or relative, such as `/assets/image.jpg`. |
 | `media-item` | A picked image (`MediaWithCrops`), such as `Model.Image`. |
+| `fallback-img` <VersionBadge version="2.1.0" inline /> | An image to show instead when nothing was picked for `media-item`, or when `src` is a file on this site that doesn't exist. See [A fallback image](#a-fallback-image). |
 | `alt` | The alt text. Without it, the media's alt text property, name or file name is used. |
 | `class` | CSS classes for the image. |
 | `style` | Inline styles for the image. |
@@ -82,6 +85,20 @@ Sizes for other screen widths make a `<picture>`:
     <img alt="Some alt text" width="200" height="200" src="/media/path/image.jpg?width=200&amp;height=200&amp;rnd=133087885756657361" loading="lazy" decoding="async" fetchpriority="low">
 </picture>
 ```
+
+### A fallback image
+
+With `fallback-img`, the image is shown instead when:
+
+- nothing was picked for `media-item`, or
+- `src` is a file on this site (starting with `/`) that doesn't exist in `wwwroot`.
+
+```cshtml
+<our-img media-item="Model.Image" fallback-img="/images/not-found.jpg" width="300" />
+<our-img src="/assets/@(Model.Slug).jpg" fallback-img="/images/not-found.jpg" width="300" />
+```
+
+The fallback is used as the `src`, so `width`, `height` and the other attributes apply to it. External `src` URLs and media files aren't checked, and nothing is checked unless `fallback-img` is set.
 
 ## Global settings
 
