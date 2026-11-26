@@ -21,6 +21,13 @@ npm run dev
 
 Open the address it prints (`http://localhost:4321/Our-Umbraco-TagHelpers/`). Pages reload as you save.
 
+The site lives under `/Our-Umbraco-TagHelpers/` because that's where GitHub Pages serves it, so `http://localhost:4321/` on its own is a 404. To run it at the root instead, as the pull request previews are, set `DOCS_BASE`:
+
+```bash
+DOCS_BASE=/ npm run dev                     # macOS and Linux
+$env:DOCS_BASE = "/"; npm run dev           # PowerShell
+```
+
 Before you push, check the site builds and type checks:
 
 ```bash
