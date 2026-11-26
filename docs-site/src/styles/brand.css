@@ -90,6 +90,13 @@
 	--sl-nav-height: 4.5rem;
 }
 
+/* The home page (no sidebar) is wider, 67.5rem as in Starlight, in both themes. Starlight sets it with
+   html:not([data-has-sidebar]), which outranks the plain :root above but not :root[data-theme='light'],
+   so without this the home page was wide in dark but 45rem in light. */
+:root:not([data-has-sidebar]) {
+	--sl-content-width: 67.5rem;
+}
+
 a,
 button {
 	transition:
