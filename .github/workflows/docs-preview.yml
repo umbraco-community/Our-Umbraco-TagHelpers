@@ -39,8 +39,7 @@ jobs:
     permissions:
       actions: read        # download the build from the docs.yml run
       contents: read       # check out wrangler.jsonc from v2/dev
-      issues: write        # comment the preview link on the pull request
-      pull-requests: read  # check the pull request that was built
+      pull-requests: write # check the pull request that was built, and comment the preview link on it
     steps:
       - name: Check Cloudflare is set up
         id: setup
