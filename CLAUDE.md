@@ -32,7 +32,7 @@ cd docs-site && npm run dev                               # docs site (http://lo
 cd docs-site && npm run build && npm run check            # build and type check the docs site
 ```
 
-Choose e2e versions with `UMBRACO_VERSIONS=17,19`. The README shows the PowerShell and Command Prompt forms. Site logs are in `tests/e2e/.data/vN/site.log`.
+Choose e2e versions with `UMBRACO_VERSIONS=17,19`. The docs site's "Cross-version tests" page (`docs-site/src/content/docs/contributing/cross-version-tests.md`) shows the PowerShell and Command Prompt forms. Site logs are in `tests/e2e/.data/vN/site.log`.
 
 ## Conventions
 
@@ -41,6 +41,6 @@ Choose e2e versions with `UMBRACO_VERSIONS=17,19`. The README shows the PowerShe
 - **Cross-version**: any library change must build on every target framework and pass the unit and e2e suites on all four versions. Umbraco 17 and 18 share `net10.0`, so the 17-built DLL must also work on 18 at runtime (watch for members that move between interfaces).
 - **Cross-platform**: scripts and documented commands must work on Windows, macOS and Linux.
 - **Demo samples**: every sample sits in `<section data-sample="name">` in `Views/Home.cshtml` or `Views/Page.cshtml`, which the specs select by. A new tag helper option gets a sample and a spec. Test data the specs need goes in uSync (content) or the TestSite migration (people), never only in a local database.
-- **Docs site**: a new tag helper gets a page in `docs-site/src/content/docs/tag-helpers/` with `addedIn` (the version it ships in) and `usage` in its frontmatter; a new option gets an inline `<VersionBadge version="x.y.z" inline />` (in an `.mdx` page). Badges and the sidebar's "Coming soon"/"New" work themselves out from the GitHub releases. See the site's "Writing the docs" page. The README still has the same content until it's trimmed to point at the site, so update both for now.
+- **Docs site**: a new tag helper gets a page in `docs-site/src/content/docs/tag-helpers/` with `addedIn` (the version it ships in) and `usage` in its frontmatter; a new option gets an inline `<VersionBadge version="x.y.z" inline />` (in an `.mdx` page). Badges and the sidebar's "Coming soon"/"New" work themselves out from the GitHub releases. See the site's "Writing the docs" page. The docs site is the reference: `README.md` (also the NuGet readme) and `umbraco-marketplace-readme.md` (the Umbraco Marketplace listing) only list the tag helpers with links to their pages, using absolute URLs, so a new tag helper adds a line to both, and a new option only needs the docs page.
 - **Known bugs** stay as `test.fixme` with a comment linking the GitHub issue (for example #97, `our-active-class` with culture domains).
 - **Docs**: before relying on Umbraco or library APIs, check current docs (the `ctx7` CLI if available); Umbraco APIs change between majors.

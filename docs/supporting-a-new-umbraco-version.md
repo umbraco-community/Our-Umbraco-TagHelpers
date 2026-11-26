@@ -37,7 +37,9 @@ Install that .NET SDK and runtime locally. `dotnet --list-sdks` and `dotnet --li
 | `tests/e2e/scripts/start-site.mjs` | Add `N: <dotnet major>` to `dotnetMajorFor`. |
 | `.github/workflows/e2e.yml` | Add `N` to the matrix, add the .NET version to both `setup-dotnet` steps (the `pack` job and the `e2e` job). While `N` is an RC, set `continue-on-error: ${{ matrix.umbraco == N }}` (report, don't block). |
 | `.github/workflows/codeql-analysis.yml` | Add the .NET version to `setup-dotnet` (CodeQL builds every target framework). |
-| `README.md` | The supported-versions sentence, the target framework list, the `-p:UmbracoVersion=` list, and the runtime prerequisites. |
+| `README.md`, `umbraco-marketplace-readme.md` | The supported versions table. |
+| `docs-site/src/content/docs/getting-started/installation.md` | The supported versions table. |
+| `docs-site/src/content/docs/contributing/` | The `-p:UmbracoVersion=` list and the runtime prerequisites (`demo-site.md`, `cross-version-tests.md`). |
 
 The demo default stays on the current **LTS** (`UmbracoVersion` default in `Our.Umbraco.TagHelpers.TestSite/Directory.Build.props`). Move it only when a newer LTS ships.
 
@@ -51,7 +53,7 @@ dotnet test Our.Umbraco.TagHelpers.Tests              # unit tests on every targ
 dotnet build Our.Umbraco.TagHelpers.TestSite -p:UmbracoVersion=N
 ```
 
-Then the cross-version suite (see the README for setting `UMBRACO_VERSIONS` in PowerShell or Command Prompt):
+Then the cross-version suite (see the docs site's "Cross-version tests" page for setting `UMBRACO_VERSIONS` in PowerShell or Command Prompt):
 
 ```bash
 cd tests/e2e

@@ -54,7 +54,8 @@
     - Project (default): the Our.Umbraco.TagHelpers project in this repository.
     - Package: an Our.Umbraco.TagHelpers .nupkg, to test exactly what would be published.
       Pack it (pwsh ./build.ps1 -Version 2.1.0-local.1), then build or run this project with
-      -p:TagHelpersSource=Package -p:TagHelpersPackageVersion=2.1.0-local.1 (see README.md).
+      -p:TagHelpersSource=Package -p:TagHelpersPackageVersion=2.1.0-local.1 (see the docs site's
+      "Packing" page, docs-site/src/content/docs/contributing/packing.md).
       TagHelpersPackageSource is the folder to restore it from (default: build.out, where build.ps1 packs).
       NuGet caches packages by version, so give each new build of the package its own version.
   -->
