@@ -19,6 +19,10 @@ changelog:
     - title: Bug Fixes 🐛
       labels:
         - bug
+    # The docs site, README and Umbraco Marketplace listing
+    - title: Documentation 📖
+      labels:
+        - documentation
     - title: Other Changes
       labels:
         - "*"
