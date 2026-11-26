@@ -8,6 +8,7 @@
     <File Path="build.ps1" />
     <File Path="README.md" />
     <File Path="umbraco-marketplace.json" />
+    <File Path="umbraco-marketplace-readme.md" />
   </Folder>
   <Folder Name="/Docs/">
     <File Path=".claude/skills/release-package/SKILL.md" />
