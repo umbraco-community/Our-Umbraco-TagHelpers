@@ -6,7 +6,7 @@ Our.Umbraco.TagHelpers v2 ships **one NuGet package for several Umbraco majors**
 |---|---|---|
 | `net9.0` | 16 | 16.0.0 |
 | `net10.0` | 17 (LTS), 18 | 17.0.0 |
-| `net11.0` | 19 | 19.0.0-rc1 |
+| `net11.0` | 19 | 19.0.0-rc2 |
 
 Because Umbraco 17 and 18 share `net10.0`, the 17-built DLL also has to work on 18. That's binary compatibility, not just source compatibility: a member that moves between versions breaks at runtime even when the code compiles (see [What broke last time](#what-broke-last-time)). The cross-version Playwright suite exists to catch exactly that.
 
