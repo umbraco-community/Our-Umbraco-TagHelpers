@@ -5,6 +5,8 @@ using Microsoft.Extensions.Options;
 using Our.Umbraco.TagHelpers.Configuration;
 using Our.Umbraco.TagHelpers.Utils;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Umbraco.Cms.Core.Cache;
@@ -189,7 +191,7 @@ namespace Our.Umbraco.TagHelpers
                 fileContents = reader.ReadToEnd();
             }
 
-            // Sanitize SVG (Is there anything in Umbraco to reuse)
+            // Sanitize SVG: remove script blocks and script URLs, then everything else that can run script (RemoveUnsafeContent)
             // https://stackoverflow.com/questions/65247336/is-there-anyway-to-sanitize-svg-file-in-c-any-libraries-anything/65375485#65375485
             var cleanedFileContents = Regex.Replace(fileContents,
                 @"<script.*?script>",
@@ -200,6 +202,16 @@ namespace Our.Umbraco.TagHelpers
                 @"javascript:",
                 @"syntax:error:",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+            try
+            {
+                cleanedFileContents = RemoveUnsafeContent(cleanedFileContents);
+            }
+            catch (Exception)
+            {
+                // Fail closed: an SVG that can't be checked isn't inlined
+                return null;
+            }
 
             if ((EnsureViewBox || (_globalSettings.OurSVG.EnsureViewBox && !IgnoreAppSettings)) || !string.IsNullOrEmpty(CssClass))
             {
@@ -226,6 +238,83 @@ namespace Our.Umbraco.TagHelpers
             }
 
             return cleanedFileContents;
+        }
+
+        // Elements that can run script or load another document when the SVG is inlined into the page
+        private static readonly HashSet<string> UnsafeElements = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "script", "foreignObject", "iframe", "frame", "embed", "object", "applet", "base",
+        };
+
+        // Animation elements, which can change another attribute (e.g. turn a link into a script URL)
+        private static readonly HashSet<string> AnimationElements = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "set", "animate", "animateMotion", "animateTransform",
+        };
+
+        private static readonly Regex UrlScheme = new("^([a-zA-Z][a-zA-Z0-9+.-]*):", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Removes what can run script once the SVG is inlined into the page: script-capable elements, event
+        /// handler attributes (on...), links that aren't internal (#...), web or image references, and
+        /// animations that target links or event handlers. Returns the SVG unchanged when there's nothing to remove.
+        /// </summary>
+        private static string RemoveUnsafeContent(string svg)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(svg);
+            var changed = false;
+
+            foreach (var node in doc.DocumentNode.Descendants().Where(n => n.NodeType == HtmlNodeType.Element).ToList())
+            {
+                if (UnsafeElements.Contains(node.Name)
+                    || (AnimationElements.Contains(node.Name) && IsUnsafeAttributeName(node.GetAttributeValue("attributeName", string.Empty))))
+                {
+                    node.Remove();
+                    changed = true;
+                    continue;
+                }
+
+                foreach (var attribute in node.Attributes.ToList())
+                {
+                    if (attribute.Name.StartsWith("on", StringComparison.OrdinalIgnoreCase)
+                        || (IsLinkAttribute(attribute.Name) && !IsSafeLink(node.Name, attribute.Value ?? string.Empty)))
+                    {
+                        attribute.Remove();
+                        changed = true;
+                    }
+                }
+            }
+
+            return changed ? doc.DocumentNode.OuterHtml : svg;
+        }
+
+        private static bool IsUnsafeAttributeName(string name) =>
+            name.StartsWith("on", StringComparison.OrdinalIgnoreCase) || IsLinkAttribute(name);
+
+        private static bool IsLinkAttribute(string name) =>
+            name.Equals("href", StringComparison.OrdinalIgnoreCase) || name.EndsWith(":href", StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsSafeLink(string element, string value)
+        {
+            // Browsers ignore whitespace and control characters in URLs, and entities are decoded first
+            var url = new string((HtmlEntity.DeEntitize(value) ?? string.Empty).Where(c => c > ' ').ToArray());
+            if (url.Length == 0 || url.StartsWith('#'))
+            {
+                return true;
+            }
+
+            var scheme = UrlScheme.Match(url).Groups[1].Value.ToLowerInvariant();
+            return element.ToLowerInvariant() switch
+            {
+                // Links: web, mail and relative URLs
+                "a" => scheme is "" or "http" or "https" or "mailto",
+                // Images: web and relative URLs, and data URLs of images
+                "image" or "feimage" => scheme is "" or "http" or "https"
+                    || (scheme == "data" && url.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase)),
+                // Everything else (use, textPath, gradients...) may only reference the SVG's own elements
+                _ => false,
+            };
         }
     }
 }
