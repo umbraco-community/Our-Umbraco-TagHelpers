@@ -90,11 +90,11 @@
 	--sl-nav-height: 4.5rem;
 }
 
-/* The same content width on the home page in both themes. Starlight widens pages without a sidebar
-   (the home page) with html:not([data-has-sidebar]), which outranks the plain :root above but not
-   :root[data-theme='light'], so the home page was wider in dark than in light. */
+/* The home page (no sidebar) is wider, 67.5rem as in Starlight, in both themes. Starlight sets it with
+   html:not([data-has-sidebar]), which outranks the plain :root above but not :root[data-theme='light'],
+   so without this the home page was wide in dark but 45rem in light. */
 :root:not([data-has-sidebar]) {
-	--sl-content-width: 45rem;
+	--sl-content-width: 67.5rem;
 }
 
 a,
