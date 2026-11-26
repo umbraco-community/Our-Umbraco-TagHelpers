@@ -1,0 +1,84 @@
+---
+title: our-self-host
+description: Downloads a third-party script, stylesheet or image once and serves it from your own site.
+addedIn: 1.2.0
+usage: attribute
+---
+
+import VersionBadge from '../../../components/VersionBadge.astro';
+
+`our-self-host` goes on any element with a `src` or `href`, such as a `<script>`, `<link>` or `<img>`. The first time the page renders, the file is downloaded into your site, and the attribute is changed to point at your copy.
+
+```cshtml
+<script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" our-self-host></script>
+```
+
+It was written by Søren Kottal for the [24 Days in Umbraco advent calendar in 2022](https://24days.in/umbraco-cms/2022/static-assets-taghelper/).
+
+## Where files are saved
+
+Files are saved under `/assets/`, keeping the folder path of the URL. Change the root folder with `RootFolder` in [`appsettings.json`](#settings).
+
+Add a `folder` attribute to save files in a subfolder:
+
+```cshtml
+<script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" our-self-host folder="libraries"></script>
+```
+
+That saves the file as `/assets/libraries/alpinejs@3.10.5/dist/cdn.min.js`.
+
+## URLs without a file extension
+
+If the URL has no extension, such as `https://unpkg.com/alpinejs`, add `ext` so the file is saved with one (and served with the right MIME type):
+
+```cshtml
+<script src="https://unpkg.com/alpinejs" our-self-host ext="js"></script>
+```
+
+That saves the file as `/assets/alpinejs.js`.
+
+## Attributes
+
+| Attribute | What it does |
+|---|---|
+| `our-self-host` | Turns self hosting on for the element. |
+| `folder` | A subfolder of the root folder to save the file in. |
+| `ext` | The file extension to save with, for URLs that don't have one. |
+
+## Caching
+
+The file is saved once, and never updated unless you delete it. Where the local file is found is kept in Umbraco's runtime cache.
+
+If a file couldn't be saved, the tag uses the original URL and tries the download again after 5 minutes <VersionBadge version="2.1.0" inline />, so a short outage at the CDN doesn't leave the site linking to it until the site restarts. Once the file is saved, it's used from then on.
+
+## Limits on what's downloaded <VersionBadge version="2.1.0" inline />
+
+`our-self-host` is meant for URLs written in your views, such as the CDN links above, not for values that editors or visitors enter. To keep downloads in check:
+
+- Only `http` and `https` URLs are downloaded, and the file must end up inside the root folder (a `folder` such as `../..` isn't allowed).
+- Redirects are followed (up to 5) only to URLs that pass the same checks, including `AllowedHosts`, and never from `https` to `http`.
+- If a download fails, takes too long or is too large, the tag keeps the original URL instead of breaking the page, and a warning is logged. The download is tried again after 5 minutes.
+
+## Settings
+
+These go in `appsettings.json`. The values shown are the defaults.
+
+```json title="appsettings.json"
+{
+  "Our.Umbraco.TagHelpers": {
+    "OurSelfHost": {
+      "RootFolder": "/assets",
+      "AllowedHosts": [],
+      "MaxFileSizeKilobytes": 1024,
+      "DownloadTimeoutSeconds": 30
+    }
+  }
+}
+```
+
+| Setting | What it does |
+|---|---|
+| `RootFolder` | The folder files are saved in. |
+| `AllowedHosts` <VersionBadge version="2.1.0" inline /> | The hosts files may be downloaded from, such as `["unpkg.com", "cdn.jsdelivr.net"]`. When it's empty, any host is allowed; a URL on another host keeps pointing at the original. |
+| `MaxFileSizeKilobytes` <VersionBadge version="2.1.0" inline /> | The largest file that's downloaded, in kilobytes (1024, 1 MB, by default). That's plenty for scripts, stylesheets, fonts and web-ready images; raise it if you self host bigger files such as large photos. |
+| `DownloadTimeoutSeconds` <VersionBadge version="2.1.0" inline /> | How long to wait for a download, in seconds. |

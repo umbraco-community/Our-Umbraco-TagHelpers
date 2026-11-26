@@ -1,0 +1,47 @@
+---
+title: <our-edit-link>
+description: Shows a link to edit the current page in the backoffice, only to users who can edit content.
+addedIn: 0.4.0
+usage: element
+---
+
+import VersionBadge from '../../../components/VersionBadge.astro';
+
+`<our-edit-link>` renders a link that opens the current page in the Umbraco backoffice. It's only rendered for someone logged in to the backoffice with access to the Content section; everyone else sees nothing.
+
+```cshtml
+<our-edit-link>Edit</our-edit-link>
+```
+
+That renders an `<a>` to the page's content item, where the GUID is the page's key:
+
+```html
+<a href="/umbraco/section/content/workspace/document/edit/b0c59e4c-158c-4fd4-9beb-ebe907693f1c">Edit</a>
+```
+
+## Fixed to the corner of the screen
+
+`use-default-styles` places the link at the bottom left of the screen, with white text on navy, so it's always in reach:
+
+```cshtml
+<our-edit-link use-default-styles>Edit</our-edit-link>
+```
+
+## Open in a new tab
+
+The link is an ordinary `<a>`, so other attributes such as `target` and `class` are kept:
+
+```cshtml
+<our-edit-link target="_blank" class="edit-link">Edit</our-edit-link>
+```
+
+## Attributes
+
+| Attribute | What it does |
+|---|---|
+| `content-key` <VersionBadge version="2.0.0" inline /> | The key (GUID) of the content item to edit. Leave it out for the current page. |
+| `use-default-styles` | Fixes the link to the bottom left of the screen with built-in styles. |
+
+:::note[Changed in version 2]
+`content-id` became `content-key`, and the `edit-url` attribute was removed, because the new backoffice addresses content by its key. See [Upgrading to version 2](../../getting-started/upgrading-to-v2/).
+:::

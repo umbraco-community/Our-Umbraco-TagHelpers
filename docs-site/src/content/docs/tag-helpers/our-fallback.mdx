@@ -1,0 +1,35 @@
+---
+title: <our-fallback>
+description: Outputs a property using Umbraco's fallback modes, or the content inside the tag when there's no value.
+addedIn: 0.2.0
+usage: element
+---
+
+import VersionBadge from '../../../components/VersionBadge.astro';
+
+`<our-fallback>` outputs a property of the current page using Umbraco's [fallback modes](https://docs.umbraco.com/umbraco-cms/fundamentals/design/rendering-content), such as falling back to another language or to an ancestor. If there's still no value, the content inside the tag is shown instead.
+
+```cshtml
+@* The Razor way *@
+@Model.Value("Header", fallback: Fallback.ToLanguage)
+
+@* With the tag helper *@
+<h3><our-fallback property="Header" mode="Fallback.ToLanguage" culture="da-DK">I do NOT have a DK culture variant of this property</our-fallback></h3>
+<h3><our-fallback property="Header" mode="Fallback.ToAncestors">I do NOT have a Header property set on ANY parent and ancestors</our-fallback></h3>
+```
+
+## Attributes
+
+| Attribute | What it does |
+|---|---|
+| `property` | The property on the page's model, as a ModelsBuilder property name such as `Header`. |
+| `mode` | The Umbraco fallback mode, such as `Fallback.ToLanguage`, `Fallback.ToAncestors` or `Fallback.ToDefaultValue`. |
+| `culture` | The culture to read the property in, such as `da-DK`. Leave it out to use the current page's culture. |
+
+## Good to know
+
+- The value is output the way `@Model.Value(...)` outputs it in Razor:
+  - plain text, such as a Textstring or Textarea, is HTML-encoded, so markup in it is shown as text,
+  - Rich Text and Markdown properties <VersionBadge version="2.1.0" inline /> are output as HTML, for example `<our-fallback property="BodyText" mode="Fallback.ToAncestors">No body text</our-fallback>`,
+  - other complex values, such as a content picker, a list or blocks, aren't rendered, since there's no single way to display them.
+- The view's model must be the page (`IPublishedContent`); otherwise nothing is rendered.

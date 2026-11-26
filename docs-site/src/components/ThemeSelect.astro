@@ -1,0 +1,77 @@
+---
+/**
+ * Light (the default) or Dark. No "Auto": the site has one default look for everyone, and anyone
+ * who prefers dark can pick it once.
+ */
+import { Icon } from '@astrojs/starlight/components';
+import Select from '@astrojs/starlight/components/Select.astro';
+---
+
+<starlight-theme-select>
+	<Select
+		label={Astro.locals.t('themeSelect.accessibleLabel')}
+		options={[
+			{ label: Astro.locals.t('themeSelect.light'), selected: true, value: 'light' },
+			{ label: Astro.locals.t('themeSelect.dark'), selected: false, value: 'dark' },
+		]}
+		width="6.25em"
+	>
+		<Fragment slot="icon">
+			<Icon name="moon" class="sl-theme-icon-dark" />
+			<Icon name="sun" class="sl-theme-icon-light" />
+		</Fragment>
+	</Select>
+</starlight-theme-select>
+
+{/* Inlined so the picker shows the stored choice before the page paints */}
+<script
+	is:inline
+	set:html={`(() => {
+		let theme = null;
+		try { theme = localStorage.getItem('starlight-theme'); } catch (e) {}
+		if (theme === 'dark') document.querySelectorAll('starlight-theme-select select').forEach((s) => { s.value = 'dark'; });
+	})();`}
+/>
+
+<style>
+	starlight-theme-select:has([value='dark']:not(:checked)) :global(.sl-theme-icon-dark),
+	starlight-theme-select:has([value='light']:not(:checked)) :global(.sl-theme-icon-light) {
+		display: none;
+	}
+</style>
+
+<script>
+	type Theme = 'dark' | 'light';
+	const storageKey = 'starlight-theme';
+
+	function setTheme(theme: Theme, store: boolean): void {
+		document.querySelectorAll<HTMLSelectElement>('starlight-theme-select select').forEach((select) => {
+			select.value = theme;
+		});
+		document.documentElement.dataset.theme = theme;
+		if (store) {
+			try {
+				localStorage.setItem(storageKey, theme);
+			} catch {
+				// Storage can be blocked; the choice then lasts for this page only
+			}
+		}
+	}
+
+	class StarlightThemeSelect extends HTMLElement {
+		constructor() {
+			super();
+			let stored: string | null = null;
+			try {
+				stored = localStorage.getItem(storageKey);
+			} catch {}
+			setTheme(stored === 'dark' ? 'dark' : 'light', false);
+			this.querySelector('select')?.addEventListener('change', (e) => {
+				if (e.currentTarget instanceof HTMLSelectElement) {
+					setTheme(e.currentTarget.value === 'dark' ? 'dark' : 'light', true);
+				}
+			});
+		}
+	}
+	customElements.define('starlight-theme-select', StarlightThemeSelect);
+</script>

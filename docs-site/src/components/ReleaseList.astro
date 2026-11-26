@@ -1,0 +1,38 @@
+---
+/** Every GitHub release, newest first, with its notes. Loaded when the site is built. */
+import { getCollection, render } from 'astro:content';
+import { compareVersions } from '../lib/versions';
+
+const repo = 'https://github.com/umbraco-community/Our-Umbraco-TagHelpers';
+const releases = (await getCollection('releases')).sort((a, b) => compareVersions(b.data.version, a.data.version));
+const rendered = await Promise.all(releases.map(async (release) => ({ release, Content: (await render(release)).Content })));
+const dateFormat = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+
+{
+	rendered.length === 0 ? (
+		<p>
+			The release notes couldn't be loaded when this page was built. See the{' '}
+			<a href={`${repo}/releases`}>releases on GitHub</a>.
+		</p>
+	) : (
+		rendered.map(({ release, Content }) => (
+			<section class="th-release" id={release.data.tag.replaceAll('.', '-')} aria-labelledby={`${release.id}-title`}>
+				<h2 id={`${release.id}-title`}>
+					{release.data.name}
+					{release.data.prerelease && <span class="th-release__pre">Prerelease</span>}
+				</h2>
+				<p class="th-release__meta">
+					<time datetime={release.data.publishedAt.toISOString()}>{dateFormat.format(release.data.publishedAt)}</time>
+					{' · '}
+					<a href={release.data.url}>View on GitHub</a>
+					{' · '}
+					<a href={`https://www.nuget.org/packages/Our.Umbraco.TagHelpers/${release.data.version}`}>NuGet</a>
+				</p>
+				<div class="th-release__body">
+					{release.body?.trim() ? <Content /> : <p>No notes were written for this release.</p>}
+				</div>
+			</section>
+		))
+	)
+}

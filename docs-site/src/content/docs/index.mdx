@@ -1,0 +1,96 @@
+---
+title: Our Umbraco TagHelpers
+description: A community package of ASP.NET Core Razor tag helpers for Umbraco CMS 16, 17, 18 and 19.
+template: splash
+hero:
+  title: Less C# in your Razor, <span class="hero-accent">more HTML</span>
+  tagline: Our Umbraco TagHelpers is a community package of ASP.NET Core tag helpers for Umbraco CMS. Translations, member-only content, responsive images, inline SVGs and more, written as HTML. One NuGet package for Umbraco 16, 17, 18 and 19.
+  actions:
+    - text: Get started
+      link: /Our-Umbraco-TagHelpers/getting-started/installation/
+      variant: primary
+    - text: Browse the tag helpers
+      link: /Our-Umbraco-TagHelpers/tag-helpers/
+      variant: secondary
+    - text: View on GitHub
+      link: https://github.com/umbraco-community/Our-Umbraco-TagHelpers
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Contributors from '../../components/Contributors.astro';
+
+## Install in two steps
+
+Add the package to your Umbraco website project:
+
+```bash
+dotnet add package Our.Umbraco.TagHelpers
+```
+
+Then register the tag helpers at the bottom of `Views/_ViewImports.cshtml`:
+
+```cshtml
+@addTagHelper *, Our.Umbraco.TagHelpers
+```
+
+## Before and after
+
+Tag helpers turn Razor logic into attributes and elements. This link only renders when the content picker has a value, and so does the image inside it:
+
+```cshtml title="Before"
+@if (Model.ContentPickerThing != null)
+{
+    <a href="@Model.ContentPickerThing.Url()" class="btn">
+        <span>@Model.ContentPickerThing.Name</span>
+        @if (Model.LinkMediaPicker != null)
+        {
+            <img src="@Model.LinkMediaPicker.Url()" />
+        }
+    </a>
+}
+```
+
+```cshtml title="After"
+<a our-if="Model.ContentPickerThing != null" href="@Model.ContentPickerThing?.Url()" class="btn">
+    <span>@Model.ContentPickerThing?.Name</span>
+    <img our-if="Model.LinkMediaPicker != null" src="@Model.LinkMediaPicker?.Url()" />
+</a>
+```
+
+## What's in the package
+
+<CardGrid>
+	<Card title="Content and language">
+		[`<our-dictionary>`](tag-helpers/our-dictionary/), [`<our-fallback>`](tag-helpers/our-fallback/),
+		[`<our-lang-switcher>`](tag-helpers/our-lang-switcher/), [`<our-hreflang>`](tag-helpers/our-hreflang/)
+		and [`<our-link>`](tag-helpers/our-link/).
+	</Card>
+	<Card title="Show or hide">
+		[`our-if`](tag-helpers/our-if/), [`our-text-if`](tag-helpers/our-text-if/), and
+		[members](tag-helpers/our-member/) or [backoffice users](tag-helpers/our-user/) only.
+	</Card>
+	<Card title="Performance">
+		Responsive [`<our-img>`](tag-helpers/our-img/), inline [`<our-svg>`](tag-helpers/our-svg/),
+		[`<our-cache>`](tag-helpers/our-cache/) and [`our-self-host`](tag-helpers/our-self-host/).
+	</Card>
+	<Card title="Site building">
+		[Surface controller forms](tag-helpers/our-controller/), [`our-active-class`](tag-helpers/our-active-class/),
+		[`<our-edit-link>`](tag-helpers/our-edit-link/), [`<our-bytes>`](tag-helpers/our-bytes/) and
+		[`<our-version>`](tag-helpers/our-version/).
+	</Card>
+</CardGrid>
+
+## Built by the Umbraco community
+
+Our Umbraco TagHelpers is a community project: the tag helpers, fixes, tests and these docs come from people across the Umbraco community.
+
+<Contributors layout="row" />
+
+[Meet the contributors](contributors/), or [find out how to join them](contributing/writing-docs/).
+
+<LinkCard title="Release notes" description="What changed in each version, straight from GitHub." href="release-notes/" />
+
+<p class="th-credit">
+	A community project for Umbraco, open source under the MIT licence.
+</p>

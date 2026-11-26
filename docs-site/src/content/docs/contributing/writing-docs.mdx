@@ -1,0 +1,89 @@
+---
+title: Writing the docs
+description: Run this documentation site locally, add a page for a tag helper, and mark when things arrived.
+sidebar:
+  order: 4
+---
+
+import VersionBadge from '../../../components/VersionBadge.astro';
+
+This site is built with [Astro Starlight](https://starlight.astro.build) from the `docs-site/` folder, and published to GitHub Pages each time `v2/dev` changes. A new tag helper, or a new option on one, gets its docs here in the same pull request.
+
+## Run it locally
+
+You need Node.js 22.23.4 or later (Astro 7's minimum), or Node.js 24 LTS.
+
+```bash
+cd docs-site
+npm ci
+npm run dev
+```
+
+Open the address it prints (`http://localhost:4321/Our-Umbraco-TagHelpers/`). Pages reload as you save.
+
+Before you push, check the site builds and type checks:
+
+```bash
+npm run build
+npm run check
+```
+
+## Add a tag helper page
+
+Add a Markdown file to `src/content/docs/tag-helpers/`, named after the tag helper. Use `.mdx` if the page needs a component such as a version badge.
+
+```md title="src/content/docs/tag-helpers/our-example.md"
+---
+title: <our-example>
+description: One sentence saying what it does. Shown in the overview table and in search results.
+addedIn: 2.2.0
+usage: element
+---
+
+`<our-example>` does one thing. Start with a sentence that says what, then show it:
+```
+
+| Frontmatter | What it's for |
+|---|---|
+| `title` | The tag as it's written in Razor: `<our-example>` for an element, `our-example` for an attribute. |
+| `description` | One sentence. It's the page's description in search results and in the [overview](../../tag-helpers/). |
+| `addedIn` | The package version it first ships in, such as `2.2.0`. |
+| `usage` | `element` or `attribute`. Pages with it are listed in the overview table. |
+| `removedIn` | The version that removed it, if it's gone. |
+
+The page then appears in the sidebar and the overview table by itself.
+
+## Version badges
+
+`addedIn` puts a badge under the page title and, while it's new, in the sidebar. They update themselves from the GitHub releases each time the site is built:
+
+| When the site is built | Badge by the title | Sidebar |
+|---|---|---|
+| The version has no stable release yet | <VersionBadge version="9.9.0" inline /> | Coming soon |
+| The version is in the newest minor release (2.1.x while 2.1 is newest) | <VersionBadge version="2.0.0" inline /> | New |
+| Older | <VersionBadge version="0.1.0" inline /> | |
+
+So a page for something on `v2/dev` reads "Coming in v2.2.0" until 2.2.0 is released, then "Added in v2.2.0" and "New" until 2.3.0, with nothing to change by hand.
+
+For an option added after the tag helper itself, put a badge next to it in an `.mdx` page:
+
+```mdx
+import VersionBadge from '../../../components/VersionBadge.astro';
+
+| `fallback-img` <VersionBadge version="2.2.0" inline /> | The image to show when ... |
+```
+
+## Release notes
+
+The [release notes](../../release-notes/) page is built from the [GitHub releases](https://github.com/umbraco-community/Our-Umbraco-TagHelpers/releases), so there's nothing to edit here for a release. Publishing a GitHub release rebuilds the site, so the notes and badges update straight away.
+
+## Style
+
+- Write short, plain sentences. Start each page with one that says what the tag helper does.
+- Show a Razor example straight after, in a ` ```cshtml ` code block.
+- Links between pages are relative, such as `[our-if](../our-if/)`, so they work under the site's `/Our-Umbraco-TagHelpers/` path.
+- Colours, fonts and shapes are in `src/styles/brand.css`, and code colours in `src/lib/code-themes.mjs` and `ec.config.mjs`.
+
+:::caution[After changing code colours]
+Astro caches rendered Markdown in `node_modules/.astro`, and doesn't notice changes to the code block settings. Delete that folder after changing `ec.config.mjs` or `code-themes.mjs`, or Markdown pages link to a code stylesheet that no longer exists.
+:::

@@ -1,0 +1,17 @@
+---
+/** Starlight's page title, with a badge saying when the tag helper arrived (or left). */
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+import VersionBadge from './VersionBadge.astro';
+
+const { addedIn, removedIn } = Astro.locals.starlightRoute.entry.data;
+---
+
+<Default />
+{
+	(addedIn || removedIn) && (
+		<p class="th-title-badges">
+			{addedIn && <VersionBadge version={addedIn} />}
+			{removedIn && <VersionBadge version={removedIn} kind="removed" />}
+		</p>
+	)
+}
