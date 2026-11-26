@@ -411,7 +411,7 @@ namespace Our.Umbraco.TagHelpers.Tests
             return doc.DocumentNode.SelectSingleNode("//svg");
         }
 
-        private string RenderSvg(string svg, TagHelperAttributeList? attributes = null)
+        private string RenderSvg(string svg, TagHelperAttributeList attributes = null)
         {
             var tagHelper = new InlineSvgTagHelper(null!, CreateHostEnvironment(svg), null!, _settings, null!, Mock.Of<ILogger<InlineSvgTagHelper>>())
             {
