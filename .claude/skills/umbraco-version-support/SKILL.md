@@ -10,7 +10,7 @@ The procedure and the list of files live in `docs/supporting-a-new-umbraco-versi
 ## Before you start
 
 1. Confirm what's asked: add Umbraco `N` (stable or RC), add .NET `X`, RC → stable, or drop `N`.
-2. Work on a new branch off `v2/dev` (for example `v2/feature/umbraco-N`). Never commit to `main` or merge `v2/dev` into it. Don't push, and don't open a PR unless asked.
+2. Work on a new branch off `v2/dev` (for example `v2/feature/umbraco-N`). Never commit to `v1/dev` (the 1.x line) or merge `v2/dev` into it. Don't push, and don't open a PR unless asked.
 3. Look up current versions; don't rely on memory:
    - the Umbraco.Cms versions on NuGet (`https://api.nuget.org/v3-flatcontainer/umbraco.cms/index.json`) and the target framework of the one you'll use (its `.nuspec`),
    - the uSync versions (`https://api.nuget.org/v3-flatcontainer/usync/index.json`),

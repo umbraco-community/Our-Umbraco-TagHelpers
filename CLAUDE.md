@@ -36,7 +36,7 @@ Choose e2e versions with `UMBRACO_VERSIONS=17,19`. The docs site's "Cross-versio
 
 ## Conventions
 
-- **Branches**: `v2/dev` is the long-lived branch for v2.x.x releases. Never merge it into `main`. Do work on a branch off `v2/dev` and PR it back into `v2/dev`.
+- **Branches**: `v2/dev` is the long-lived branch for v2.x.x releases. `v1/dev` is the 1.x line (formerly `main`), for 1.x patch releases only. Never merge `v2/dev` into `v1/dev`. Do work on a branch off `v2/dev` and PR it back into `v2/dev`.
 - **Commits**: small and granular, with no `Co-Authored-By: Claude` trailer. Don't push or open PRs unless asked.
 - **Cross-version**: any library change must build on every target framework and pass the unit and e2e suites on all four versions. Umbraco 17 and 18 share `net10.0`, so the 17-built DLL must also work on 18 at runtime (watch for members that move between interfaces).
 - **Cross-platform**: scripts and documented commands must work on Windows, macOS and Linux.
