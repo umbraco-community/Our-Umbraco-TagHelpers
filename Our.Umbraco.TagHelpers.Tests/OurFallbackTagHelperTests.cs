@@ -75,7 +75,8 @@ namespace Our.Umbraco.TagHelpers.Tests
         {
             var property = new Mock<IPublishedProperty>();
             property.Setup(p => p.HasValue(It.IsAny<string?>(), It.IsAny<string?>())).Returns(value is not null);
-            property.Setup(p => p.GetValue(It.IsAny<string?>(), It.IsAny<string?>())).Returns(value);
+            // null is deliberate: it's the "no value" case
+            property.Setup(p => p.GetValue(It.IsAny<string?>(), It.IsAny<string?>())).Returns(value!);
             var content = new Mock<IPublishedContent>();
             content.Setup(c => c.GetProperty("Header")).Returns(property.Object);
 
