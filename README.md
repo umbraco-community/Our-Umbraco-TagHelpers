@@ -84,7 +84,7 @@ Removed in version 2: `<our-macro>`, as Umbraco 14 removed macros. See [Removed 
 | 18 | .NET 10 |
 | 19 | .NET 11 |
 
-Version 1.x supports earlier versions of Umbraco, from Umbraco 9. Its README is on the [`main` branch](https://github.com/umbraco-community/Our-Umbraco-TagHelpers/tree/main).
+Version 1.x supports earlier versions of Umbraco, from Umbraco 9. Its README is on the [`v1/dev` branch](https://github.com/umbraco-community/Our-Umbraco-TagHelpers/tree/v1/dev).
 
 ## Contributing
 

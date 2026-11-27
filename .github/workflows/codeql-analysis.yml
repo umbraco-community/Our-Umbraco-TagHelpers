@@ -12,12 +12,12 @@
 name: "CodeQL"
 
 on:
-  # v2/dev is where v2 is developed (and the default branch); main is the v1 line
+  # v2/dev is where v2 is developed (and the default branch). v1/dev, the 1.x line, has its own copy of this workflow.
   push:
-    branches: [ main, v2/dev ]
+    branches: [ v2/dev ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ main, v2/dev ]
+    branches: [ v2/dev ]
   schedule:
     - cron: '34 5 * * 3'
   # Run a scan by hand from the Actions tab (or: gh workflow run codeql-analysis.yml --ref v2/dev)
